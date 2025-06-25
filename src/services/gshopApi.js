@@ -7,12 +7,20 @@ const gshopApi = createApi({
   reducerPath: 'gshopApi',
   baseQuery: axiosBaseQuery(), // Adjust base URL as needed
   endpoints: (builder) => ({
-    // getAllPreorders: builder.query({
-    //   query: () => ({
-    //     url: endpoints.PREORDERS,
-    //     method: 'GET',
-    //   }),
-    // }),
+    login: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.LOGIN,
+        method: 'POST',
+      }),
+    }),
+    verifyOTP: builder.mutation({
+      query: (data) => ({
+        params: data,
+        url: endpoints.VERIFY_OTP,
+        method: 'POST',
+      }),
+    }),
     // getPreorderById: builder.query({
     //   query: (id) => ({
     //     url: `${endpoints.PREORDERS}/${id}`,
@@ -23,8 +31,8 @@ const gshopApi = createApi({
 });
 
 export const {
-  // useGetAllPreordersQuery,
-  // useGetPreorderByIdQuery,
+  useLoginMutation,
+  useVerifyOTPMutation,
 } = gshopApi;
 
 export default gshopApi;

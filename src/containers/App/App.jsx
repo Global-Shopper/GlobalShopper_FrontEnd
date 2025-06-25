@@ -4,6 +4,7 @@ import { store } from '@/store/store';
 import './App.css'
 import { useEffect } from 'react';
 import AppRoutes from '@/routes/Routes';
+import { Toaster } from 'sonner';
 
 // Set up API interceptor for handling disconnect and token expiration
 setUpInterceptor(store);
@@ -20,7 +21,7 @@ function App() {
     <>
       <div className="App">
         <AppRoutes />
-        {!isOnline && <ToastContainer />}
+        <Toaster richColors/>
       </div>
     </>
   )
