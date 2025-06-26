@@ -1,43 +1,28 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
-import { ArrowLeft, Mail, ShoppingCart, CheckCircle, XCircle, Clock } from "lucide-react"
+import { ArrowLeft, Mail, ShoppingCart, CheckCircle, XCircle, Clock, BlocksIcon, BanIcon } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { useVerifyOTPMutation } from "@/services/gshopApi"
+import { useLazyResendOTPQuery, useVerifyOTPMutation } from "@/services/gshopApi"
 import errorCode from "@/const/errorCode"
 
 export default function OTPverification() {
   const navigate = useNavigate()
   const [otp, setOtp] = useState("")
-  const [isResending, setIsResending] = useState(false)
-  const [localError, setLocalError] = useState("")
   const email = useLocation().state?.email
-  const [verifyOTP, { isLoading, error, data }] = useVerifyOTPMutation()
+  const [verifyOTP, { isLoading: isVerifyLoading, isError: isVerifyError, data: verifyRes, error: verifyError }] = useVerifyOTPMutation()
+  const [resendOTP, { isLoading: isResendingLoading, isError: isResendError, data: resendRes, error: resendError }] = useLazyResendOTPQuery()
 
   // Only update OTP value
   const handleOTPChange = (value) => {
     setOtp(value)
-    setLocalError("")
   }
 
-  // Auto-verify when 6 digits are entered
-  useEffect(() => {
-    if (otp.length === 6 && !isLoading && !data?.success) {
-      handleVerifyOTP()
-    }
-    // eslint-disable-next-line
-  }, [otp])
-
-  const handleVerifyOTP = async () => {
-    if (otp.length !== 6) {
-      setLocalError("Vui lòng nhập đủ 6 số OTP")
-      return
-    }
-    setLocalError("")
+  const handleVerifyOTP = useCallback(async () => {
     try {
       await verifyOTP({ email, otp }).unwrap()
         .then(() => {
@@ -57,34 +42,36 @@ export default function OTPverification() {
           }
           else {
             toast.error("Lỗi xác thực", {
-              description: e?.data?.message || "OTP không hợp lệ hoặc hết hạn. Vui lòng thử lại.",
+              description: e?.data?.message || "Đã xảy ra lỗi khi xác thực mã OTP. Vui lòng thử lại.",
             })
           }
         })
     } catch (e) {
       console.log(e);
     }
-  }
+  }, [email, navigate, otp, verifyOTP])
+
+  useEffect(() => {
+    if (otp.length === 6) {
+      handleVerifyOTP()
+    }
+  }, [handleVerifyOTP, otp.length])
 
   const handleResendOTP = async () => {
-    setIsResending(true)
-    setLocalError("")
     setOtp("")
     try {
-      // Replace with real API call if available
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      toast({
-        title: "Đã gửi lại mã OTP",
-        description: `Mã xác thực mới đã được gửi tới ${email}`,
+      await resendOTP({ email }).unwrap()
+      .then(() => {
+        toast("Gửi lại OTP thành công", {
+        })
       })
-    } catch {
-      toast({
-        variant: "destructive",
-        title: "Gửi lại OTP thất bại",
-        description: "Vui lòng thử lại sau.",
+      .catch((e) => {
+        toast.error("Gửi lại OTP thất bại", {
+          description: e?.data?.message || "Đã xảy ra lỗi khi gửi lại mã OTP. Vui lòng thử lại.",
+        })
       })
-    } finally {
-      setIsResending(false)
+    } catch (e) {
+      console.log(e)
     }
   }
 
@@ -116,12 +103,12 @@ export default function OTPverification() {
                 <Label htmlFor="otp" className="text-center block">
                   Nhập mã xác thực
                 </Label>
-                <div className="flex justify-center">
+                <div className="flex justify-center items-center gap-2">
                   <InputOTP
                     maxLength={6}
                     value={otp}
                     onChange={handleOTPChange}
-                    disabled={isLoading || data?.success}
+                    disabled={isVerifyLoading || verifyRes?.success}
                   >
                     <InputOTPGroup>
                       {[0, 1, 2, 3, 4, 5].map(i => (
@@ -129,28 +116,25 @@ export default function OTPverification() {
                       ))}
                     </InputOTPGroup>
                   </InputOTP>
+                  {/* Status Icon (right of OTP input) */}
+                  {isVerifyError && (
+                    <>
+                      {verifyError?.data?.statusCode === 400 && (
+                        <XCircle className="h-6 w-6 text-orange-600" />
+                      )}
+                      {verifyError?.data?.statusCode === 429 && (
+                        <BanIcon className="h-6 w-6 text-red-600" />
+                      )}
+                    </>
+                  )}
+                  {verifyRes?.success && (
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  )}
                 </div>
-
-                {/* Status Icon Only (optional) */}
-                {(data?.success || error) && (
-                  <div className="flex justify-center">
-                    {data?.success && <CheckCircle className="h-5 w-5 text-green-600" />}
-                    {error?.data?.errorCode === "OTP_EXPIRED" && <Clock className="h-5 w-5 text-orange-600" />}
-                    {error && !error?.data?.errorCode && <XCircle className="h-5 w-5 text-red-600" />}
-                  </div>
-                )}
-
-                {/* Local Error Message */}
-                {localError && (
-                  <Alert variant="destructive" className="py-2">
-                    <AlertDescription className="text-sm">{localError}</AlertDescription>
-                  </Alert>
-                )}
-
                 {/* Loading State */}
-                {isLoading && (
+                {isVerifyLoading && (
                   <div className="text-center">
-                    <div className="inline-flex items-center space-x-2 text-sm text-muted-foreground">
+                    <div className="w-full h-12">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                       <span>Đang xác thực...</span>
                     </div>
@@ -159,25 +143,24 @@ export default function OTPverification() {
               </div>
 
               {/* Manual Verify Button */}
-              {otp.length === 6 && !isLoading && !data?.success && (
-                <Button onClick={handleVerifyOTP} className="w-full h-12" disabled={isLoading}>
+              {otp.length === 6 && !isVerifyLoading && !verifyRes?.success && (
+                <Button onClick={handleVerifyOTP} className="w-full h-12" disabled={isVerifyLoading}>
                   Xác thực OTP
                 </Button>
               )}
 
-              {/* Resend Section */}
-              <div className="text-center space-y-3">
+              <div className="text-center space-y-20">
                 <p className="text-sm text-muted-foreground">Không nhận được mã?</p>
                 <Button
                   variant="outline"
                   onClick={handleResendOTP}
-                  disabled={isResending}
+                  disabled={isResendingLoading}
                   className="h-10"
                 >
-                  {isResending ? (
+                  {isResendingLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                      Đang gửi...
+                      Đang gửi... 
                     </>
                   ) : (
                     <>

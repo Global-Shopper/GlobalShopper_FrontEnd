@@ -2,6 +2,7 @@ import { combineReducers } from "@reduxjs/toolkit";
 import persistReducer from "redux-persist/lib/persistReducer";
 import appReducer from "../features/app";
 import userReducer from "../features/user";
+import authReducer from "../features/auth";
 import storage from "redux-persist/lib/storage";
 
 const userPersistConfig = {
@@ -12,6 +13,7 @@ const userPersistConfig = {
 
 const combinedReducer = combineReducers({
   app: appReducer,
+  auth: authReducer,
   user: persistReducer(userPersistConfig, userReducer),
 });
 

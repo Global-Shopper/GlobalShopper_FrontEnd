@@ -14,11 +14,44 @@ const gshopApi = createApi({
         method: 'POST',
       }),
     }),
+    register: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.REGISTER,
+        method: 'POST',
+      }),
+    }),
     verifyOTP: builder.mutation({
       query: (data) => ({
         params: data,
         url: endpoints.VERIFY_OTP,
         method: 'POST',
+      }),
+    }),
+    resendOTP: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.RESEND_OTP,
+      }),
+    }),
+    verifyOTPForgotPassword: builder.mutation({
+      query: (data) => ({
+        params: data,
+        url: endpoints.VERIFY_OTP_FORGOT_PASSWORD,
+        method: 'POST',
+      }),
+    }),
+    forgotPassword: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.FORGOT_PASSWORD,
+      }),
+    }),
+    resetPassword: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.RESET_PASSWORD,
+        method: 'PUT',
       }),
     }),
     // getPreorderById: builder.query({
@@ -33,6 +66,11 @@ const gshopApi = createApi({
 export const {
   useLoginMutation,
   useVerifyOTPMutation,
+  useLazyResendOTPQuery,
+  useLazyForgotPasswordQuery,
+  useResetPasswordMutation,
+  useRegisterMutation,
+  useVerifyOTPForgotPasswordMutation,
 } = gshopApi;
 
 export default gshopApi;

@@ -6,7 +6,7 @@ import Homepage from "../containers/Home/Homepage";
 import Login from "@/containers/Auth/Login";
 import Signup from "@/containers/Auth/SignUp";
 import OTPverification from "@/containers/Auth/OTPverification";
-import ForgotPassword from "@/containers/Auth/ForgotPassword";
+import ForgotPassword from "@/containers/Auth/ForgotPassword/ForgotPassword";
 
 const AppRoutes = () => {
   return (
