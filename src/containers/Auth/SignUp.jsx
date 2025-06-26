@@ -6,18 +6,20 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff, Mail, Lock, User, ShoppingCart, Check } from "lucide-react"
 import { toast } from "sonner"
 import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { RadioGroup } from "@/components/ui/radio-group"
+import { useRegisterMutation } from "@/services/gshopApi"
+import errorCode from "@/const/errorCode"
 
 export default function Signup() {
+  const navigate = useNavigate()
+  const [register, { isLoading, isError, data }] = useRegisterMutation()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   // Yup validation schema (Tiếng Việt)
   const validationSchema = Yup.object({
@@ -51,6 +53,55 @@ export default function Signup() {
     return { strength, label: labels[strength], color: colors[strength] }
   }
 
+  // Separate function to handle register API call
+  const handleRegister = async (values, { setSubmitting, resetForm }) => {
+    try {
+      // Prepare payload for API
+      const payload = {
+        name: values.fullName,
+        email: values.email,
+        password: values.password,
+        gender: values.gender,
+        phone: values.phone ? values.phone : "0912345678",
+        address: values.address ? values.address : "0",
+        avatar: values.avatar ? values.avatar : "0",
+        dateOfBirth: values.dateOfBirth ? values.dateOfBirth : 0,
+      }
+      await register(payload).unwrap()
+        .then(() => {
+          toast("Tạo tài khoản thành công", {
+            description: `Chào mừng ${values.fullName}! Cảm ơn bạn đã tham gia Global Shopper.`,
+          })
+          // Navigate to OTP verification page with email
+          navigate("/otp-verify", { state: { email: values.email } })
+        })
+        .catch((e) => {
+          if (e?.data?.errorCode === errorCode.EMAIL_ALREADY_EXISTS) {
+            toast.error("Email đã tồn tại", {
+              description: e?.data?.message || "Email này đã được đăng ký trong hệ thống.",
+            })
+          }
+          else if (e?.data?.errorCode === errorCode.INVALID_EMAIL) {
+            toast.error("Email không hợp lệ", {
+              description: e?.data?.message || "Vui lòng kiểm tra lại địa chỉ email.",
+            })
+          }
+          else {
+            toast.error("Đăng ký thất bại", {
+              description: e?.data?.message || "Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại.",
+            })
+          }
+        })
+    } catch (e) {
+      console.log(e)
+      toast.error("Đăng ký thất bại", {
+        description: "Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại.",
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex">
       {/* Left Section - Signup Form */}
@@ -79,26 +130,13 @@ export default function Signup() {
                   password: "",
                   confirmPassword: "",
                   agreedToTerms: false,
+                  phone: "",
+                  address: "",
+                  avatar: "",
+                  dateOfBirth: "",
                 }}
                 validationSchema={validationSchema}
-                onSubmit={async (values, { setSubmitting, resetForm }) => {
-                  setIsLoading(true)
-                  try {
-                    // Simulate API call - replace with actual signup logic
-                    await new Promise((resolve) => setTimeout(resolve, 1000))
-                    toast("Tạo tài khoản thành công", {
-                      description: `Chào mừng ${values.fullName}! Cảm ơn bạn đã tham gia Global Shopper.`,
-                    })
-                    resetForm()
-                  } catch {
-                    toast.warning("Đăng ký thất bại", {
-                      description: "Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại.",
-                    })
-                  } finally {
-                    setIsLoading(false)
-                    setSubmitting(false)
-                  }
-                }}
+                onSubmit={handleRegister}
               >
                 {({ values, errors, touched, isSubmitting, setFieldValue }) => {
                   const passwordStrength = getPasswordStrength(values.password)
@@ -161,12 +199,16 @@ export default function Signup() {
                               disabled={isLoading || isSubmitting}
                             >
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="male" id="male" />
+                                <RadioGroupItem value="MALE" id="male" />
                                 <Label htmlFor="male" className="cursor-pointer">Nam</Label>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="female" id="female" />
+                                <RadioGroupItem value="FEMALE" id="female" />
                                 <Label htmlFor="female" className="cursor-pointer">Nữ</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="OTHERS" id="others" />
+                                <Label htmlFor="others" className="cursor-pointer">Khác</Label>
                               </div>
                             </RadioGroup>
                           )}
@@ -178,6 +220,18 @@ export default function Signup() {
                             </Alert>
                           )}
                         </ErrorMessage>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth">Ngày sinh</Label>
+                        <Field
+                          as={Input}
+                          id="dateOfBirth"
+                          name="dateOfBirth"
+                          type="date"
+                          placeholder="Chọn ngày sinh (tùy chọn)"
+                          disabled={isLoading || isSubmitting}
+                        />
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">

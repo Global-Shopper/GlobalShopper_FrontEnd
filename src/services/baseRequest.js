@@ -42,7 +42,7 @@ export const axiosBaseQuery =
 const setUpInterceptor = (store) => {
   // Retry logic
   axiosRetry(axiosInstance, {
-    retries: 1,
+    retries: 0,
     retryDelay: (retryCount) => retryCount * 500,
     shouldResetTimeout: true,
     retryCondition: (error) => {
