@@ -5,21 +5,21 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Mail, ShoppingCart, CheckCircle, XCircle, Lock, Eye, EyeOff } from "lucide-react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
 import { useLazyForgotPasswordQuery } from "@/services/gshopApi"
-import ForgotPwOTP from "./ForgotPwOTP"
+import ForgotPwOTP from "./ForgotPWOTP"
 import NewPasswordForm from "./NewPasswordForm"
 import { useDispatch, useSelector } from "react-redux"
-import { setEmail, setForgotPasswordStep } from "@/features/auth"
+import { setForgotPasswordStep } from "@/features/auth"
+import { setEmail } from "@/features/user"
 
 export default function ForgotPassword() {
-  const navigate = useNavigate()
   const dispatch = useDispatch()
   const step = useSelector((state) => state.rootReducer?.auth?.forgotPasswordStep)
-  const email = useSelector((state) => state.rootReducer?.auth?.email)
+  const email = useSelector((state) => state.rootReducer?.user?.email)
   const [forgotPassword, { isLoading: isForgotLoading }] = useLazyForgotPasswordQuery()
 
   // Email step
@@ -85,7 +85,7 @@ export default function ForgotPassword() {
             <CardContent className="space-y-6 p-0">
               {step === "email" && (
                 <Formik
-                  initialValues={{ email: "" }}
+                  initialValues={{ email: email }}
                   validationSchema={emailValidationSchema}
                   onSubmit={handleEmailSubmit}
                 >

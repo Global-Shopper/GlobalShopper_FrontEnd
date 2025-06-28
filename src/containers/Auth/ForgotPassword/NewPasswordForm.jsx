@@ -7,18 +7,23 @@ import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
 import { useResetPasswordMutation } from "@/services/gshopApi"
 import { toast } from "sonner"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
+import errorCode from "@/const/errorCode"
+import { setForgotPasswordStep } from "@/features/auth"
+import { useNavigate } from "react-router-dom"
 
 export default function NewPasswordForm() {
-  const accessToken = useSelector((state) => state.rootReducer?.user?.accessToken)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const forgotPasswordToken = useSelector((state) => state.rootReducer?.auth?.forgotPasswordToken)
   const [resetPassword, { isLoading }] = useResetPasswordMutation()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const passwordValidationSchema = Yup.object({
     password: Yup.string()
-      .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
-      .required("Mật khẩu không được để trống"),
+      .required('Password is required')
+      .min(6, 'Password must be at least 6 characters'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Mật khẩu xác nhận phải khớp')
       .required("Xác nhận mật khẩu không được để trống"),
@@ -26,12 +31,28 @@ export default function NewPasswordForm() {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      await resetPassword({ token: accessToken, password: values.password }).unwrap()
-      toast.success("Đặt lại mật khẩu thành công", {
-        description: "Mật khẩu của bạn đã được đặt lại. Đang chuyển hướng...",
-      })
-      resetForm()
-      // You can dispatch a navigation or state reset here if needed
+      await resetPassword({ token: forgotPasswordToken, password: values.password }).unwrap()
+        .then(() => {
+          navigate("/login")
+          toast.success("Đặt lại mật khẩu thành công", {
+            description: "Mật khẩu của bạn đã được đặt lại. Đang chuyển hướng...",
+          })
+          resetForm()
+        })
+        .catch((e) => {
+          if (e?.data?.errorCode === errorCode.EXPIRED_OTP) {
+            dispatch(setForgotPasswordStep("email"))
+            toast.error("OTP sai hoặc hết hạn", {
+              description: "Mã OTP đã hết hạn. Vui lòng yêu cầu mã OTP mới.",
+            })
+          }
+          else {
+            toast.error("Đặt lại mật khẩu thất bại", {
+              description: e?.data?.message || "Đã xảy ra lỗi khi đặt lại mật khẩu. Vui lòng thử lại.",
+            })
+          }
+        }
+        )
     } catch (e) {
       toast.error("Đặt lại mật khẩu thất bại", {
         description: e?.data?.message || "Đã xảy ra lỗi khi đặt lại mật khẩu. Vui lòng thử lại.",
