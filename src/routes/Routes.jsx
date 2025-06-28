@@ -7,8 +7,8 @@ import Login from "@/containers/Auth/Login";
 import Signup from "@/containers/Auth/SignUp";
 import OTPverification from "@/containers/Auth/OTPverification";
 import ForgotPassword from "@/containers/Auth/ForgotPassword/ForgotPassword";
-import AccountCenterLayout from "@/containers/CustomerCenter.jsx/AccountCenterLayout";
-import CustomerProfile from "@/containers/CustomerCenter.jsx/CustomerProfile";
+import AccountCenterLayout from "@/containers/CustomerCenter/AccountCenterLayout";
+import CustomerProfile from "@/containers/CustomerCenter/CustomerProfile/CustomerProfile";
 
 const AppRoutes = () => {
   return (

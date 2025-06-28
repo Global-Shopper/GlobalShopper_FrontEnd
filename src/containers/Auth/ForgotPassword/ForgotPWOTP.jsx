@@ -10,7 +10,7 @@ import { setForgotPasswordStep, setForgotPasswordToken, setOTP } from "@/feature
 
 export default function ForgotPwOTP() {
   const dispatch = useDispatch()
-  const email = useSelector((state) => state?.rootReducer?.auth?.email)
+  const email = useSelector((state) => state?.rootReducer?.user?.email)
   const otp = useSelector((state) => state?.rootReducer.auth?.otp)
   const [verifyOTP, { isLoading: isVerifyLoading, isError: isVerifyError, data: verifyRes, error: verifyError }] = useVerifyOTPForgotPasswordMutation()
   const [triggerResend, { isLoading: isResendLoading, isError: isResendError, data: resendRes, error: resendError }] = useLazyForgotPasswordQuery()

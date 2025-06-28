@@ -14,7 +14,7 @@ import * as Yup from "yup"
 import { useLoginMutation } from "@/services/gshopApi"
 import errorCode from "@/const/errorCode"
 import { useDispatch } from "react-redux"
-import { setAccessToken, setAvatar, setEmail, setIsLoggedIn, setName, setPhone, setRole } from "@/features/user"
+import { setAccessToken, setAvatar, setEmail, setIsLoggedIn, setName, setPhone, setRole, setUserInfo } from "@/features/user"
 
 export default function Login() {
   const dispatch = useDispatch()
@@ -34,13 +34,7 @@ export default function Login() {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       login(values).unwrap().then((res) => {
-        dispatch(setIsLoggedIn(true))
-        dispatch(setAccessToken(res?.token))
-        dispatch(setName(res?.user?.name))
-        dispatch(setPhone(res?.user?.phone))
-        dispatch(setRole(res?.user?.role))
-        dispatch(setAvatar(res?.user?.avatar))
-        dispatch(setEmail(res?.user?.email))
+        dispatch(setUserInfo({...res?.user, accessToken: res?.token}))
         toast("Đăng nhập thành công", {
           description: "Mừng bạn trở lại! Bạn đã đăng nhập thành công vào Global Shopper.",
         })

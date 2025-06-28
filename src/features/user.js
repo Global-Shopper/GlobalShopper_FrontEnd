@@ -46,6 +46,23 @@ const userSlice = createSlice({
 		setEmail(state, action) {
 			state.email = action.payload;
 		},
+		setUserInfo(state, action) {
+			const { name, phone, role, avatar, email, accessToken } = action.payload;
+			state.name = name || state.name;
+			state.phone = phone || state.phone;
+			state.role = role || state.role;
+			state.avatar = avatar || state.avatar;
+			state.email = email || state.email;
+			state.accessToken = accessToken || state.accessToken;
+			state.isLoggedIn = true;
+		},
+		updateProfile(state, action) {
+			const { name, phone, avatar, email } = action.payload;
+			state.name = name || state.name;
+			state.phone = phone || state.phone;
+			state.avatar = avatar || state.avatar;
+			state.email = email || state.email;
+		},
 		signout() {
 			return initialState
 		},
@@ -64,6 +81,8 @@ export const {
 	setAvatar,
 	setEmail,
 	signout,
+	setUserInfo,
+	updateProfile,
 } = userSlice.actions;
 
 export default userSlice.reducer;
