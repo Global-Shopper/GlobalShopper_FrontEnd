@@ -13,11 +13,14 @@ import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
 import { useLoginMutation } from "@/services/gshopApi"
 import errorCode from "@/const/errorCode"
+import { useDispatch } from "react-redux"
+import { setAccessToken, setAvatar, setEmail, setIsLoggedIn, setName, setPhone, setRole } from "@/features/user"
 
 export default function Login() {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
-  const [login, { data, isLoading, isError }] = useLoginMutation()
+  const [login, { isLoading }] = useLoginMutation()
 
   // Yup validation schema
   const validationSchema = Yup.object({
@@ -30,10 +33,18 @@ export default function Login() {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      login(values).unwrap().then(() => {
+      login(values).unwrap().then((res) => {
+        dispatch(setIsLoggedIn(true))
+        dispatch(setAccessToken(res?.token))
+        dispatch(setName(res?.user?.name))
+        dispatch(setPhone(res?.user?.phone))
+        dispatch(setRole(res?.user?.role))
+        dispatch(setAvatar(res?.user?.avatar))
+        dispatch(setEmail(res?.user?.email))
         toast("Đăng nhập thành công", {
           description: "Mừng bạn trở lại! Bạn đã đăng nhập thành công vào Global Shopper.",
         })
+        navigate("/")
       })
         .catch((e) => {
           if (e.data?.errorCode === errorCode.EMAIL_UNCONFIRMED) {

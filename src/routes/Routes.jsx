@@ -7,6 +7,8 @@ import Login from "@/containers/Auth/Login";
 import Signup from "@/containers/Auth/SignUp";
 import OTPverification from "@/containers/Auth/OTPverification";
 import ForgotPassword from "@/containers/Auth/ForgotPassword/ForgotPassword";
+import AccountCenterLayout from "@/containers/CustomerCenter.jsx/AccountCenterLayout";
+import CustomerProfile from "@/containers/CustomerCenter.jsx/CustomerProfile";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +20,16 @@ const AppRoutes = () => {
 
       <Route path="/" element={<Homelayout />}>
         <Route index element={<Homepage />} />
+      </Route>
+      
+      {/* Customer Account Center Routes */}
+      <Route path="/account-center" element={<AccountCenterLayout />}>
+        <Route index element={<CustomerProfile />} />
+        <Route path="requests" element={<div className="p-6"><h1>Yêu cầu mua hàng</h1><p>Trang quản lý yêu cầu mua hàng</p></div>} />
+        <Route path="quotes" element={<div className="p-6"><h1>Báo giá</h1><p>Trang xem báo giá từ yêu cầu</p></div>} />
+        <Route path="orders" element={<div className="p-6"><h1>Đơn hàng</h1><p>Trang theo dõi đơn hàng</p></div>} />
+        <Route path="refunds" element={<div className="p-6"><h1>Yêu cầu hoàn tiền</h1><p>Trang quản lý yêu cầu hoàn tiền</p></div>} />
+        <Route path="settings" element={<div className="p-6"><h1>Cài đặt</h1><p>Trang cài đặt tài khoản</p></div>} />
       </Route>
 
       {/* Protected Admin Routes */}

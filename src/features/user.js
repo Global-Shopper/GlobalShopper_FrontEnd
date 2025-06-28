@@ -5,7 +5,11 @@ const initialState = {
 	accessToken: "",
   refreshToken: "",
 	accessTokenExpired: false,
-	username: "",
+	name: "",
+	phone: "",
+	role: "",
+	avatar: "",
+	email: "",
 };
 
 const userSlice = createSlice({
@@ -27,6 +31,21 @@ const userSlice = createSlice({
     setRefreshToken(state, action) {
       state.refreshToken = action.payload;
     },
+		setName(state, action) {
+			state.name = action.payload;
+		},
+		setPhone(state, action) {
+			state.phone = action.payload;
+		},
+		setRole(state, action) {
+			state.role = action.payload;
+		},
+		setAvatar(state, action) {
+			state.avatar = action.payload;
+		},
+		setEmail(state, action) {
+			state.email = action.payload;
+		},
 		signout() {
 			return initialState
 		},
@@ -39,6 +58,11 @@ export const {
   setRefreshToken,
 	setAccessTokenExpired,
 	setUsername,
+	setName,
+	setPhone,
+	setRole,
+	setAvatar,
+	setEmail,
 	signout,
 } = userSlice.actions;
 

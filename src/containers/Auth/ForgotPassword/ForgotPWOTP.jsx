@@ -6,8 +6,7 @@ import { Mail, CheckCircle, XCircle } from "lucide-react"
 import { useLazyForgotPasswordQuery, useVerifyOTPForgotPasswordMutation } from "@/services/gshopApi"
 import { toast } from "sonner"
 import { useDispatch, useSelector } from "react-redux"
-import { setForgotPasswordStep, setOTP } from "@/features/auth"
-import { setAccessToken } from "@/features/user"
+import { setForgotPasswordStep, setForgotPasswordToken, setOTP } from "@/features/auth"
 
 export default function ForgotPwOTP() {
   const dispatch = useDispatch()
@@ -50,7 +49,7 @@ export default function ForgotPwOTP() {
       await verifyOTP({ email, otp: value }).unwrap()
       .then((res) => {
         console.log(res)
-          dispatch(setAccessToken(res?.resetPasswordToken)) // Update OTP in state
+          dispatch(setForgotPasswordToken(res?.resetPasswordToken)) // Update OTP in state
         toast("Xác thực OTP thành công")
           dispatch(setForgotPasswordStep("newpassword")) // Navigate to new password step
     })
@@ -70,6 +69,7 @@ export default function ForgotPwOTP() {
       await triggerResend({ email }).unwrap()
       setResendSuccess(true)
     } catch (e) {
+      console.log(e)
       setResendSuccess(false)
     }
   }
