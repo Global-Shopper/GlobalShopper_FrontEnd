@@ -47,6 +47,21 @@ const gshopApi = createApi({
         url: endpoints.FORGOT_PASSWORD,
       }),
     }),
+    getCustomerInfo: builder.query({
+      query: () => ({
+        url: `${endpoints.CUSTOMER_PROFILE}/current-information`,
+        method: 'GET',
+      }),
+      invalidatesTags: ['CustomerProfile'],
+    }),
+    updateCustomerProfile: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.CUSTOMER_PROFILE,
+        method: 'PUT',
+      }),
+      providesTags: ['CustomerProfile'],
+    }),
     resetPassword: builder.mutation({
       query: (data) => ({
         data: data,
@@ -54,12 +69,57 @@ const gshopApi = createApi({
         method: 'PUT',
       }),
     }),
-    // getPreorderById: builder.query({
-    //   query: (id) => ({
-    //     url: `${endpoints.PREORDERS}/${id}`,
-    //     method: 'GET',
-    //   }),
-    // }),
+    getShippingAddress: builder.query({
+      query: () => ({
+        url: endpoints.SHIPPING_ADDRESS,
+        method: 'GET',
+      }),
+      transformResponse: (response) => {
+        if (Array.isArray(response)) {
+          response = [...response].sort((a, b) => (b.default === true) - (a.default === true));
+        }
+        return response;
+      },
+      providesTags: ['ShippingAddress'],
+    }),
+    createShippingAddress: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.SHIPPING_ADDRESS,
+        method: 'POST',
+      }),
+      invalidatesTags: ['ShippingAddress'],
+    }),
+    updateShippingAddress: builder.mutation({
+      query: ({ id, ...data }) => ({
+        data: data,
+        params: id,
+        url: endpoints.SHIPPING_ADDRESS,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['ShippingAddress'],
+    }),
+    deleteShippingAddress: builder.mutation({
+      query: (id) => ({
+        url: `${endpoints.SHIPPING_ADDRESS}/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ShippingAddress'],
+    }),
+    defaultShippingAddress: builder.mutation({
+      query: (id) => ({
+        url: `${endpoints.DEFAULT_SHIPPING_ADDRESS}/${id}`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['ShippingAddress'],
+    }),
+    changePassword: builder.mutation({
+      query: (data) => ({
+        params: data,
+        url: endpoints.CHANGE_PASSWORD,
+        method: 'PUT',
+      }),
+    }),
   }),
 });
 
@@ -71,6 +131,14 @@ export const {
   useResetPasswordMutation,
   useRegisterMutation,
   useVerifyOTPForgotPasswordMutation,
+  useCreateShippingAddressMutation,
+  useUpdateShippingAddressMutation,
+  useGetShippingAddressQuery,
+  useDeleteShippingAddressMutation,
+  useChangePasswordMutation,
+  useGetCustomerInfoQuery,
+  useUpdateCustomerProfileMutation,
+  useDefaultShippingAddressMutation,
 } = gshopApi;
 
 export default gshopApi;

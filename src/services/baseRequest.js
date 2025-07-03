@@ -1,6 +1,7 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
 import { setOnLineStatus } from "../features/app";
+import { signout } from "@/features/user";
 
 // Axios instance setup
 const url = import.meta.env.VITE_GSHOP_API;
@@ -93,6 +94,24 @@ const setUpInterceptor = (store) => {
       return config;
     },
     (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  axiosInstance.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    async error => {
+      console.log(error);
+      if (error?.status === 401 || error.response?.data?.statusCode === 401) {
+        try {
+          store.dispatch(signout());
+        } catch (error) {
+          return Promise.reject({ ...error })
+        }
+      }
+
       return Promise.reject(error);
     }
   );

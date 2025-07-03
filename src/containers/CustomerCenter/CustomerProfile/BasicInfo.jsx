@@ -14,6 +14,7 @@ import {
   Check
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useChangePasswordMutation, useGetCustomerInfoQuery, useUpdateCustomerProfileMutation } from '@/services/gshopApi'
 
 const BasicInfo = () => {
   const dispatch = useDispatch()
@@ -28,6 +29,9 @@ const BasicInfo = () => {
     avatar: avatar
   })
 
+  const [changePassword, { isLoading: isChangeLoading }] = useChangePasswordMutation()
+  const { data: customerInfo, isLoading: isInfoLoading, isError: isInfoError } = useGetCustomerInfoQuery()
+  const [updateProfile, { isLoading: isUpdateLoading }] = useUpdateCustomerProfileMutation()
   const [isEditingBasic, setIsEditingBasic] = useState(false)
   const [editBasicInfo, setEditBasicInfo] = useState(basicInfo)
 

@@ -21,7 +21,7 @@ const items = [
   },
   {
     title: "Yêu cầu mua hàng",
-    url: "/account-center/requests",
+    url: "/account-center/purchase-request-list",
     icon: Home,
   },
   {

@@ -56,7 +56,7 @@ const userSlice = createSlice({
 			state.accessToken = accessToken || state.accessToken;
 			state.isLoggedIn = true;
 		},
-		updateProfile(state, action) {
+		setCustomerBaseInfo(state, action) {
 			const { name, phone, avatar, email } = action.payload;
 			state.name = name || state.name;
 			state.phone = phone || state.phone;
@@ -83,6 +83,7 @@ export const {
 	signout,
 	setUserInfo,
 	updateProfile,
+	setCustomerBaseInfo,
 } = userSlice.actions;
 
 export default userSlice.reducer;

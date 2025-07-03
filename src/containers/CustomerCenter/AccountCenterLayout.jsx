@@ -12,7 +12,7 @@ const AccountCenterLayout = () => {
       <div className="flex flex-1">
         <SidebarProvider>
           <CustomerSidebar />
-          <main className="p-6">
+          <main className="p-6 w-full">
             <Outlet />
           </main>
         </SidebarProvider>
