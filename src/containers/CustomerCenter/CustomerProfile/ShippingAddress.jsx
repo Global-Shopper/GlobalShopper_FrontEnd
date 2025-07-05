@@ -149,7 +149,7 @@ const ShippingAddress = () => {
           {/* Existing Addresses - Single Column */}
           {!isAddressLoading && !isAddressError && (
             <div className="space-y-4">
-              {addresses.map((address) => (
+              {addresses?.map((address) => (
                 <Card key={address.id} className={`relative ${address.default ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`}>
                   {address.default && (
                     <div className="absolute -top-2 -right-2">

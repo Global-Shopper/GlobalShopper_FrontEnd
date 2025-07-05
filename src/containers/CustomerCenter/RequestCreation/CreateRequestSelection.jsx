@@ -9,7 +9,7 @@ export default function CreateRequestSelection() {
   const navigate = useNavigate()
 
   const handleBackToDashboard = () => {
-    navigate("/")
+    navigate("/account-center/purchase-request-list")
   }
 
   const handleSelectWithLink = () => {
@@ -40,16 +40,6 @@ export default function CreateRequestSelection() {
 
         {/* Selection Cards */}
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full mb-6 shadow-lg">
-              <ShoppingCart className="h-10 w-10" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Chọn loại yêu cầu mua hàng</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Chúng tôi hỗ trợ hai loại yêu cầu khác nhau để phù hợp với mọi tình huống mua sắm của bạn
-            </p>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Without Link Option */}
             <Card

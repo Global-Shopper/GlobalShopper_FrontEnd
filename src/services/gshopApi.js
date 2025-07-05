@@ -21,6 +21,13 @@ const gshopApi = createApi({
         method: 'POST',
       }),
     }),
+    changeEmail: builder.mutation({
+      query: (newEmail) => ({
+        params: newEmail,
+        url: endpoints.CHANGE_EMAIL,
+        method: 'POST',
+      }),
+    }),
     verifyOTP: builder.mutation({
       query: (data) => ({
         params: data,
@@ -52,7 +59,7 @@ const gshopApi = createApi({
         url: `${endpoints.CUSTOMER_PROFILE}/current-information`,
         method: 'GET',
       }),
-      invalidatesTags: ['CustomerProfile'],
+      providesTags: ['CustomerProfile'],
     }),
     updateCustomerProfile: builder.mutation({
       query: (data) => ({
@@ -60,7 +67,15 @@ const gshopApi = createApi({
         url: endpoints.CUSTOMER_PROFILE,
         method: 'PUT',
       }),
-      providesTags: ['CustomerProfile'],
+      invalidatesTags: ['CustomerProfile'],
+    }),
+    uploadAvatar: builder.mutation({
+      query: (formData) => ({
+        data: formData,
+        url: endpoints.UPLOAD_AVATAR,
+        method: 'POST',
+      }),
+      invalidatesTags: ['CustomerProfile'],
     }),
     resetPassword: builder.mutation({
       query: (data) => ({
@@ -120,6 +135,14 @@ const gshopApi = createApi({
         method: 'PUT',
       }),
     }),
+    getPurchaseRequest: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.PURCHASE_REQUEST,
+        method: 'GET',
+      }),
+      providesTags: ['PurchaseRequest'],
+    }),
   }),
 });
 
@@ -130,6 +153,7 @@ export const {
   useLazyForgotPasswordQuery,
   useResetPasswordMutation,
   useRegisterMutation,
+  useChangeEmailMutation,
   useVerifyOTPForgotPasswordMutation,
   useCreateShippingAddressMutation,
   useUpdateShippingAddressMutation,
@@ -139,6 +163,8 @@ export const {
   useGetCustomerInfoQuery,
   useUpdateCustomerProfileMutation,
   useDefaultShippingAddressMutation,
+  useUploadAvatarMutation,
+  useGetPurchaseRequestQuery,
 } = gshopApi;
 
 export default gshopApi;
