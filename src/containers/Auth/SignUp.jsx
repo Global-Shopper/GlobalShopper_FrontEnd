@@ -65,7 +65,7 @@ export default function Signup() {
         phone: values.phone ? values.phone : "0912345678",
         address: values.address ? values.address : "0",
         avatar: values.avatar ? values.avatar : "0",
-        dateOfBirth: values.dateOfBirth ? values.dateOfBirth : 0,
+        dateOfBirth: 0,
       }
       await register(payload).unwrap()
         .then(() => {
@@ -133,7 +133,7 @@ export default function Signup() {
                   phone: "",
                   address: "",
                   avatar: "",
-                  dateOfBirth: "",
+                  dateOfBirth: 0,
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleRegister}
@@ -220,18 +220,6 @@ export default function Signup() {
                             </Alert>
                           )}
                         </ErrorMessage>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="dateOfBirth">Ngày sinh</Label>
-                        <Field
-                          as={Input}
-                          id="dateOfBirth"
-                          name="dateOfBirth"
-                          type="date"
-                          placeholder="Chọn ngày sinh (tùy chọn)"
-                          disabled={isLoading || isSubmitting}
-                        />
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">

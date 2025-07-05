@@ -2,15 +2,17 @@ import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { ArrowLeft, Mail, ShoppingCart, CheckCircle, XCircle, Clock, BlocksIcon, BanIcon } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useLazyResendOTPQuery, useVerifyOTPMutation } from "@/services/gshopApi"
 import errorCode from "@/const/errorCode"
+import { useDispatch } from "react-redux"
+import { setUserInfo } from "@/features/user"
 
 export default function OTPverification() {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const [otp, setOtp] = useState("")
   const email = useLocation().state?.email
@@ -25,10 +27,11 @@ export default function OTPverification() {
   const handleVerifyOTP = useCallback(async () => {
     try {
       await verifyOTP({ email, otp }).unwrap()
-        .then(() => {
+        .then((res) => {
           toast("Xác thực OTP thành công", {
             description: "Email của bạn đã được xác thực. Đang chuyển hướng...",
           })
+          dispatch(setUserInfo({...res?.user, accessToken: res?.token}))
           navigate("/")
         })
         .catch((e) => {

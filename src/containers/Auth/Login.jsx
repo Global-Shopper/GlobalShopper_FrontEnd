@@ -14,7 +14,7 @@ import * as Yup from "yup"
 import { useLoginMutation } from "@/services/gshopApi"
 import errorCode from "@/const/errorCode"
 import { useDispatch } from "react-redux"
-import { setAccessToken, setAvatar, setEmail, setIsLoggedIn, setName, setPhone, setRole, setUserInfo } from "@/features/user"
+import { setUserInfo } from "@/features/user"
 
 export default function Login() {
   const dispatch = useDispatch()
