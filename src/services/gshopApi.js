@@ -108,8 +108,7 @@ const gshopApi = createApi({
     updateShippingAddress: builder.mutation({
       query: ({ id, ...data }) => ({
         data: data,
-        params: id,
-        url: endpoints.SHIPPING_ADDRESS,
+        url: `${endpoints.SHIPPING_ADDRESS}/${id}`,
         method: 'PUT',
       }),
       invalidatesTags: ['ShippingAddress'],
