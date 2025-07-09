@@ -129,7 +129,7 @@ const gshopApi = createApi({
     }),
     changePassword: builder.mutation({
       query: (data) => ({
-        params: data,
+        data: data,
         url: endpoints.CHANGE_PASSWORD,
         method: 'PUT',
       }),

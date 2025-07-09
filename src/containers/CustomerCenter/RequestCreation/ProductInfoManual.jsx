@@ -1,15 +1,25 @@
-"use client"
-
 import { useState } from "react"
-import { Button } from "../ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Textarea } from "../ui/textarea"
-import { Badge } from "../ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, Package, ImageIcon, ArrowRight, ArrowLeft } from "lucide-react"
-import { createEmptyProduct } from "../../types/purchase-request"
+
+// Define createEmptyProduct here:
+const createEmptyProduct = () => ({
+  name: "",
+  description: "",
+  quantity: 1,
+  color: "",
+  size: "",
+  variants: [],
+  link: "",
+  image: "",
+  // Add any other fields your product object needs
+})
 
 const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "Free Size"]
 const colorOptions = ["Đỏ", "Xanh dương", "Xanh lá", "Đen", "Trắng", "Vàng", "Hồng", "Tím", "Cam", "Nâu", "Xám"]

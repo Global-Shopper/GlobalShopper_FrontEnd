@@ -106,7 +106,7 @@ const ProfileInfoCard = () => {
   // Change password state
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
+    oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   })
@@ -220,12 +220,12 @@ const ProfileInfoCard = () => {
 
     try {
       await changePassword({
-        currentPassword: passwordData.currentPassword,
+        oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
       }).unwrap()
 
       setPasswordData({
-        currentPassword: "",
+        oldPassword: "",
         newPassword: "",
         confirmPassword: "",
       })
@@ -240,7 +240,7 @@ const ProfileInfoCard = () => {
 
   const handlePasswordCancel = () => {
     setPasswordData({
-      currentPassword: "",
+      oldPassword: "",
       newPassword: "",
       confirmPassword: "",
     })
@@ -353,7 +353,7 @@ const ProfileInfoCard = () => {
                 <Input
                   id="email"
                   type="email"
-                  value={isEditingEmail ? editEmail : customerInfo.email || ''}
+                  value={isEditingEmail ? editEmail : customerInfo?.email || ''}
                   onChange={(e) => {
                     console.log(e.target.value)
                     setEditEmail(e.target.value)
@@ -409,7 +409,7 @@ const ProfileInfoCard = () => {
                 <Label htmlFor="name">Họ và tên</Label>
                 <Input
                   id="name"
-                  value={isEditingBasic ? editBasicInfo.name : customerInfo?.name || ''}
+                  value={isEditingBasic ? editBasicInfo?.name : customerInfo?.name || ''}
                   onChange={(e) => isEditingBasic && setEditBasicInfo({ ...editBasicInfo, name: e.target.value })}
                   disabled={!isEditingBasic}
                   placeholder="Nhập họ và tên"
@@ -424,7 +424,7 @@ const ProfileInfoCard = () => {
                 <Input
                   id="phone"
                   type="tel"
-                  value={isEditingBasic ? editBasicInfo.phone : customerInfo?.phone || ''}
+                  value={isEditingBasic ? editBasicInfo?.phone : customerInfo?.phone || ''}
                   onChange={(e) => isEditingBasic && setEditBasicInfo({ ...editBasicInfo, phone: e.target.value })}
                   disabled={!isEditingBasic}
                   placeholder="Nhập số điện thoại"
@@ -437,7 +437,7 @@ const ProfileInfoCard = () => {
               <div className="space-y-2">
                 <Label htmlFor="gender">Giới tính</Label>
                 <Select
-                  value={isEditingBasic ? editBasicInfo.gender : customerInfo.gender || ''}
+                  value={isEditingBasic ? editBasicInfo?.gender : customerInfo?.gender || ''}
                   onValueChange={(value) => isEditingBasic && setEditBasicInfo({ ...editBasicInfo, gender: value })}
                   disabled={!isEditingBasic}
                 >
@@ -459,7 +459,7 @@ const ProfileInfoCard = () => {
                 <Input
                   id="dateOfBirth"
                   type="date"
-                  value={isEditingBasic ? formatDateOfBirth(editBasicInfo.dateOfBirth) : formatDateOfBirth(customerInfo.dateOfBirth)}
+                  value={isEditingBasic ? formatDateOfBirth(editBasicInfo.dateOfBirth) : formatDateOfBirth(customerInfo?.dateOfBirth)}
                   onChange={(e) => isEditingBasic && setEditBasicInfo({
                     ...editBasicInfo,
                     dateOfBirth: parseDateOfBirth(e.target.value)
@@ -532,13 +532,13 @@ const ProfileInfoCard = () => {
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Mật khẩu hiện tại</Label>
+                <Label htmlFor="oldPassword">Mật khẩu hiện tại</Label>
                 <div className="relative">
                   <Input
-                    id="currentPassword"
-                    type={showPasswords.current ? "text" : "password"}
-                    value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    id="oldPassword"
+                    type={showPasswords?.current ? "text" : "password"}
+                    value={passwordData?.oldPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e?.target?.value })}
                     placeholder="Nhập mật khẩu hiện tại"
                   />
                   <Button
@@ -557,9 +557,9 @@ const ProfileInfoCard = () => {
                 <div className="relative">
                   <Input
                     id="newPassword"
-                    type={showPasswords.new ? "text" : "password"}
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    type={showPasswords?.new ? "text" : "password"}
+                    value={passwordData?.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e?.target?.value })}
                     placeholder="Nhập mật khẩu mới"
                   />
                   <Button
@@ -578,9 +578,9 @@ const ProfileInfoCard = () => {
                 <div className="relative">
                   <Input
                     id="confirmPassword"
-                    type={showPasswords.confirm ? "text" : "password"}
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    type={showPasswords?.confirm ? "text" : "password"}
+                    value={passwordData?.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e?.target?.value })}
                     placeholder="Nhập lại mật khẩu mới"
                   />
                   <Button

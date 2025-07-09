@@ -1,18 +1,23 @@
-"use client"
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button } from "../ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { Textarea } from "../ui/textarea"
-import { Alert, AlertDescription } from "../ui/alert"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Store, ArrowRight, ArrowLeft, Info, Home } from "lucide-react"
 import ProductInfoManual from "./ProductInfoManual"
 import RequestConfirmation from "./RequestConfirmation"
 import RequestSuccess from "./RequestSuccess"
-import { createEmptyShopInfo } from "../../types/purchase-request"
+
+// Define createEmptyShopInfo here instead of importing
+const createEmptyShopInfo = () => ({
+  name: "",
+  email: "",
+  address: "",
+  website: "",
+})
 
 export default function WithoutLinkWorkflowPage() {
   const navigate = useNavigate()
@@ -25,11 +30,11 @@ export default function WithoutLinkWorkflowPage() {
   }
 
   const handleBackToSelection = () => {
-    navigate("/create-request")
+    navigate(-1)
   }
 
   const handleBackToDashboard = () => {
-    navigate("/")
+    navigate("/account-center/purchase-request-list")
   }
 
   const renderBreadcrumb = () => (
@@ -84,21 +89,14 @@ export default function WithoutLinkWorkflowPage() {
   }
 
   const renderShopInfo = () => (
-    <Card className="shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white">
+    <Card className="shadow-lg p-2 py-4">
+      <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg">
         <CardTitle className="flex items-center gap-3 text-xl">
-          <Store className="h-6 w-6" />
+          <Store className="h-6 w-6 mt-1" />
           Thông tin cửa hàng
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-8 space-y-6">
-        <Alert className="bg-orange-50 border-orange-200">
-          <Info className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            Vui lòng cung cấp thông tin chi tiết về cửa hàng để chúng tôi có thể hỗ trợ bạn tốt nhất.
-          </AlertDescription>
-        </Alert>
-
+      <CardContent className="p-4 pt-2 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="shopName" className="text-base font-medium">
@@ -197,7 +195,6 @@ export default function WithoutLinkWorkflowPage() {
         )}
         {currentStep === "confirmation" && (
           <RequestConfirmation
-            type="without-link"
             products={products}
             shopInfo={shopInfo}
             onNext={handleSuccess}

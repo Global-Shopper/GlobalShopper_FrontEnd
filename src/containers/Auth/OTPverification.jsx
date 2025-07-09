@@ -11,7 +11,7 @@ import errorCode from "@/const/errorCode"
 import { useDispatch } from "react-redux"
 import { setUserInfo } from "@/features/user"
 
-export default function OTPverification() {
+export default function OTPverification({ changeEmail }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [otp, setOtp] = useState("")
@@ -181,12 +181,22 @@ export default function OTPverification() {
 
               {/* Back to Login */}
               <div className="text-center pt-4">
-                <Button asChild variant="ghost" className="h-10">
+                {
+                  changeEmail ?
+                  <Button asChild variant="ghost" className="h-10">
                   <Link to="/login" className="flex items-center space-x-2">
                     <ArrowLeft className="h-4 w-4" />
                     <span>Quay lại đăng nhập</span>
                   </Link>
                 </Button>
+                : 
+                <Button asChild variant="ghost" className="h-10">
+                  <Link to="/account-center" className="flex items-center space-x-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>Quay lại trang cá nhân</span>
+                  </Link>
+                </Button>
+                }
               </div>
             </CardContent>
           </Card>
