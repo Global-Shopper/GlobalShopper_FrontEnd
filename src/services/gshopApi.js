@@ -28,6 +28,13 @@ const gshopApi = createApi({
         method: 'POST',
       }),
     }),
+    verifyChangeEmail: builder.mutation({
+      query: (data) => ({
+        params: data,
+        url: endpoints.VERIFY_CHANGE_EMAIL,
+        method: 'POST',
+      }),
+    }),
     verifyOTP: builder.mutation({
       query: (data) => ({
         params: data,
@@ -153,6 +160,7 @@ export const {
   useResetPasswordMutation,
   useRegisterMutation,
   useChangeEmailMutation,
+  useVerifyChangeEmailMutation,
   useVerifyOTPForgotPasswordMutation,
   useCreateShippingAddressMutation,
   useUpdateShippingAddressMutation,

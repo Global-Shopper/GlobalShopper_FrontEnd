@@ -2,6 +2,7 @@ const endpoints = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   VERIFY_OTP: '/auth/verify-otp',
+  VERIFY_CHANGE_EMAIL: '/auth/verify-otp-and-change-email',
   RESEND_OTP: '/auth/resend-otp',
   CHANGE_EMAIL: '/auth/change-email',
   RESET_PASSWORD: '/auth/forgot-password/reset',

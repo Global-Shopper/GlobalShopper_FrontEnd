@@ -11,14 +11,18 @@ import {
   useGetCustomerInfoQuery,
   useUpdateCustomerProfileMutation,
   useUploadAvatarMutation,
+  useVerifyChangeEmailMutation,
 } from "@/services/gshopApi"
 import { toast } from "sonner"
-import { setAvatar, setCustomerBaseInfo, setEmail } from "@/features/user"
+import { setAccessToken, setAvatar, setCustomerBaseInfo, setEmail, setUserInfo } from "@/features/user"
 import * as Yup from "yup"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useLocation, useNavigate } from "react-router-dom"
 
 const ProfileInfoCard = () => {
+  const navigate = useNavigate()
   const dispatch = useDispatch()
+  const location = useLocation()
 
   // Get customer info from API
   const { data: customerInfo, isLoading: isInfoLoading, isError: isInfoError } = useGetCustomerInfoQuery()
@@ -28,6 +32,7 @@ const ProfileInfoCard = () => {
   const [updateProfile, { isLoading: isUpdateLoading }] = useUpdateCustomerProfileMutation()
   const [uploadAvatar, { isLoading: isUploadLoading }] = useUploadAvatarMutation()
   const [changeEmail, { isLoading: isChangeEmailLoading }] = useChangeEmailMutation()
+
 
   const [isEditingEmail, setIsEditingEmail] = useState(false)
   const [isEditingBasic, setIsEditingBasic] = useState(false)
@@ -139,13 +144,10 @@ const ProfileInfoCard = () => {
   // Handle email editing
   const handleEmailSave = async () => {
     try {
-      console.log(editEmail)
-      // Update Redux state - only email
-      await changeEmail({newEmail: editEmail}).unwrap()
+      await changeEmail().unwrap()
         .then(() => {
           setIsEditingEmail(false)
-          dispatch(setEmail(editEmail))
-          toast.success("Cập nhật email thành công!")
+          navigate("/otp-verify/change-email", { state: { email: editEmail } })
         })
     } catch (error) {
       toast.error("Cập nhật email thất bại!", {
@@ -266,6 +268,16 @@ const ProfileInfoCard = () => {
     if (!dateString) return ''
     return new Date(dateString).getTime()
   }
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const token = query.get("token");
+    if (token) {
+      dispatch(setAccessToken(token))
+      dispatch(setUserInfo(customerInfo))
+    }
+  }, [customerInfo, dispatch, location])
+
   // Loading state
   if (isInfoLoading) {
     return (
@@ -374,7 +386,7 @@ const ProfileInfoCard = () => {
                       <Edit className="h-3 w-3" />
                       Chỉnh sửa email
                     </Button>
-                    <p className="text-xs text-muted-foreground">*OTP sẽ được gửi tới địa chỉ email mới để xác nhận</p>
+                    <p className="text-xs text-muted-foreground">*OTP sẽ được gửi tới địa chỉ email cũ để xác nhận</p>
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2">
@@ -382,10 +394,10 @@ const ProfileInfoCard = () => {
                       onClick={handleEmailSave}
                       size="sm"
                       className="flex items-center gap-2"
-                      disabled={isUpdateLoading}
+                      disabled={isChangeEmailLoading}
                     >
                       <Save className="h-3 w-3" />
-                      {isUpdateLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                      {isChangeEmailLoading ? "Đang lưu..." : "Lưu thay đổi"}
                     </Button>
                     <Button
                       variant="outline"
