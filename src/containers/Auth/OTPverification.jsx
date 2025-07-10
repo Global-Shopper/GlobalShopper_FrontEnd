@@ -31,11 +31,10 @@ export default function OTPverification({ changeEmail }) {
   const handleVerifyOTP = useCallback(async () => {
     try {
       if (changeEmail) {
-        const res = await verifyChangeEmail({ newEmail: email, otp }).unwrap();
+        await verifyChangeEmail({ newEmail: email, otp }).unwrap();
         toast("Xác thực OTP thành công", {
           description: "Email cũ của bạn đã được xác thực. Vui lòng nhấp vào đường dẫn đã được gửi trong email mới để hoàn tất quá trình đổi email.",
         });
-        dispatch(setUserInfo({ ...res?.user, accessToken: res?.token }));
         navigate("/account-center");
       } else {
         const res = await verifyOTP({ email, otp }).unwrap();

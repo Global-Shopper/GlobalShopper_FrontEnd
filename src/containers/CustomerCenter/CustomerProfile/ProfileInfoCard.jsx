@@ -274,7 +274,9 @@ const ProfileInfoCard = () => {
     const token = query.get("token");
     if (token) {
       dispatch(setAccessToken(token))
-      dispatch(setUserInfo(customerInfo))
+      if (customerInfo) {
+        dispatch(setUserInfo(customerInfo))
+      }
     }
   }, [customerInfo, dispatch, location])
 
