@@ -6,18 +6,22 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { ArrowLeft, Mail, ShoppingCart, CheckCircle, XCircle, Clock, BlocksIcon, BanIcon } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { useLazyResendOTPQuery, useVerifyOTPMutation } from "@/services/gshopApi"
+import { useLazyResendOTPQuery, useVerifyChangeEmailMutation, useVerifyOTPMutation } from "@/services/gshopApi"
 import errorCode from "@/const/errorCode"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { setUserInfo } from "@/features/user"
+import GShopLogo from "@/assets/LOGO_Gshop.png";
 
-export default function OTPverification() {
+
+export default function OTPverification({ changeEmail }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [otp, setOtp] = useState("")
+  const oldEmail = useSelector((state) => state?.rootReducer?.user?.email)
   const email = useLocation().state?.email
   const [verifyOTP, { isLoading: isVerifyLoading, isError: isVerifyError, data: verifyRes, error: verifyError }] = useVerifyOTPMutation()
   const [resendOTP, { isLoading: isResendingLoading, isError: isResendError, data: resendRes, error: resendError }] = useLazyResendOTPQuery()
+  const [verifyChangeEmail, { isLoading: isVerifyChangeEmailLoading}] = useVerifyChangeEmailMutation()
 
   // Only update OTP value
   const handleOTPChange = (value) => {
@@ -26,33 +30,38 @@ export default function OTPverification() {
 
   const handleVerifyOTP = useCallback(async () => {
     try {
-      await verifyOTP({ email, otp }).unwrap()
-        .then((res) => {
-          toast("Xác thực OTP thành công", {
-            description: "Email của bạn đã được xác thực. Đang chuyển hướng...",
-          })
-          dispatch(setUserInfo({...res?.user, accessToken: res?.token}))
-          navigate("/")
-        })
-        .catch((e) => {
-          // 4xx 5xx errors will be caught here
-          // If the OTP times out, a new OTP will be available. Only one OTP can be used within 5 minutes.
-          if (e?.data?.errorCode === errorCode.ALREADY_VERIFIED) {
-            toast.error("Email đã được xác thực", {
-              description: e?.data?.message || "Email của bạn đã được xác thực trước đó.",
-            })
-            navigate("/login")
-          }
-          else {
-            toast.error("Lỗi xác thực", {
-              description: e?.data?.message || "Đã xảy ra lỗi khi xác thực mã OTP. Vui lòng thử lại.",
-            })
-          }
-        })
+      if (changeEmail) {
+        const res = await verifyChangeEmail({ newEmail: email, otp }).unwrap();
+        toast("Xác thực OTP thành công", {
+          description: "Email cũ của bạn đã được xác thực. Vui lòng nhấp vào đường dẫn đã được gửi trong email mới để hoàn tất quá trình đổi email.",
+        });
+        dispatch(setUserInfo({ ...res?.user, accessToken: res?.token }));
+        navigate("/account-center");
+      } else {
+        const res = await verifyOTP({ email, otp }).unwrap();
+        toast("Xác thực OTP thành công", {
+          description: "Email của bạn đã được xác thực. Đang chuyển hướng...",
+        });
+        dispatch(setUserInfo({ ...res?.user, accessToken: res?.token }));
+        navigate("/");
+      }
     } catch (e) {
-      console.log(e);
+      if (e?.data?.errorCode === errorCode.ALREADY_VERIFIED) {
+        toast.error("Email đã được xác thực", {
+          description: e?.data?.message || "Email của bạn đã được xác thực trước đó.",
+        });
+        if (changeEmail) {
+          navigate("/account-center");
+        } else {
+          navigate("/login");
+        }
+      } else {
+        toast.error("Lỗi xác thực", {
+          description: e?.data?.message || "Đã xảy ra lỗi khi xác thực mã OTP. Vui lòng thử lại.",
+        });
+      }
     }
-  }, [email, navigate, otp, verifyOTP])
+  }, [email, navigate, otp, verifyOTP, verifyChangeEmail, changeEmail, dispatch]);
 
   useEffect(() => {
     if (otp.length === 6) {
@@ -64,15 +73,15 @@ export default function OTPverification() {
     setOtp("")
     try {
       await resendOTP({ email }).unwrap()
-      .then(() => {
-        toast("Gửi lại OTP thành công", {
+        .then(() => {
+          toast("Gửi lại OTP thành công", {
+          })
         })
-      })
-      .catch((e) => {
-        toast.error("Gửi lại OTP thất bại", {
-          description: e?.data?.message || "Đã xảy ra lỗi khi gửi lại mã OTP. Vui lòng thử lại.",
+        .catch((e) => {
+          toast.error("Gửi lại OTP thất bại", {
+            description: e?.data?.message || "Đã xảy ra lỗi khi gửi lại mã OTP. Vui lòng thử lại.",
+          })
         })
-      })
     } catch (e) {
       console.log(e)
     }
@@ -85,17 +94,18 @@ export default function OTPverification() {
         <div className="w-full max-w-md space-y-8">
           {/* Logo and Header */}
           <div className="text-center space-y-2">
-            <Link to="/" className="inline-flex items-center space-x-2 mb-8">
-              <div className="bg-primary rounded-full p-2">
-                <ShoppingCart className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="text-2xl font-bold text-primary">Global Shopper</span>
+            <Link to="/" className="flex justify-center space-x-2 max-w-lg">
+              <img src={GShopLogo} alt="Logo" width={100} height={100} className="h-12 w-12" />
             </Link>
             <h1 className="text-3xl font-bold tracking-tight">Xác thực Email</h1>
             <p className="text-muted-foreground">
               Chúng tôi đã gửi mã xác thực gồm 6 số tới
               <br />
-              <span className="font-medium text-foreground">{email}</span>
+              {changeEmail && oldEmail ?
+                <span className="font-medium text-foreground">{oldEmail}</span>
+                :
+                <span className="font-medium text-foreground">{email}</span>
+              }
             </p>
           </div>
 
@@ -135,7 +145,7 @@ export default function OTPverification() {
                   )}
                 </div>
                 {/* Loading State */}
-                {isVerifyLoading && (
+                {isVerifyLoading || isVerifyChangeEmailLoading && (
                   <div className="text-center">
                     <div className="w-full h-12">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
@@ -163,7 +173,7 @@ export default function OTPverification() {
                   {isResendingLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                      Đang gửi... 
+                      Đang gửi...
                     </>
                   ) : (
                     <>
@@ -181,12 +191,22 @@ export default function OTPverification() {
 
               {/* Back to Login */}
               <div className="text-center pt-4">
-                <Button asChild variant="ghost" className="h-10">
-                  <Link to="/login" className="flex items-center space-x-2">
-                    <ArrowLeft className="h-4 w-4" />
-                    <span>Quay lại đăng nhập</span>
-                  </Link>
-                </Button>
+                {
+                  !changeEmail ?
+                    <Button asChild variant="ghost" className="h-10">
+                      <Link to="/login" className="flex items-center space-x-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        <span>Quay lại đăng nhập</span>
+                      </Link>
+                    </Button>
+                    :
+                    <Button asChild variant="ghost" className="h-10">
+                      <Link to="/account-center" className="flex items-center space-x-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        <span>Quay lại trang cá nhân</span>
+                      </Link>
+                    </Button>
+                }
               </div>
             </CardContent>
           </Card>

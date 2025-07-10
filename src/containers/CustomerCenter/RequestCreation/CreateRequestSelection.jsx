@@ -13,11 +13,11 @@ export default function CreateRequestSelection() {
   }
 
   const handleSelectWithLink = () => {
-    navigate("/create-request/with-link")
+    navigate("/account-center/create-request/with-link")
   }
 
   const handleSelectWithoutLink = () => {
-    navigate("/create-request/without-link")
+    navigate("/account-center/create-request/without-link")
   }
 
   return (

@@ -59,7 +59,7 @@ const Header = () => {
               : <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <img
-                    src={avatar}
+                    src={avatar ? avatar : "https://via.placeholder.com/36"}
                     alt="User Avatar"
                     width={36}
                     height={36}

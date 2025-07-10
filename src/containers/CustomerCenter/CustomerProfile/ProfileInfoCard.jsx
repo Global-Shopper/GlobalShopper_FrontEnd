@@ -11,14 +11,18 @@ import {
   useGetCustomerInfoQuery,
   useUpdateCustomerProfileMutation,
   useUploadAvatarMutation,
+  useVerifyChangeEmailMutation,
 } from "@/services/gshopApi"
 import { toast } from "sonner"
-import { setAvatar, setCustomerBaseInfo, setEmail } from "@/features/user"
+import { setAccessToken, setAvatar, setCustomerBaseInfo, setEmail, setUserInfo } from "@/features/user"
 import * as Yup from "yup"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useLocation, useNavigate } from "react-router-dom"
 
 const ProfileInfoCard = () => {
+  const navigate = useNavigate()
   const dispatch = useDispatch()
+  const location = useLocation()
 
   // Get customer info from API
   const { data: customerInfo, isLoading: isInfoLoading, isError: isInfoError } = useGetCustomerInfoQuery()
@@ -28,6 +32,7 @@ const ProfileInfoCard = () => {
   const [updateProfile, { isLoading: isUpdateLoading }] = useUpdateCustomerProfileMutation()
   const [uploadAvatar, { isLoading: isUploadLoading }] = useUploadAvatarMutation()
   const [changeEmail, { isLoading: isChangeEmailLoading }] = useChangeEmailMutation()
+
 
   const [isEditingEmail, setIsEditingEmail] = useState(false)
   const [isEditingBasic, setIsEditingBasic] = useState(false)
@@ -106,7 +111,7 @@ const ProfileInfoCard = () => {
   // Change password state
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
+    oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   })
@@ -139,13 +144,10 @@ const ProfileInfoCard = () => {
   // Handle email editing
   const handleEmailSave = async () => {
     try {
-      console.log(editEmail)
-      // Update Redux state - only email
-      await changeEmail({newEmail: editEmail}).unwrap()
+      await changeEmail().unwrap()
         .then(() => {
           setIsEditingEmail(false)
-          dispatch(setEmail(editEmail))
-          toast.success("Cập nhật email thành công!")
+          navigate("/otp-verify/change-email", { state: { email: editEmail } })
         })
     } catch (error) {
       toast.error("Cập nhật email thất bại!", {
@@ -220,12 +222,12 @@ const ProfileInfoCard = () => {
 
     try {
       await changePassword({
-        currentPassword: passwordData.currentPassword,
+        oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
       }).unwrap()
 
       setPasswordData({
-        currentPassword: "",
+        oldPassword: "",
         newPassword: "",
         confirmPassword: "",
       })
@@ -240,7 +242,7 @@ const ProfileInfoCard = () => {
 
   const handlePasswordCancel = () => {
     setPasswordData({
-      currentPassword: "",
+      oldPassword: "",
       newPassword: "",
       confirmPassword: "",
     })
@@ -266,6 +268,16 @@ const ProfileInfoCard = () => {
     if (!dateString) return ''
     return new Date(dateString).getTime()
   }
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const token = query.get("token");
+    if (token) {
+      dispatch(setAccessToken(token))
+      dispatch(setUserInfo(customerInfo))
+    }
+  }, [customerInfo, dispatch, location])
+
   // Loading state
   if (isInfoLoading) {
     return (
@@ -353,7 +365,7 @@ const ProfileInfoCard = () => {
                 <Input
                   id="email"
                   type="email"
-                  value={isEditingEmail ? editEmail : customerInfo.email || ''}
+                  value={isEditingEmail ? editEmail : customerInfo?.email || ''}
                   onChange={(e) => {
                     console.log(e.target.value)
                     setEditEmail(e.target.value)
@@ -374,7 +386,7 @@ const ProfileInfoCard = () => {
                       <Edit className="h-3 w-3" />
                       Chỉnh sửa email
                     </Button>
-                    <p className="text-xs text-muted-foreground">*OTP sẽ được gửi tới địa chỉ email mới để xác nhận</p>
+                    <p className="text-xs text-muted-foreground">*OTP sẽ được gửi tới địa chỉ email cũ để xác nhận</p>
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2">
@@ -382,10 +394,10 @@ const ProfileInfoCard = () => {
                       onClick={handleEmailSave}
                       size="sm"
                       className="flex items-center gap-2"
-                      disabled={isUpdateLoading}
+                      disabled={isChangeEmailLoading}
                     >
                       <Save className="h-3 w-3" />
-                      {isUpdateLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                      {isChangeEmailLoading ? "Đang lưu..." : "Lưu thay đổi"}
                     </Button>
                     <Button
                       variant="outline"
@@ -409,7 +421,7 @@ const ProfileInfoCard = () => {
                 <Label htmlFor="name">Họ và tên</Label>
                 <Input
                   id="name"
-                  value={isEditingBasic ? editBasicInfo.name : customerInfo?.name || ''}
+                  value={isEditingBasic ? editBasicInfo?.name : customerInfo?.name || ''}
                   onChange={(e) => isEditingBasic && setEditBasicInfo({ ...editBasicInfo, name: e.target.value })}
                   disabled={!isEditingBasic}
                   placeholder="Nhập họ và tên"
@@ -424,7 +436,7 @@ const ProfileInfoCard = () => {
                 <Input
                   id="phone"
                   type="tel"
-                  value={isEditingBasic ? editBasicInfo.phone : customerInfo?.phone || ''}
+                  value={isEditingBasic ? editBasicInfo?.phone : customerInfo?.phone || ''}
                   onChange={(e) => isEditingBasic && setEditBasicInfo({ ...editBasicInfo, phone: e.target.value })}
                   disabled={!isEditingBasic}
                   placeholder="Nhập số điện thoại"
@@ -437,7 +449,7 @@ const ProfileInfoCard = () => {
               <div className="space-y-2">
                 <Label htmlFor="gender">Giới tính</Label>
                 <Select
-                  value={isEditingBasic ? editBasicInfo.gender : customerInfo.gender || ''}
+                  value={isEditingBasic ? editBasicInfo?.gender : customerInfo?.gender || ''}
                   onValueChange={(value) => isEditingBasic && setEditBasicInfo({ ...editBasicInfo, gender: value })}
                   disabled={!isEditingBasic}
                 >
@@ -459,7 +471,7 @@ const ProfileInfoCard = () => {
                 <Input
                   id="dateOfBirth"
                   type="date"
-                  value={isEditingBasic ? formatDateOfBirth(editBasicInfo.dateOfBirth) : formatDateOfBirth(customerInfo.dateOfBirth)}
+                  value={isEditingBasic ? formatDateOfBirth(editBasicInfo.dateOfBirth) : formatDateOfBirth(customerInfo?.dateOfBirth)}
                   onChange={(e) => isEditingBasic && setEditBasicInfo({
                     ...editBasicInfo,
                     dateOfBirth: parseDateOfBirth(e.target.value)
@@ -532,13 +544,13 @@ const ProfileInfoCard = () => {
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Mật khẩu hiện tại</Label>
+                <Label htmlFor="oldPassword">Mật khẩu hiện tại</Label>
                 <div className="relative">
                   <Input
-                    id="currentPassword"
-                    type={showPasswords.current ? "text" : "password"}
-                    value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    id="oldPassword"
+                    type={showPasswords?.current ? "text" : "password"}
+                    value={passwordData?.oldPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e?.target?.value })}
                     placeholder="Nhập mật khẩu hiện tại"
                   />
                   <Button
@@ -557,9 +569,9 @@ const ProfileInfoCard = () => {
                 <div className="relative">
                   <Input
                     id="newPassword"
-                    type={showPasswords.new ? "text" : "password"}
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    type={showPasswords?.new ? "text" : "password"}
+                    value={passwordData?.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e?.target?.value })}
                     placeholder="Nhập mật khẩu mới"
                   />
                   <Button
@@ -578,9 +590,9 @@ const ProfileInfoCard = () => {
                 <div className="relative">
                   <Input
                     id="confirmPassword"
-                    type={showPasswords.confirm ? "text" : "password"}
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    type={showPasswords?.confirm ? "text" : "password"}
+                    value={passwordData?.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e?.target?.value })}
                     placeholder="Nhập lại mật khẩu mới"
                   />
                   <Button

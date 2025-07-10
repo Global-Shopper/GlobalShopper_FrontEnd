@@ -1,14 +1,41 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "../ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Separator } from "../ui/separator"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { CheckCircle, ArrowRight, ArrowLeft, ExternalLink, Loader2 } from "lucide-react"
-import { REQUEST_STATUS, REQUEST_TYPE } from "../../types/purchase-request"
+
+// Helper function to get status text
+const getStatusText = (status) => {
+  switch (status) {
+    case 'SENT':
+      return 'Đã gửi'
+    case 'PROCESSING':
+      return 'Đang xử lý'
+    case 'COMPLETED':
+      return 'Hoàn thành'
+    case 'CANCELLED':
+      return 'Đã hủy'
+    default:
+      return status
+  }
+}
+
+// Helper function to get request type text
+const getRequestTypeText = (type) => {
+  switch (type) {
+    case 'ONLINE':
+      return 'Có link'
+    case 'OFFLINE':
+      return 'Không có link'
+    default:
+      return type
+  }
+}
 
 const savedAddresses = [
   { id: "addr_1", label: "🏠 Nhà riêng", address: "123 Đường Nguyễn Huệ, Quận 1, TP.HCM" },
@@ -38,7 +65,7 @@ export default function RequestConfirmation({ type, products, shopInfo, onNext, 
       shopInfo,
       contactInfo,
       shippingAddressId,
-      status: REQUEST_STATUS.SENT,
+      status: 'sent',
       createdAt: new Date(),
       updatedAt: new Date(),
       totalProducts: products.length,
@@ -118,7 +145,7 @@ export default function RequestConfirmation({ type, products, shopInfo, onNext, 
           <div className="space-y-6">
             <h4 className="font-bold text-lg text-gray-900">Tóm tắt yêu cầu</h4>
 
-            {type === REQUEST_TYPE.WITHOUT_LINK && shopInfo && (
+            {type === "without-link" && shopInfo && (
               <div className="bg-orange-50 p-6 rounded-lg border border-orange-200">
                 <h5 className="font-semibold mb-3 text-orange-800">Thông tin cửa hàng</h5>
                 <div className="space-y-2 text-sm">
