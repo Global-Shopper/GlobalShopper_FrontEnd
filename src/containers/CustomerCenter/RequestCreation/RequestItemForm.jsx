@@ -15,16 +15,15 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, Package, ArrowRight, ArrowLeft } from "lucide-react"
 import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant"
 
-const createEmptyProduct = () => ({
-  name: "",
-  quantity: 1,
-  link: "",
-  note: "",
-  variants: [],
-})
 
 export default function RequestItemForm({ items, onItemsChange, onNext, onBack }) {
-  const [currentProduct, setCurrentProduct] = useState(createEmptyProduct())
+  const [currentProduct, setCurrentProduct] = useState({
+    name: "",
+    quantity: 1,
+    link: "",
+    note: "",
+    variants: [],
+  })
   const [variantRows, setVariantRows] = useState([])
   const [showFieldDropdown, setShowFieldDropdown] = useState(false)
 
@@ -67,7 +66,13 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
       variants,
     }
     onItemsChange([...items, product])
-    setCurrentProduct(createEmptyProduct())
+    setCurrentProduct({
+      name: "",
+      quantity: 1,
+      link: "",
+      note: "",
+      variants: [],
+    })
     setVariantRows([])
     setShowFieldDropdown(false)
   }
@@ -164,9 +169,11 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
                 min="1"
                 max="10"
                 value={currentProduct.quantity}
-                onChange={e =>
-                  setCurrentProduct(prev => ({ ...prev, quantity: Number.parseInt(e.target.value) || 1 }))
-                }
+                onChange={e => {
+                  let value = Number.parseInt(e.target.value) || 1;
+                  if (value > 10) value = 10;
+                  setCurrentProduct(prev => ({ ...prev, quantity: value }));
+                }}
                 className="h-12"
               />
             </div>
