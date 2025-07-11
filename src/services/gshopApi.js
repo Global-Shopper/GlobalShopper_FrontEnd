@@ -149,6 +149,20 @@ const gshopApi = createApi({
       }),
       providesTags: ['PurchaseRequest'],
     }),
+    createWithLinkPurchaseRequest: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.WITH_LINK_PURCHASE_REQUEST,
+        method: 'POST',
+      }),
+    }),
+    createWithoutLinkPurchaseRequest: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.WITHOUT_LINK_PURCHASE_REQUEST,
+        method: 'POST',
+      }),
+    }),
   }),
 });
 
@@ -172,6 +186,8 @@ export const {
   useDefaultShippingAddressMutation,
   useUploadAvatarMutation,
   useGetPurchaseRequestQuery,
+  useCreateWithLinkPurchaseRequestMutation,
+  useCreateWithoutLinkPurchaseRequestMutation,
 } = gshopApi;
 
 export default gshopApi;

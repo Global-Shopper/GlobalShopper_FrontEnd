@@ -5,27 +5,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Store, ArrowRight, ArrowLeft, Info, Home } from "lucide-react"
-import ProductInfoManual from "./ProductInfoManual"
+import { Store, ArrowRight, ArrowLeft, Home } from "lucide-react"
+import RequestItemForm from "./RequestItemForm"
 import RequestConfirmation from "./RequestConfirmation"
 import RequestSuccess from "./RequestSuccess"
-
-// Define createEmptyShopInfo here instead of importing
-const createEmptyShopInfo = () => ({
-  name: "",
-  email: "",
-  address: "",
-  website: "",
-})
+import { useCreateWithoutLinkPurchaseRequestMutation } from "@/services/gshopApi"
 
 export default function WithoutLinkWorkflowPage() {
   const navigate = useNavigate()
-  const [currentStep, setCurrentStep] = useState("shop-info")
-  const [shopInfo, setShopInfo] = useState(createEmptyShopInfo())
-  const [products, setProducts] = useState([])
+  const [createPurchaseRequest] = useCreateWithoutLinkPurchaseRequestMutation()
+  const [currentStep, setCurrentStep] = useState("contactInfo")
+
+  const [shopName, setShopName] = useState("")
+  const [shopEmail, setShopEmail] = useState("")
+  const [shopAddress, setShopAddress] = useState("")
+  const [shopWebsite, setShopWebsite] = useState("")
+  const [items, setItems] = useState([])
+  const [shippingAddressId, setShippingAddressId] = useState(null)
+
+  const contactInfo = [
+    `Tên cửa hàng: ${shopName}`,
+    shopEmail ? `Email: ${shopEmail}` : null,
+    `Địa chỉ: ${shopAddress}`,
+    shopWebsite ? `Website: ${shopWebsite}` : null,
+  ].filter(Boolean)
 
   const handleSuccess = () => {
+    createPurchaseRequest({
+      shippingAddressId,
+      contactInfo,
+      items,
+    }).unwrap()
     setCurrentStep("success")
   }
 
@@ -53,7 +63,7 @@ export default function WithoutLinkWorkflowPage() {
   )
 
   const renderStepIndicator = () => {
-    const steps = ["shop-info", "product-info", "confirmation", "success"]
+    const steps = ["contactInfo", "requestItems", "confirmation", "success"]
     const stepLabels = ["Thông tin CH", "Thông tin SP", "Xác nhận", "Hoàn thành"]
     const currentIndex = steps.indexOf(currentStep)
 
@@ -64,11 +74,10 @@ export default function WithoutLinkWorkflowPage() {
             <div key={step} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-colors shadow-lg ${
-                    index <= currentIndex
-                      ? "bg-gradient-to-br from-orange-600 to-orange-700 text-white"
-                      : "bg-gray-200 text-gray-500"
-                  }`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-colors shadow-lg ${index <= currentIndex
+                    ? "bg-gradient-to-br from-orange-600 to-orange-700 text-white"
+                    : "bg-gray-200 text-gray-500"
+                    }`}
                 >
                   {index + 1}
                 </div>
@@ -76,9 +85,8 @@ export default function WithoutLinkWorkflowPage() {
               </div>
               {index < steps.length - 1 && (
                 <div
-                  className={`w-16 h-1 mx-4 transition-colors ${
-                    index < currentIndex ? "bg-gradient-to-r from-orange-600 to-orange-700" : "bg-gray-200"
-                  }`}
+                  className={`w-16 h-1 mx-4 transition-colors ${index < currentIndex ? "bg-gradient-to-r from-orange-600 to-orange-700" : "bg-gray-200"
+                    }`}
                 />
               )}
             </div>
@@ -88,7 +96,7 @@ export default function WithoutLinkWorkflowPage() {
     )
   }
 
-  const renderShopInfo = () => (
+  const renderContactInfo = () => (
     <Card className="shadow-lg p-2 py-4">
       <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg">
         <CardTitle className="flex items-center gap-3 text-xl">
@@ -104,8 +112,8 @@ export default function WithoutLinkWorkflowPage() {
             </Label>
             <Input
               id="shopName"
-              value={shopInfo.name}
-              onChange={(e) => setShopInfo((prev) => ({ ...prev, name: e.target.value }))}
+              value={shopName}
+              onChange={(e) => setShopName(e.target.value)}
               placeholder="Ví dụ: Nike Store, Uniqlo, Zara..."
               className="h-12"
             />
@@ -118,8 +126,8 @@ export default function WithoutLinkWorkflowPage() {
             <Input
               id="shopEmail"
               type="email"
-              value={shopInfo.email}
-              onChange={(e) => setShopInfo((prev) => ({ ...prev, email: e.target.value }))}
+              value={shopEmail}
+              onChange={(e) => setShopEmail(e.target.value)}
               placeholder="contact@store.com"
               className="h-12"
             />
@@ -132,8 +140,8 @@ export default function WithoutLinkWorkflowPage() {
           </Label>
           <Textarea
             id="shopAddress"
-            value={shopInfo.address}
-            onChange={(e) => setShopInfo((prev) => ({ ...prev, address: e.target.value }))}
+            value={shopAddress}
+            onChange={(e) => setShopAddress(e.target.value)}
             placeholder="Địa chỉ cụ thể của cửa hàng (số nhà, đường, quận/huyện, thành phố)..."
             rows={3}
             className="resize-none"
@@ -147,8 +155,8 @@ export default function WithoutLinkWorkflowPage() {
           <Input
             id="shopWebsite"
             type="url"
-            value={shopInfo.website}
-            onChange={(e) => setShopInfo((prev) => ({ ...prev, website: e.target.value }))}
+            value={shopWebsite}
+            onChange={(e) => setShopWebsite(e.target.value)}
             placeholder="https://store-website.com"
             className="h-12"
           />
@@ -160,9 +168,9 @@ export default function WithoutLinkWorkflowPage() {
             Quay lại
           </Button>
           <Button
-            onClick={() => setCurrentStep("product-info")}
+            onClick={() => setCurrentStep("requestItems")}
             className="flex-1 h-12 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800"
-            disabled={!shopInfo.name || !shopInfo.address}
+            disabled={!shopName || !shopAddress}
           >
             Tiếp tục
             <ArrowRight className="h-4 w-4 ml-2" />
@@ -184,21 +192,23 @@ export default function WithoutLinkWorkflowPage() {
 
         {renderStepIndicator()}
 
-        {currentStep === "shop-info" && renderShopInfo()}
-        {currentStep === "product-info" && (
-          <ProductInfoManual
-            products={products}
-            onProductsChange={setProducts}
+        {currentStep === "contactInfo" && renderContactInfo()}
+        {currentStep === "requestItems" && (
+          <RequestItemForm
+            items={items}
+            onItemsChange={setItems}
             onNext={() => setCurrentStep("confirmation")}
-            onBack={() => setCurrentStep("shop-info")}
+            onBack={() => setCurrentStep("contactInfo")}
           />
         )}
         {currentStep === "confirmation" && (
           <RequestConfirmation
-            products={products}
-            shopInfo={shopInfo}
+            items={items}
+            contactInfo={contactInfo}
             onNext={handleSuccess}
-            onBack={() => setCurrentStep("product-info")}
+            onBack={() => setCurrentStep("requestItems")}
+            setShippingAddressId={setShippingAddressId}
+            shippingAddressId={shippingAddressId}
           />
         )}
         {currentStep === "success" && <RequestSuccess onClose={() => navigate("/")} />}

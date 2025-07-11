@@ -73,7 +73,6 @@ const RequestCard = ({ request }) => {
                 {getRequestTypeText(request.requestType)}
               </Badge>
             </div>
-            <p className="text-sm text-gray-500">ID: {request.id}</p>
           </div>
         </div>
 
@@ -120,7 +119,7 @@ const RequestCard = ({ request }) => {
               )}
               {item.variants && item.variants.length > 0 && (
                 <p className="text-xs text-gray-500">
-                  Phân loại: {item.variants.join(', ')}
+                  Loại sản phẩm: {item.variants.join(', ')}
                 </p>
               )}
             </div>

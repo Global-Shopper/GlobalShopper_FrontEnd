@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 
 const CreateRequestLayout = () => {
   return (
-    <Outlet/>
+    <div className='p-0'><Outlet/></div>
   )
 }
 

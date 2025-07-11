@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom"
-import { ShoppingCart, Store, Link, ArrowRight, ArrowLeft } from "lucide-react"
+import { Store, Link, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { SUPPORTED_PLATFORMS } from "@/const/purchaseReqStatus"
 
 export default function CreateRequestSelection() {
   const navigate = useNavigate()
@@ -137,10 +136,6 @@ export default function CreateRequestSelection() {
                         <div className="w-2 h-2 bg-blue-500 rounded-full" />
                         <span>Xử lý hàng loạt nhanh chóng</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                        <span>Amazon, eBay, AliExpress...</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -162,14 +157,6 @@ export default function CreateRequestSelection() {
           {/* Supported Platforms */}
           <div className="mt-12 text-center">
             <div className="bg-white/70 backdrop-blur-sm p-8 rounded-xl border border-gray-200 max-w-4xl mx-auto">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Các sàn thương mại điện tử được hỗ trợ</h3>
-              <div className="flex flex-wrap justify-center gap-3 mb-6">
-                {SUPPORTED_PLATFORMS.map((platform) => (
-                  <Badge key={platform} variant="outline" className="bg-white/50 hover:bg-white px-3 py-1">
-                    {platform}
-                  </Badge>
-                ))}
-              </div>
               <p className="text-gray-600 mb-6">
                 Nếu bạn không chắc chắn nên chọn loại yêu cầu nào, đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ
                 bạn.
