@@ -75,7 +75,7 @@ const Header = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/orders" className="flex items-center">
+                    <Link to="/account-center/purchase-request-list" className="flex items-center">
                       <CalendarArrowUp className="mr-2 h-4 w-4" />
                       <span>Yêu cầu mua hàng</span>
                     </Link>

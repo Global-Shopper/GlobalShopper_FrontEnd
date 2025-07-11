@@ -1,27 +1,19 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Package, Trash2, ExternalLink, AlertTriangle, ArrowRight, ArrowLeft } from "lucide-react"
+import { ExternalLink, AlertTriangle } from "lucide-react"
 
 const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "Free Size"]
 const colorOptions = ["Đỏ", "Xanh dương", "Xanh lá", "Đen", "Trắng", "Vàng", "Hồng", "Tím", "Cam", "Nâu", "Xám"]
 
-export default function ProductManagement({ products, onProductsChange, onNext, onBack, failedLinks }) {
+export default function ProductManagement({ products, onProductsChange, failedLinks }) {
   const updateProduct = (productId, updates) => {
     onProductsChange(products.map((product) => (product.id === productId ? { ...product, ...updates } : product)))
   }
-
-  const removeProduct = (productId) => {
-    onProductsChange(products.filter((product) => product.id !== productId))
-  }
-
-  const isFormValid = products.length > 0 && products.every((p) => p.name && p.color && p.size)
-
   return (
     <Card >
       <CardContent className="p-4 py-2">
@@ -34,7 +26,7 @@ export default function ProductManagement({ products, onProductsChange, onNext, 
           </Alert>
         )}
 
-        {products.map((product, index) => (
+        {products.map((product) => (
           <div key={product.id} className="border-t pt-6 first:border-t-0 first:pt-0">
             <div className="flex items-center justify-between">
                 {failedLinks?.has(product.link) && (
