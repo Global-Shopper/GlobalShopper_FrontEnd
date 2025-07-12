@@ -14,6 +14,8 @@ import CreateRequestSelection from "@/containers/CustomerCenter/RequestCreation/
 import CreateRequestLayout from "@/containers/CustomerCenter/RequestCreation/CreateRequestLayout";
 import WithoutLinkWorkflowPage from "@/containers/CustomerCenter/RequestCreation/WithoutLinkWorkflowPage";
 import WithLinkWorkflowPage from "@/containers/CustomerCenter/RequestCreation/WithLinkWorkflowPage";
+import WalletOverview from "@/containers/Wallet/WalletOverview";
+import WalletDeposit from "@/containers/Wallet/WalletDeposit";
 
 const AppRoutes = () => {
   return (
@@ -26,6 +28,8 @@ const AppRoutes = () => {
 
       <Route path="/" element={<Homelayout />}>
         <Route index element={<Homepage />} />
+        <Route path="/wallet" element={<WalletOverview />} />
+        <Route path="/wallet/deposit" element={<WalletDeposit />} />
       </Route>
 
       {/* Customer Account Center Routes */}

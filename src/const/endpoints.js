@@ -16,6 +16,7 @@ const endpoints = {
   PURCHASE_REQUEST: '/purchase-request',
   WITH_LINK_PURCHASE_REQUEST: '/purchase-request/online-request',
   WITHOUT_LINK_PURCHASE_REQUEST: '/purchase-request/offline-request',
+  WALLET: '/wallet',
 }
 export default endpoints
 

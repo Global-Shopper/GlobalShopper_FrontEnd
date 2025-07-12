@@ -155,11 +155,27 @@ const gshopApi = createApi({
         url: endpoints.WITH_LINK_PURCHASE_REQUEST,
         method: 'POST',
       }),
+      invalidatesTags: ['PurchaseRequest'],
     }),
     createWithoutLinkPurchaseRequest: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.WITHOUT_LINK_PURCHASE_REQUEST,
+        method: 'POST',
+      }),
+      invalidatesTags: ['PurchaseRequest'],
+    }),
+    getWallet: builder.query({
+      query: () => ({
+        url: endpoints.WALLET,
+        method: 'GET',
+      }),
+      providesTags: ['Wallet'],
+    }),
+    depositWallet: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.WALLET,
         method: 'POST',
       }),
     }),
@@ -188,6 +204,8 @@ export const {
   useGetPurchaseRequestQuery,
   useCreateWithLinkPurchaseRequestMutation,
   useCreateWithoutLinkPurchaseRequestMutation,
+  useGetWalletQuery,
+  useDepositWalletMutation,
 } = gshopApi;
 
 export default gshopApi;
