@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useDepositWalletMutation, useGetWalletQuery } from '@/services/gshopApi'
+import { useDepositWalletMutation, useGetWalletQuery, useLazyCheckPaymentQuery } from '@/services/gshopApi'
 
 // Predefined amount options
 const AMOUNT_OPTIONS = [
@@ -38,6 +38,7 @@ const DepositValidationSchema = Yup.object().shape({
 
 const WalletDeposit = () => {
   const navigate = useNavigate()
+  const [checkPayment, { isLoading: isCheckingPayment }] = useLazyCheckPaymentQuery()
   const [depositWallet, { isLoading: isDepositing }] = useDepositWalletMutation()
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
 
@@ -50,6 +51,7 @@ const WalletDeposit = () => {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
+      console.log(values)
       await depositWallet({
         balance: values.amount
       }).unwrap()
@@ -74,6 +76,20 @@ const WalletDeposit = () => {
   const handleBack = () => {
     navigate(-1)
   }
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const email = query.get("email");
+    const vnpAmount = query.get("vnp_Amount");
+    const vnpResponseCode = query.get("vnp_ResponseCode");
+    if (email & vnpAmount && vnpResponseCode) {
+      checkPayment({
+        email: email,
+        vnp_Amount: vnpAmount,
+        vnp_ResponseCode: vnpResponseCode
+      })
+    }
+  }, [checkPayment])
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -221,31 +237,6 @@ const WalletDeposit = () => {
                               )}
                             </CardContent>
                           </Card>
-
-                          {/* Transaction Summary */}
-                          {values?.amount && (
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Thông tin giao dịch</CardTitle>
-                              </CardHeader>
-                              <CardContent className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-gray-600">Số tiền nạp:</span>
-                                  <span className="font-medium">
-                                    {formatCurrency(values.amount)}
-                                  </span>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                  <span className="font-medium">Tổng cộng:</span>
-                                  <span className="text-lg font-bold text-blue-600">
-                                    {formatCurrency(values.amount)}
-                                  </span>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          )}
-
                           {/* Security Notice */}
                           <Card className="border-blue-200 bg-blue-50">
                             <CardContent className="pt-6">
@@ -273,7 +264,6 @@ const WalletDeposit = () => {
 
           {/* Desktop Sidebar */}
           <div className="hidden lg:block space-y-6">
-            {/* Current Balance */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

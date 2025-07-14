@@ -1,4 +1,4 @@
-import { useState } from "react"
+// import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -94,39 +94,54 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
               <div className="space-y-4">
                 {items.map((product, index) => (
                   <div key={product.id || index} className="bg-white p-4 rounded border">
-                    <div className="flex flex-col gap-2">
-                      <div>
-                        <span className="font-medium text-gray-900">{index + 1}. {product.name}</span>
-                        {product.link && (
-                          <span className="ml-2 text-blue-600 text-sm">
-                            <a
-                              href={product.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:underline"
-                            >
-                              Xem sản phẩm
-                            </a>
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        <strong>Số lượng:</strong> {product.quantity}
-                      </div>
-                      {product.variants && product.variants.length > 0 && (
-                        <ul className="mt-1 space-y-1">
-                          {product.variants.map((variant, vIdx) => (
-                            <li key={vIdx} className="text-sm text-gray-700 pl-2 border-l-2 border-orange-300">
-                              {variant}
-                            </li>
+                    <div className="flex items-start gap-4">
+                      {/* Image preview section */}
+                      {product.images && product.images.length > 0 && (
+                        <div className="flex-shrink-0 flex flex-wrap gap-2">
+                          {product.images.map((img, idx) => (
+                            <img
+                              key={img}
+                              src={img}
+                              alt={`Product preview ${idx + 1}`}
+                              className="w-16 h-16 object-cover rounded-lg border"
+                            />
                           ))}
-                        </ul>
-                      )}
-                      {product.note && (
-                        <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          <strong>Ghi chú:</strong> {product.note}
                         </div>
                       )}
+                      <div className="flex-1 flex flex-col gap-2">
+                        <div>
+                          <span className="font-medium text-gray-900">{index + 1}. {product.name}</span>
+                          {product.link && (
+                            <span className="ml-2 text-blue-600 text-sm">
+                              <a
+                                href={product.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline"
+                              >
+                                Xem sản phẩm
+                              </a>
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong>Số lượng:</strong> {product.quantity}
+                        </div>
+                        {product.variants && product.variants.length > 0 && (
+                          <ul className="mt-1 space-y-1">
+                            {product.variants.map((variant, vIdx) => (
+                              <li key={vIdx} className="text-sm text-gray-700 pl-2 border-l-2 border-orange-300">
+                                {variant}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {product.note && (
+                          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                            <strong>Ghi chú:</strong> {product.note}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

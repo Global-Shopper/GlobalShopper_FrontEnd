@@ -23,7 +23,7 @@ export default function RequestDashboard() {
   const { data: purchaseRequestsData, isLoading: isRequestLoading, isError: isRequestError } = useGetPurchaseRequestQuery({
     page: currentPage,
     size: pageSize,
-    type: "0"
+    type: "assigned"
   })
 
   // Extract data from API response

@@ -17,6 +17,7 @@ const endpoints = {
   WITH_LINK_PURCHASE_REQUEST: '/purchase-request/online-request',
   WITHOUT_LINK_PURCHASE_REQUEST: '/purchase-request/offline-request',
   WALLET: '/wallet',
+  CHECKPAYMENT: '/wallet/check-payment-vnpay',
 }
 export default endpoints
 

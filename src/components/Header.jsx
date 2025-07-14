@@ -49,12 +49,19 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container flex h-16 items-center justify-between px-4 md:px-32">
-        <Link to="/" className="flex items-center space-x-2">
-          <img src={GShopLogo || "/placeholder.svg"} alt="Logo" width={48} height={48} className="h-12 w-12" />
-          <span className="text-xl font-bold">Global Shopper</span>
+        <Link
+          to="/"
+        >
+          <img
+            src={GShopLogo || "/placeholder.svg"}
+            alt="Logo"
+            width={48}
+            height={48}
+            className="h-12 w-12"
+          />
         </Link>
 
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className=" md:flex items-center space-x-6">
           <Link to="/services" className="text-sm font-medium hover:text-primary transition-colors">
             Dịch vụ
           </Link>

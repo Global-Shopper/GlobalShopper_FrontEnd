@@ -4,11 +4,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Copy, ExternalLink, Home } from "lucide-react"
 
-export default function RequestSuccess({ onClose }) {
-  const requestId = `REQ_${Date.now().toString().slice(-8)}`
-
+export default function RequestSuccess({onClose, purchaseData}) {
   const copyRequestId = () => {
-    navigator.clipboard.writeText(requestId)
+    console.log(purchaseData)
+    navigator.clipboard.writeText(purchaseData?.id || "")
     // You could add a toast notification here
   }
 
@@ -34,7 +33,7 @@ export default function RequestSuccess({ onClose }) {
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-700">Mã yêu cầu:</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-gray-900 bg-white px-2 py-1 rounded">{requestId}</span>
+                  <span className="font-mono text-gray-900 bg-white px-2 py-1 rounded">{purchaseData?.id || ""}</span>
                   <Button variant="ghost" size="sm" onClick={copyRequestId} className="h-6 w-6 p-0 hover:bg-green-200">
                     <Copy className="h-3 w-3" />
                   </Button>

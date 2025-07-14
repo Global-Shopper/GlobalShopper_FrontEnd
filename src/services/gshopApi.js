@@ -179,6 +179,13 @@ const gshopApi = createApi({
         method: 'POST',
       }),
     }),
+    checkPayment: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.CHECKPAYMENT,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
@@ -206,6 +213,7 @@ export const {
   useCreateWithoutLinkPurchaseRequestMutation,
   useGetWalletQuery,
   useDepositWalletMutation,
+  useLazyCheckPaymentQuery
 } = gshopApi;
 
 export default gshopApi;
