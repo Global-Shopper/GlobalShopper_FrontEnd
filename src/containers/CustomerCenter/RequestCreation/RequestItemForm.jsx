@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,20 +12,23 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, Package, ArrowRight, ArrowLeft } from "lucide-react"
+import { Plus, Trash2, Package, ArrowRight, ArrowLeft, Upload, Image as ImageIcon, Loader2 } from "lucide-react"
 import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant"
-
+import { uploadToCloudinary } from "@/utils/uploadToCloudinary"
 
 export default function RequestItemForm({ items, onItemsChange, onNext, onBack }) {
-  const [currentProduct, setCurrentProduct] = useState({
+  const [currentRequestItem, setCurrentRequestItem] = useState({
     name: "",
     quantity: 1,
     link: "",
     note: "",
+    images: [],
     variants: [],
   })
   const [variantRows, setVariantRows] = useState([])
   const [showFieldDropdown, setShowFieldDropdown] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   // Compute available fields for adding new variant
   const usedFieldTypes = variantRows.map(row => row.fieldType)
@@ -52,67 +55,123 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
     setVariantRows(rows => rows.filter((_, i) => i !== idx))
   }
 
-  const addProduct = () => {
-    if (!currentProduct.name.trim()) {
+  const handleImageUpload = async (event) => {
+    const files = Array.from(event.target.files)
+    if (!files.length) return
+
+    // Validate all files
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        alert('Vui lòng chọn file hình ảnh')
+        return
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Kích thước file không được vượt quá 5MB')
+        return
+      }
+    }
+
+    setIsUploading(true)
+    try {
+      const uploadPromises = files.map(file => uploadToCloudinary(file))
+      const urls = await Promise.all(uploadPromises)
+      setCurrentRequestItem(prev => ({
+        ...prev,
+        images: [...prev.images, ...urls.filter(Boolean)]
+      }))
+    } catch {
+      alert('Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeImage = (idx) => {
+    setCurrentRequestItem(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== idx)
+    }))
+  }
+
+  const addRequestItem = () => {
+    if (!currentRequestItem.name.trim()) {
       alert("Vui lòng nhập tên sản phẩm")
       return
     }
     const variants = variantRows
       .filter(row => (row.fieldType === "Khác" ? row.customFieldName.trim() : true) && row.fieldValue.trim())
       .map(row => `${row.fieldType === "Khác" ? row.customFieldName : row.fieldType}: ${row.fieldValue}`)
-    const product = {
-      ...currentProduct,
-      id: `product_${Date.now()}`,
+    const requestItem = {
+      ...currentRequestItem,
+      id: `requestItem_${Date.now()}`,
       variants,
     }
-    onItemsChange([...items, product])
-    setCurrentProduct({
+    onItemsChange([...items, requestItem])
+    setCurrentRequestItem({
       name: "",
       quantity: 1,
       link: "",
       note: "",
+      images: [],
       variants: [],
     })
     setVariantRows([])
     setShowFieldDropdown(false)
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
-  const removeProduct = productId => {
-    onItemsChange(items.filter(product => product.id !== productId))
+  const removeRequestItem = requestItemId => {
+    onItemsChange(items.filter(item => item.id !== requestItemId))
   }
 
   // Render
   return (
     <div className="space-y-6">
-      {/* Product List */}
+      {/* Request Items List */}
       {items.length > 0 && (
         <Card>
           <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white">
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Danh sách sản phẩm ({items.length})
+              Danh sách sản phẩm yêu cầu ({items.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
-              {items.map(product => (
-                <div key={product.id} className="p-6 hover:bg-gray-50 transition-colors">
+              {items.map(requestItem => (
+                <div key={requestItem.id} className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-lg">{product.name}</h3>
-                        <Badge variant="outline">Số lượng: {product.quantity}</Badge>
+                      <div className="flex items-start gap-4">
+                        {requestItem.images.length > 0 && (
+                          <div className="flex-shrink-0 flex flex-wrap gap-2">
+                            {requestItem.images.map((img, idx) => (
+                              <img
+                                key={img}
+                                src={img}
+                                alt={`Product preview ${idx + 1}`}
+                                className="w-16 h-16 object-cover rounded-lg border"
+                              />
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-lg">{requestItem.name}</h3>
+                            <Badge variant="outline">Số lượng: {requestItem.quantity}</Badge>
+                          </div>
+                          {requestItem.variants.map((variant, vIdx) => (
+                            <p key={vIdx} className="text-sm text-gray-600">{variant}</p>
+                          ))}
+                          {requestItem.note && (
+                            <p className="text-sm text-gray-600 bg-gray-100 p-2 rounded mt-2">💬 {requestItem.note}</p>
+                          )}
+                        </div>
                       </div>
-                      {product.variants.map((variant, vIdx) => (
-                        <p key={vIdx} className="text-sm text-gray-600">{variant}</p>
-                      ))}
-                      {product.note && (
-                        <p className="text-sm text-gray-600 bg-gray-100 p-2 rounded">💬 {product.note}</p>
-                      )}
                     </div>
                     <Button
                       type="button"
-                      onClick={() => removeProduct(product.id)}
+                      onClick={() => removeRequestItem(requestItem.id)}
                       variant="outline"
                       size="sm"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -127,62 +186,121 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
         </Card>
       )}
 
-      {/* Add New Product */}
+      {/* Add New Request Item */}
       <Card>
         <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white">
           <CardTitle className="flex items-center gap-3">
             <Plus className="h-5 w-5" />
-            Thêm sản phẩm mới
+            Thêm sản phẩm yêu cầu mới
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
-          {/* Product Info */}
+          {/* Request Item Info */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="productName" className="text-base font-medium">Tên sản phẩm *</Label>
+              <Label htmlFor="requestItemName" className="text-base font-medium">Tên sản phẩm *</Label>
               <Input
-                id="productName"
-                value={currentProduct.name}
-                onChange={e => setCurrentProduct(prev => ({ ...prev, name: e.target.value }))}
+                id="requestItemName"
+                value={currentRequestItem.name}
+                onChange={e => setCurrentRequestItem(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Ví dụ: Áo thun nam Nike, Giày sneaker Adidas..."
                 className="h-12"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="productNote" className="text-base font-medium">Ghi chú (tuỳ chọn)</Label>
+              <Label htmlFor="requestItemNote" className="text-base font-medium">Ghi chú (tuỳ chọn)</Label>
               <Textarea
-                id="productNote"
-                value={currentProduct.note}
-                onChange={e => setCurrentProduct(prev => ({ ...prev, note: e.target.value }))}
+                id="requestItemNote"
+                value={currentRequestItem.note}
+                onChange={e => setCurrentRequestItem(prev => ({ ...prev, note: e.target.value }))}
                 placeholder="Ghi chú thêm về sản phẩm nếu có..."
                 rows={4}
                 className="resize-none"
               />
             </div>
           </div>
+
+          {/* Image Upload Section */}
+          <div className="space-y-4">
+            <Label className="text-base font-medium">Hình ảnh sản phẩm (có thể chọn nhiều)</Label>
+            <div className="flex flex-wrap gap-4">
+              {currentRequestItem.images.map((img, idx) => (
+                <div key={img} className="relative">
+                  <img
+                    src={img}
+                    alt={`Product preview ${idx + 1}`}
+                    className="w-24 h-24 object-cover rounded-lg border"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeImage(idx)}
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="flex items-center gap-2"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Đang tải lên...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      Thêm ảnh
+                    </>
+                  )}
+                </Button>
+                <p className="text-sm text-gray-500 mt-1">
+                  Hỗ trợ: JPG, PNG, GIF. Tối đa 5MB mỗi ảnh, chọn nhiều ảnh cùng lúc.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="productQuantity" className="text-base font-medium">Số lượng *</Label>
+              <Label htmlFor="requestItemQuantity" className="text-base font-medium">Số lượng *</Label>
               <Input
-                id="productQuantity"
+                id="requestItemQuantity"
                 type="number"
                 min="1"
                 max="10"
-                value={currentProduct.quantity}
+                value={currentRequestItem.quantity}
                 onChange={e => {
                   let value = Number.parseInt(e.target.value) || 1;
                   if (value > 10) value = 10;
-                  setCurrentProduct(prev => ({ ...prev, quantity: value }));
+                  setCurrentRequestItem(prev => ({ ...prev, quantity: value }));
                 }}
                 className="h-12"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="productLink" className="text-base font-medium">Link sản phẩm (nếu có)</Label>
+              <Label htmlFor="requestItemLink" className="text-base font-medium">Link sản phẩm (nếu có)</Label>
               <Input
-                id="productLink"
-                value={currentProduct.link}
-                onChange={e => setCurrentProduct(prev => ({ ...prev, link: e.target.value }))}
+                id="requestItemLink"
+                value={currentRequestItem.link}
+                onChange={e => setCurrentRequestItem(prev => ({ ...prev, link: e.target.value }))}
                 placeholder="https://example.com/product"
                 className="h-12"
               />
@@ -270,9 +388,9 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
             </div>
           </div>
 
-          <Button onClick={addProduct} className="w-full h-12 bg-green-600 hover:bg-green-700">
+          <Button onClick={addRequestItem} className="w-full h-12 bg-green-600 hover:bg-green-700">
             <Plus className="h-5 w-5 mr-2" />
-            Thêm sản phẩm vào danh sách
+            Thêm sản phẩm vào danh sách yêu cầu
           </Button>
         </CardContent>
       </Card>

@@ -10,10 +10,11 @@ import RequestItemForm from "./RequestItemForm"
 import RequestConfirmation from "./RequestConfirmation"
 import RequestSuccess from "./RequestSuccess"
 import { useCreateWithoutLinkPurchaseRequestMutation } from "@/services/gshopApi"
+import { toast } from "sonner"
 
 export default function WithoutLinkWorkflowPage() {
   const navigate = useNavigate()
-  const [createPurchaseRequest] = useCreateWithoutLinkPurchaseRequestMutation()
+  const [createPurchaseRequest, {data: purchaseData}] = useCreateWithoutLinkPurchaseRequestMutation()
   const [currentStep, setCurrentStep] = useState("contactInfo")
 
   const [shopName, setShopName] = useState("")
@@ -35,7 +36,11 @@ export default function WithoutLinkWorkflowPage() {
       shippingAddressId,
       contactInfo,
       items,
-    }).unwrap()
+    }).unwrap().then(() => {
+      toast.success("Yêu cầu mua hàng đã được gửi thành công!")
+    }).catch((error) => {
+      toast.error(error?.data?.message || "Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.")
+    })
     setCurrentStep("success")
   }
 
@@ -211,7 +216,7 @@ export default function WithoutLinkWorkflowPage() {
             shippingAddressId={shippingAddressId}
           />
         )}
-        {currentStep === "success" && <RequestSuccess onClose={() => navigate("/")} />}
+        {currentStep === "success" && <RequestSuccess onClose={() => navigate("/")} purchaseData={purchaseData} />}
       </div>
     </div>
   )

@@ -35,10 +35,10 @@ const getStatusText = (status) => {
   switch (status) {
     case 'SENT':
       return 'Đã gửi'
-    case 'PROCESSING':
+    case 'CHECKING':
       return 'Đang xử lý'
-    case 'COMPLETED':
-      return 'Hoàn thành'
+    case 'QUOTED':
+      return 'Đã báo giá'
     case 'CANCELLED':
       return 'Đã hủy'
     default:
