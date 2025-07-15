@@ -136,7 +136,7 @@ const ProfileInfoCard = () => {
       dispatch(setAvatar(newAvatarUrl))
       toast.success("Cập nhật ảnh đại diện thành công!")
     } catch (error) {
-      toast.error("Tải ảnh đại diện thất bại!")
+      toast.error(error?.data?.message || "Tải ảnh đại diện thất bại!")
       console.error("Upload avatar failed", error)
     }
   }

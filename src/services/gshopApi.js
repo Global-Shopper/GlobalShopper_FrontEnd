@@ -5,6 +5,12 @@ import endpoints from '../const/endpoints';
 //Lưu ý khi cho dev, cần phải sửa lại baseURL trong file baseRequest.js
 const gshopApi = createApi({
   reducerPath: 'gshopApi',
+  tagTypes: [
+    'CustomerProfile',
+    'ShippingAddress',
+    'PurchaseRequest',
+    'Wallet',
+  ],
   baseQuery: axiosBaseQuery(), // Adjust base URL as needed
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -149,6 +155,13 @@ const gshopApi = createApi({
       }),
       providesTags: ['PurchaseRequest'],
     }),
+    checkingPurchaseRequest: builder.mutation({
+      query: (id) => ({
+        url: `${endpoints.CHECKING_PURCHASE_REQUEST}/${id}`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['PurchaseRequest'],
+    }),
     createWithLinkPurchaseRequest: builder.mutation({
       query: (data) => ({
         data: data,
@@ -213,7 +226,8 @@ export const {
   useCreateWithoutLinkPurchaseRequestMutation,
   useGetWalletQuery,
   useDepositWalletMutation,
-  useLazyCheckPaymentQuery
+  useLazyCheckPaymentQuery,
+  useCheckingPurchaseRequestMutation,
 } = gshopApi;
 
 export default gshopApi;

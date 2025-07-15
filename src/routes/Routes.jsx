@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router-dom";
 import AdminLayout from "../containers/Admin/AdminLayout";
-import PurchaseRequestPage from "../containers/Admin/PurchaseRequestPage";
 import Homelayout from "../containers/Home/Homelayout";
 import Homepage from "../containers/Home/Homepage";
 import Login from "@/containers/Auth/Login";
@@ -16,6 +15,8 @@ import WithoutLinkWorkflowPage from "@/containers/CustomerCenter/RequestCreation
 import WithLinkWorkflowPage from "@/containers/CustomerCenter/RequestCreation/WithLinkWorkflowPage";
 import WalletOverview from "@/containers/Wallet/WalletOverview";
 import WalletDeposit from "@/containers/Wallet/WalletDeposit";
+import AdPurchaseReqDetail from "../containers/Admin/AdPurchaseReqDetail";
+import AdPurchaseReqList from "../containers/Admin/AdPurchaseReqList";
 
 const AppRoutes = () => {
   return (
@@ -51,7 +52,8 @@ const AppRoutes = () => {
 
       {/* Protected Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
-        <Route path="" element={<PurchaseRequestPage />} />
+        <Route index element={<AdPurchaseReqList />} />
+        <Route path="purchase-request/:id" element={<AdPurchaseReqDetail />} />
       </Route>
     </Routes>
   );
