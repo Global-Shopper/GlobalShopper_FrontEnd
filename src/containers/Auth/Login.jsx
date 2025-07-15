@@ -38,7 +38,11 @@ export default function Login() {
         toast("Đăng nhập thành công", {
           description: "Mừng bạn trở lại! Bạn đã đăng nhập thành công vào Global Shopper.",
         })
-        navigate("/")
+        if (res?.user?.role === "CUSTOMER") {
+          navigate("/")
+        } else if (res?.user?.role === "ADMIN") {
+          navigate("/admin")
+        }
       })
         .catch((e) => {
           if (e.data?.errorCode === errorCode.EMAIL_UNCONFIRMED) {

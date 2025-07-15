@@ -4,21 +4,17 @@ import { Badge } from "@/components/ui/badge"
 import {
   ArrowRight,
   CheckCircle,
-  ShoppingCart,
   Users,
   BarChart3,
   Shield,
   Clock,
   Zap,
   FileText,
-  Settings,
   Star,
-  ChevronRight,
   Package,
-  Search,
-  UserCheck,
 } from "lucide-react"
 import { Link } from "react-router-dom"
+import heroImage from "@/assets/heroImage.jpg"
 
 export default function Homepage() {
   return (
@@ -68,7 +64,7 @@ export default function Homepage() {
               </div>
               <div className="flex items-center justify-center">
                 <img
-                  src="/placeholder.svg?height=400&width=600"
+                  src={heroImage}
                   width={600}
                   height={400}
                   alt="Xem trước Bảng điều khiển GlobalShopper"

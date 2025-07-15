@@ -10,9 +10,9 @@ import {
   ArrowLeft,
   Wallet,
   AlertCircle,
-  DollarSign,
   Shield,
-  Check
+  Check,
+  Banknote
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -20,33 +20,30 @@ import { useDepositWalletMutation, useGetWalletQuery, useLazyCheckPaymentQuery }
 
 // Predefined amount options
 const AMOUNT_OPTIONS = [
-  { value: 50000, label: '50,000 VNĐ' },
-  { value: 100000, label: '100,000 VNĐ' },
-  { value: 200000, label: '200,000 VNĐ' },
-  { value: 500000, label: '500,000 VNĐ' },
-  { value: 1000000, label: '1,000,000 VNĐ' },
-  { value: 2000000, label: '2,000,000 VNĐ' }
+  { value: 50000, label: '50.000 VNĐ' },
+  { value: 100000, label: '100.000 VNĐ' },
+  { value: 200000, label: '200.000 VNĐ' },
+  { value: 500000, label: '500.000 VNĐ' },
+  { value: 1000000, label: '1.000.000 VNĐ' },
+  { value: 2000000, label: '2.000.000 VNĐ' }
 ]
 
 // Validation schema
 const DepositValidationSchema = Yup.object().shape({
   amount: Yup.number()
-    .min(10000, 'Số tiền tối thiểu là 10,000 VNĐ')
-    .max(50000000, 'Số tiền tối đa là 50,000,000 VNĐ')
-    .required('Vui lòng nhập số tiền (Tối thiểu 10,000 VNĐ, Tối đa 50,000,000 VNĐ)')
+    .min(10000, 'Số tiền tối thiểu là 10.000 VNĐ')
+    .max(50000000, 'Số tiền tối đa là 50.000.000 VNĐ')
+    .required('Vui lòng nhập số tiền (Tối thiểu 10.000 VNĐ, Tối đa 50.000.000 VNĐ)')
 })
 
 const WalletDeposit = () => {
   const navigate = useNavigate()
-  const [checkPayment, { isLoading: isCheckingPayment }] = useLazyCheckPaymentQuery()
+  const [checkPayment] = useLazyCheckPaymentQuery()
   const [depositWallet, { isLoading: isDepositing }] = useDepositWalletMutation()
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount || 0)
+    return `${new Intl.NumberFormat("vi-VN").format(amount)} VNĐ`
   }
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -82,6 +79,7 @@ const WalletDeposit = () => {
     const email = query.get("email");
     const vnpAmount = query.get("vnp_Amount");
     const vnpResponseCode = query.get("vnp_ResponseCode");
+    // const errorCode = query.get("vnp_ErrorCode");
     if (email & vnpAmount && vnpResponseCode) {
       checkPayment({
         email: email,
@@ -145,18 +143,30 @@ const WalletDeposit = () => {
 
                           <div className="space-y-3">
                             <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                              <Field
-                                as={Input}
-                                id="amount"
-                                name="amount"
-                                type="number"
-                                placeholder="Tối thiểu 10,000 VNĐ, Tối đa 50,000,000 VNĐ"
-                                className={`pl-10 text-lg ${errors.amount && touched.amount ? "border-destructive" : ""}`}
-                                disabled={isSubmitting}
-                                min="10000"
-                                max="50000000"
-                              />
+                              <Banknote className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                              <Field name="amount">
+                                {({ field }) => (
+                                  <Input
+                                    id="amount"
+                                    type="text"
+                                    placeholder="Tối thiểu 10.000 VNĐ, Tối đa 50.000.000 VNĐ"
+                                    className={`pl-10 text-lg ${errors.amount && touched.amount ? "border-destructive" : ""}`}
+                                    disabled={isSubmitting}
+                                    value={
+                                      field.value === '' ? '' : `${formatCurrency(field.value)}`
+                                    }
+                                    onChange={(e) => {
+                                      const raw = e.target.value.replace(/[^0-9]/g, '') // remove commas and non-digits
+                                      const parsed = parseInt(raw || '0', 10)
+                                      if (parsed > 50000000) {
+                                        setFieldValue('amount', 50000000)
+                                      } else {
+                                        setFieldValue('amount', parsed)
+                                      }
+                                    }}
+                                  />
+                                )}
+                              </Field>
                             </div>
                             <ErrorMessage name="amount">
                               {(msg) => (

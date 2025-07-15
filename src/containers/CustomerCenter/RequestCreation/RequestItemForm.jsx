@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, Package, ArrowRight, ArrowLeft, Upload, Image as ImageIcon, Loader2 } from "lucide-react"
 import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant"
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary"
+import { toast } from "sonner"
 
 export default function RequestItemForm({ items, onItemsChange, onNext, onBack }) {
   const [currentRequestItem, setCurrentRequestItem] = useState({
@@ -62,11 +63,11 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
     // Validate all files
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
-        alert('Vui lòng chọn file hình ảnh')
+        toast.error('Vui lòng chọn file hình ảnh')
         return
       }
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Kích thước file không được vượt quá 5MB')
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Kích thước file không được vượt quá 10MB')
         return
       }
     }
@@ -129,9 +130,9 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
     <div className="space-y-6">
       {/* Request Items List */}
       {items.length > 0 && (
-        <Card>
-          <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white">
-            <CardTitle className="flex items-center gap-2">
+        <Card className="shadow-lg p-2 py-4">
+          <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg">
+            <CardTitle className="flex items-center gap-3 text-xl">
               <Package className="h-5 w-5" />
               Danh sách sản phẩm yêu cầu ({items.length})
             </CardTitle>
@@ -187,9 +188,9 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
       )}
 
       {/* Add New Request Item */}
-      <Card>
-        <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white">
-          <CardTitle className="flex items-center gap-3">
+      <Card className="shadow-lg p-2 py-4">
+        <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg">
+          <CardTitle className="flex items-center gap-3 text-xl">
             <Plus className="h-5 w-5" />
             Thêm sản phẩm yêu cầu mới
           </CardTitle>

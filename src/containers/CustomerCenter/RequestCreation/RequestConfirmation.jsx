@@ -2,8 +2,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowRight, ArrowLeft, Loader2, PackageCheck } from "lucide-react"
 import { useCreateWithoutLinkPurchaseRequestMutation, useGetShippingAddressQuery } from "@/services/gshopApi"
+import { toast } from "sonner"
 
 export default function RequestConfirmation({ type, items, contactInfo, onNext, onBack, setShippingAddressId, shippingAddressId }) {
   const { data: addresses } = useGetShippingAddressQuery()
@@ -13,7 +14,7 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
 
   const handleSubmit = async () => {
     if (!shippingAddressId) {
-      alert("Vui lòng chọn địa chỉ giao hàng")
+      toast.error("Vui lòng chọn địa chỉ giao hàng trước khi gửi yêu cầu.")
       return
     }
     onNext({
@@ -25,9 +26,10 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white">
-          <CardTitle className="flex items-center gap-3 text-xl">
+      <Card className="shadow-lg p-2 py-4">
+      <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg">
+      <CardTitle className="flex items-center gap-3 text-xl">
+      <PackageCheck />
             Xác nhận thông tin yêu cầu
           </CardTitle>
         </CardHeader>
@@ -39,7 +41,7 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
               {addresses?.map((address) => (
                 <div
                   key={address.id}
-                  className={`cursor-pointer border rounded p-4 transition-all ${
+                  className={`cursor-pointer border rounded-2xl p-4 transition-all ${
                     address.id === shippingAddressId
                       ? "ring-2 ring-primary/80 bg-primary/5 border-primary"
                       : "hover:ring-2 hover:ring-primary/30"
@@ -89,11 +91,11 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
               </div>
             )}
 
-            <div className="bg-gray-50 p-6 rounded-lg border">
+            <div className="bg-gray-50 p-6 rounded-2xl border">
               <h5 className="font-semibold mb-4 text-gray-800">Danh sách sản phẩm ({items.length})</h5>
               <div className="space-y-4">
                 {items.map((product, index) => (
-                  <div key={product.id || index} className="bg-white p-4 rounded border">
+                  <div key={product.id || index} className="bg-white p-4 rounded-2xl border">
                     <div className="flex items-start gap-4">
                       {/* Image preview section */}
                       {product.images && product.images.length > 0 && (
