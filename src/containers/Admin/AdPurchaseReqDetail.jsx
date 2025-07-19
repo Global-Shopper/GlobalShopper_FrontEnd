@@ -536,7 +536,7 @@ function AdPurchaseReqDetail() {
                       <>
                         <div className="space-y-3">
                           <Label htmlFor="quote-price" className="text-sm font-medium">
-                            Giá báo giá (VND/sản phẩm)
+                            Báo giá (VND/sản phẩm)
                           </Label>
                           <Input
                             id="quote-price"

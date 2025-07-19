@@ -112,7 +112,7 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
                       )}
                       <div className="flex-1 flex flex-col gap-2">
                         <div>
-                          <span className="font-medium text-gray-900">{index + 1}. {product.name}</span>
+                          <span className="font-medium text-gray-900">{index + 1}. {product.productName}</span>
                           {product.link && (
                             <span className="ml-2 text-blue-600 text-sm">
                               <a
@@ -138,9 +138,9 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
                             ))}
                           </ul>
                         )}
-                        {product.note && (
+                        {product.description && (
                           <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                            <strong>Ghi chú:</strong> {product.note}
+                            <strong>Ghi chú:</strong> {product.description}
                           </div>
                         )}
                       </div>
