@@ -19,10 +19,10 @@ import { toast } from "sonner"
 
 export default function RequestItemForm({ items, onItemsChange, onNext, onBack }) {
   const [currentRequestItem, setCurrentRequestItem] = useState({
-    name: "",
+    productName: "",
     quantity: 1,
-    link: "",
-    note: "",
+    productURL: "",
+    description: "",
     images: [],
     variants: [],
   })
@@ -95,7 +95,7 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
   }
 
   const addRequestItem = () => {
-    if (!currentRequestItem.name.trim()) {
+    if (!currentRequestItem.productName.trim()) {
       alert("Vui lòng nhập tên sản phẩm")
       return
     }
@@ -104,15 +104,14 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
       .map(row => `${row.fieldType === "Khác" ? row.customFieldName : row.fieldType}: ${row.fieldValue}`)
     const requestItem = {
       ...currentRequestItem,
-      id: `requestItem_${Date.now()}`,
       variants,
     }
     onItemsChange([...items, requestItem])
     setCurrentRequestItem({
-      name: "",
+      productName: "",
       quantity: 1,
-      link: "",
-      note: "",
+      productURL: "",
+      description: "",
       images: [],
       variants: [],
     })
@@ -158,14 +157,14 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
                         )}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">{requestItem.name}</h3>
+                            <h3 className="font-semibold text-lg">{requestItem.productName}</h3>
                             <Badge variant="outline">Số lượng: {requestItem.quantity}</Badge>
                           </div>
                           {requestItem.variants.map((variant, vIdx) => (
                             <p key={vIdx} className="text-sm text-gray-600">{variant}</p>
                           ))}
-                          {requestItem.note && (
-                            <p className="text-sm text-gray-600 bg-gray-100 p-2 rounded mt-2">💬 {requestItem.note}</p>
+                          {requestItem.description && (
+                            <p className="text-sm text-gray-600 bg-gray-100 p-2 rounded mt-2">💬 {requestItem.description}</p>
                           )}
                         </div>
                       </div>
@@ -202,8 +201,8 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
               <Label htmlFor="requestItemName" className="text-base font-medium">Tên sản phẩm *</Label>
               <Input
                 id="requestItemName"
-                value={currentRequestItem.name}
-                onChange={e => setCurrentRequestItem(prev => ({ ...prev, name: e.target.value }))}
+                value={currentRequestItem?.productName}
+                onChange={e => setCurrentRequestItem(prev => ({ ...prev, productName: e.target.value }))}
                 placeholder="Ví dụ: Áo thun nam Nike, Giày sneaker Adidas..."
                 className="h-12"
               />
@@ -212,8 +211,8 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
               <Label htmlFor="requestItemNote" className="text-base font-medium">Ghi chú (tuỳ chọn)</Label>
               <Textarea
                 id="requestItemNote"
-                value={currentRequestItem.note}
-                onChange={e => setCurrentRequestItem(prev => ({ ...prev, note: e.target.value }))}
+                value={currentRequestItem?.description}
+                onChange={e => setCurrentRequestItem(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Ghi chú thêm về sản phẩm nếu có..."
                 rows={4}
                 className="resize-none"
@@ -225,7 +224,7 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
           <div className="space-y-4">
             <Label className="text-base font-medium">Hình ảnh sản phẩm (có thể chọn nhiều)</Label>
             <div className="flex flex-wrap gap-4">
-              {currentRequestItem.images.map((img, idx) => (
+              {currentRequestItem?.images.map((img, idx) => (
                 <div key={img} className="relative">
                   <img
                     src={img}
@@ -287,7 +286,7 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
                 type="number"
                 min="1"
                 max="10"
-                value={currentRequestItem.quantity}
+                value={currentRequestItem?.quantity}
                 onChange={e => {
                   let value = Number.parseInt(e.target.value) || 1;
                   if (value > 10) value = 10;
@@ -300,8 +299,8 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
               <Label htmlFor="requestItemLink" className="text-base font-medium">Link sản phẩm (nếu có)</Label>
               <Input
                 id="requestItemLink"
-                value={currentRequestItem.link}
-                onChange={e => setCurrentRequestItem(prev => ({ ...prev, link: e.target.value }))}
+                value={currentRequestItem?.productURL}
+                onChange={e => setCurrentRequestItem(prev => ({ ...prev, productURL: e.target.value }))}
                 placeholder="https://example.com/product"
                 className="h-12"
               />

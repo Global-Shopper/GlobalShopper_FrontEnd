@@ -14,7 +14,7 @@ import {
   Check,
   Banknote
 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useDepositWalletMutation, useGetWalletQuery, useLazyCheckPaymentQuery } from '@/services/gshopApi'
 
@@ -41,11 +41,27 @@ const WalletDeposit = () => {
   const [checkPayment] = useLazyCheckPaymentQuery()
   const [depositWallet, { isLoading: isDepositing }] = useDepositWalletMutation()
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
+  const query = new URLSearchParams(location.search);
+  const email = query.get("email");
+  const vnpAmount = query.get("vnp_Amount");
+  const vnpResponseCode = query.get("vnp_ResponseCode");
 
+  if (email & vnpAmount && vnpResponseCode != "24") {
+    checkPayment({
+      email: email,
+      vnp_Amount: vnpAmount,
+      vnp_ResponseCode: vnpResponseCode
+    })
+  } else if (vnpResponseCode == 24) {
+    toast.error("Giao dịch đã bị hủy", {
+      description: "Bạn đã hủy giao dịch nạp tiền. Vui lòng thử lại nếu cần.",
+    })
+  }
+  
   const formatCurrency = (amount) => {
     return `${new Intl.NumberFormat("vi-VN").format(amount)} VNĐ`
   }
-
+  
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       console.log(values)
@@ -74,20 +90,6 @@ const WalletDeposit = () => {
     navigate(-1)
   }
 
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const email = query.get("email");
-    const vnpAmount = query.get("vnp_Amount");
-    const vnpResponseCode = query.get("vnp_ResponseCode");
-    // const errorCode = query.get("vnp_ErrorCode");
-    if (email & vnpAmount && vnpResponseCode) {
-      checkPayment({
-        email: email,
-        vnp_Amount: vnpAmount,
-        vnp_ResponseCode: vnpResponseCode
-      })
-    }
-  }, [checkPayment])
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

@@ -25,7 +25,7 @@ export default function Signup() {
   const validationSchema = Yup.object({
     fullName: Yup.string()
       .required("Họ tên không được để trống")
-      .min(2, "Họ tên phải có ít nhất 2 ký tự"),
+      .min(5, "Họ tên phải có ít nhất 5 ký tự"),
     email: Yup.string()
       .email("Vui lòng nhập địa chỉ email hợp lệ")
       .required("Email không được để trống"),

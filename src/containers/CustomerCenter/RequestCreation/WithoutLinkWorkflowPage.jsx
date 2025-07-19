@@ -22,6 +22,7 @@ export default function WithoutLinkWorkflowPage() {
   const [shopAddress, setShopAddress] = useState("")
   const [shopWebsite, setShopWebsite] = useState("")
   const [items, setItems] = useState([])
+  console.log(items)
   const [shippingAddressId, setShippingAddressId] = useState(null)
 
   const contactInfo = [
@@ -35,7 +36,7 @@ export default function WithoutLinkWorkflowPage() {
     createPurchaseRequest({
       shippingAddressId,
       contactInfo,
-      items,
+      requestItems: items,
     }).unwrap().then(() => {
       toast.success("Yêu cầu mua hàng đã được gửi thành công!")
     }).catch((error) => {
@@ -155,7 +156,7 @@ export default function WithoutLinkWorkflowPage() {
 
         <div className="space-y-2">
           <Label htmlFor="shopWebsite" className="text-base font-medium">
-            Website cửa hàng (nếu có)
+            Link Website hoặc mạng xã hội của cửa hàng (nếu có)
           </Label>
           <Input
             id="shopWebsite"
