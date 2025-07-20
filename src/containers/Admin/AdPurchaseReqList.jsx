@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Eye, PackageCheck, Receipt } from "lucide-react"
+import { Eye, PackageCheck, Receipt, Search } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useCheckingPurchaseRequestMutation, useGetPurchaseRequestQuery } from '@/services/gshopApi'
 import {
@@ -20,8 +20,10 @@ import {
 } from "@/components/ui/pagination"
 import { generatePaginationItems, shouldShowPagination } from "@/utils/Pagination"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import PageLoading from "@/components/PageLoading";
 import { toast } from 'sonner'
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const TABS = [
   { value: "assigned", label: "Yêu cầu đã nhận" },
@@ -34,6 +36,7 @@ const AdPurchaseReqList = () => {
   const [tab, setTab] = useState("unassigned")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [searchTerm, setSearchTerm] = useState("")
 
   const { data: requestsData, isFetching: isRequestLoading, isError: isRequestError } = useGetPurchaseRequestQuery({
     page: currentPage - 1,
@@ -69,15 +72,31 @@ const AdPurchaseReqList = () => {
     }
   }
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'SENT':
+        return 'Đang xử lý'
+      case 'CHECKING':
+        return 'Đã xác nhận'
+      case 'QUOTED':
+        return 'Đã báo giá'
+      case 'CANCELLED':
+        return 'Đã hủy'
+      default:
+        return status
+    }
+  }
+
   // Table rendering function
   const renderTable = (requests, assigned) => (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-20">ID</TableHead>
           <TableHead>Tên Khách Hàng</TableHead>
+          <TableHead>Tên Cửa Hàng</TableHead>
           <TableHead>Số Điện Thoại</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead>Địa Chỉ Giao Hàng</TableHead>
           <TableHead>Trạng Thái</TableHead>
           <TableHead className="text-center">Số Sản Phẩm</TableHead>
           <TableHead className="text-center">Ngày tạo yêu cầu</TableHead>
@@ -88,15 +107,23 @@ const AdPurchaseReqList = () => {
       <TableBody>
         {requests.map((request) => (
           <TableRow key={request.id}>
+            <TableCell className="font-medium text-xs w-20">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help">{request.id?.substring(0, 13)}...</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{request.id}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TableCell>
             <TableCell className="font-medium">{request.customer?.name}</TableCell>
+            <TableCell>{request.shop?.name || "-"}</TableCell>
             <TableCell>{request.customer?.phone}</TableCell>
             <TableCell>{request.customer?.email}</TableCell>
-            <TableCell className="max-w-[200px] truncate" title={request.shippingAddress?.location}>
-              {request.shippingAddress?.location}
-            </TableCell>
             <TableCell>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                {request.status}
+                {getStatusText(request.status)}
               </span>
             </TableCell>
             <TableCell className="text-center">
@@ -116,39 +143,57 @@ const AdPurchaseReqList = () => {
             </TableCell>
             <TableCell className="text-center" colSpan={2}>
               <div className="flex items-center justify-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  title="Xem chi tiết"
-                // onClick={() => handleViewDetails(request)}
-                >
-                  <Eye className="h-4 w-4" />
-                  <span className="sr-only">Xem chi tiết</span>
-                </Button>
-                {assigned ? <Button
-                  variant="ghost"
-                  size="sm"
-                  loading={isCheckLoading}
-                  onClick={() => handleChecking(request.id)}
-                  title="Nhận yêu cầu"
-                  className="h-8 w-8 p-0"
-                >
-                  <Receipt className="h-4 w-4" />
-                  <span className="sr-only">Nhận yêu cầu</span>
-                </Button> :
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  loading={isCheckLoading}
-                  onClick={() => handleChecking(request.id)}
-                  title="Nhận yêu cầu"
-                  className="h-8 w-8 p-0"
-                >
-                  <PackageCheck className="h-4 w-4" />
-                  <span className="sr-only">Tạo báo giá</span>
-                </Button>
-                }
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 cursor-help"
+                    // onClick={() => handleViewDetails(request)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">Xem chi tiết</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Xem chi tiết</p>
+                  </TooltipContent>
+                </Tooltip>
+                {assigned ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        loading={isCheckLoading}
+                        onClick={() => handleChecking(request.id)}
+                        className="h-8 w-8 p-0 cursor-help"
+                      >
+                        <Receipt className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Nhận yêu cầu</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        loading={isCheckLoading}
+                        onClick={() => handleChecking(request.id)}
+                        className="h-8 w-8 p-0 cursor-help"
+                      >
+                        <PackageCheck className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Tạo báo giá</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             </TableCell>
           </TableRow>
@@ -164,38 +209,58 @@ const AdPurchaseReqList = () => {
 
   const handleTabChange = (value) => {
     setTab(value)
-    setCurrentPage(1) // Reset to first page on tab change
+    setCurrentPage(1)
   }
 
-  // When page size changes, reset to first page
   const handlePageSizeChange = (value) => {
-    setPageSize(Number(value))
+    setPageSize(value)
     setCurrentPage(1)
+  }
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearchTerm(value)
+    console.log("Search term:", value)
   }
 
   return (
     <div className="p-6">
       <Tabs value={tab} onValueChange={handleTabChange}>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-6">
-          <TabsList>
-            {TABS.map(t => (
-              <TabsTrigger key={t.value} value={t.value}>
-                {t.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <div className="flex items-center gap-2">
-            <label htmlFor="pageSize" className="text-sm">Số dòng/trang:</label>
-            <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-              <SelectTrigger id="pageSize" className="w-24">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAGE_SIZE_OPTIONS.map(size => (
-                  <SelectItem key={size} value={String(size)}>{size}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <TabsList>
+              {TABS.map(t => (
+                <TabsTrigger key={t.value} value={t.value}>
+                  {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <div className="flex items-center gap-2">
+              <label htmlFor="pageSize" className="text-sm">Số dòng/trang:</label>
+              <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                <SelectTrigger id="pageSize" className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map(size => (
+                    <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Tìm kiếm theo ID, tên khách hàng, email, số điện thoại..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="pl-10"
+            />
           </div>
         </div>
         <TabsContent value="assigned">

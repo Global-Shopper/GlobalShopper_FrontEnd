@@ -52,10 +52,9 @@ export default function CreateRequestSelection() {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900">Không có link sản phẩm</h3>
+                  <h3 className="text-xl font-bold text-gray-900">Sản phẩm không có trên sàn thương mại điện tử</h3>
                   <p className="text-gray-600 leading-relaxed text-lg">
-                    Bạn biết sản phẩm muốn mua nhưng chưa có link cụ thể. Chúng tôi sẽ giúp bạn tìm kiếm từ thông tin
-                    cửa hàng và mô tả sản phẩm chi tiết.
+                  Bạn chỉ cần cung cấp thông tin cửa hàng và mô tả sản phẩm chi tiết, chúng tôi sẽ hỗ trợ tìm kiếm và mua hàng cho bạn.
                   </p>
 
                   <div className="space-y-4">
@@ -112,10 +111,9 @@ export default function CreateRequestSelection() {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900">Có link sản phẩm</h3>
+                  <h3 className="text-xl font-bold text-gray-900">Sản phẩm đăng bán trên các sàn thương mại điện tử quốc tế</h3>
                   <p className="text-gray-600 leading-relaxed text-lg">
-                    Bạn đã có link sản phẩm từ các sàn thương mại điện tử quốc tế. Hệ thống AI sẽ tự động trích xuất
-                    thông tin sản phẩm từ link.
+                    Dành cho các sản phẩm Amazon, eBay, Taobao, v.v
                   </p>
 
                   <div className="space-y-4">
