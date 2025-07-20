@@ -178,6 +178,13 @@ const gshopApi = createApi({
       }),
       invalidatesTags: ['PurchaseRequest'],
     }),
+    getPurchaseRequestDetail: builder.query({
+      query: (id) => ({
+        url: `${endpoints.PURCHASE_REQUEST}/${id}`,
+        method: 'GET',
+      }),
+      providesTags: ['PurchaseRequest'],
+    }),
     getWallet: builder.query({
       query: () => ({
         url: endpoints.WALLET,
@@ -228,6 +235,7 @@ export const {
   useDepositWalletMutation,
   useLazyCheckPaymentQuery,
   useCheckingPurchaseRequestMutation,
+  useGetPurchaseRequestDetailQuery
 } = gshopApi;
 
 export default gshopApi;
