@@ -52,7 +52,7 @@ export default function CreateRequestSelection() {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                  <h3 className="text-xl font-bold text-gray-900">Sản phẩm không có trên sàn thương mại điện tử</h3>
+                  <h3 className="text-xl font-bold text-gray-900">Sản phẩm nội địa nước ngoài</h3>
                   <p className="text-gray-600 leading-relaxed text-lg">
                   Bạn chỉ cần cung cấp thông tin cửa hàng và mô tả sản phẩm chi tiết, chúng tôi sẽ hỗ trợ tìm kiếm và mua hàng cho bạn.
                   </p>

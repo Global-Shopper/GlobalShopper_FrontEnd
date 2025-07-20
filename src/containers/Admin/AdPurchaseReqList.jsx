@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Table,
   TableBody,
@@ -37,6 +38,8 @@ const AdPurchaseReqList = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [searchTerm, setSearchTerm] = useState("")
+  const searchInputRef = useRef(null)
+  const navigate = useNavigate()
 
   const { data: requestsData, isFetching: isRequestLoading, isError: isRequestError } = useGetPurchaseRequestQuery({
     page: currentPage - 1,
@@ -149,7 +152,7 @@ const AdPurchaseReqList = () => {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0 cursor-help"
-                    // onClick={() => handleViewDetails(request)}
+                    onClick={() => navigate(`/admin/purchase-request/${request.id}`)}
                     >
                       <Eye className="h-4 w-4" />
                       <span className="sr-only">Xem chi tiết</span>
@@ -219,9 +222,14 @@ const AdPurchaseReqList = () => {
 
   // Handle search input change
   const handleSearchChange = (e) => {
-    const value = e.target.value
-    setSearchTerm(value)
-    console.log("Search term:", value)
+    setSearchTerm(e.target.value)
+  }
+  // On blur or Enter, navigate to /purchase-request/{id}
+  const handleSearchAction = () => {
+    const value = searchInputRef.current?.value?.trim()
+    if (value) {
+      navigate(`purchase-request/${value}`)
+    }
   }
 
   return (
@@ -252,13 +260,20 @@ const AdPurchaseReqList = () => {
           </div>
           
           {/* Search Bar */}
-          <div className="relative max-w-md">
+          <div className="relative max-w-md mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
+              ref={searchInputRef}
               type="text"
-              placeholder="Tìm kiếm theo ID, tên khách hàng, email, số điện thoại..."
+              placeholder="Tìm kiếm theo ID"
               value={searchTerm}
               onChange={handleSearchChange}
+              onBlur={handleSearchAction}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearchAction()
+                }
+              }}
               className="pl-10"
             />
           </div>

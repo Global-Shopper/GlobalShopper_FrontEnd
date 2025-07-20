@@ -42,8 +42,6 @@ const AppRoutes = () => {
           <Route path="without-link" element={<WithoutLinkWorkflowPage />} />
           <Route path="with-link" element={<WithLinkWorkflowPage />} />
         </Route>
-        <Route path="create-request/with-link" element={<div className="p-6"><h1>Tạo yêu cầu với link</h1><p>Trang tạo yêu cầu mua hàng với link sản phẩm</p></div>} />
-        
         <Route path="quotes" element={<div className="p-6"><h1>Báo giá</h1><p>Trang xem báo giá từ yêu cầu</p></div>} />
         <Route path="orders" element={<div className="p-6"><h1>Đơn hàng</h1><p>Trang theo dõi đơn hàng</p></div>} />
         <Route path="refunds" element={<div className="p-6"><h1>Yêu cầu hoàn tiền</h1><p>Trang quản lý yêu cầu hoàn tiền</p></div>} />

@@ -21,62 +21,10 @@ import {
   Circle,
   Users,
 } from "lucide-react"
-
-const req = {
-  id: "6d08cf8c-d552-475f-a72f-3ce2c3b1ab12",
-  shippingAddress: {
-    id: "9c91f37c-b46b-49ca-9c47-33dd5598d56b",
-    name: "Dung SG Ne",
-    tag: "Nhà riêng",
-    phoneNumber: "0866123456",
-    location: "S10.05, Long Binh, TP Thu Duc, TP Ho Chi Minh",
-    default: true,
-  },
-  status: "SENT",
-  requestItems: [
-    {
-      id: "4be23bb9-9ce8-47fe-a1af-cb4d4183b9be",
-      productURL: "https://www.madsnorgaard.com/products/cosy-denim-rachel-jacket-vintage-blue",
-      productName: "Cosy Denim Rachel Jacket",
-      variants: [
-        "Màu sắc: Vintage Blue",
-        "Xuất xứ: Denmark",
-        "Kích thước: 34",
-        "Mô tả: Slim-fit cropped jacket in soft, lightweight denim with angled side seams and wide sleeves.",
-        "Chất liệu: 100% Organic Cotton",
-        "Thương hiệu: madsnorgaard",
-      ],
-      description: "Vintage Blue",
-      quantity: 1,
-    },
-    {
-      id: "c9b435ef-d0b8-4a10-9384-ce39529f8115",
-      productURL: "https://www.madsnorgaard.com/products/cosy-denim-crane-shirt-dark-indigo",
-      productName: "Cosy Denim Crane Shirt",
-      variants: ["Màu sắc: Dark Indigo", "Chất liệu: 100% Cotton", "Kích thước: 36"],
-      description: "Dark Indigo",
-      quantity: 3,
-    },
-  ],
-  admin: null,
-  customer: {
-    id: "3f87e8d1-9875-467c-829e-030420a06734",
-    name: "Lee Chong Dung",
-    email: "dungtdse172809@fpt.edu.vn",
-    phone: "0912345678",
-    gender: "MALE",
-    dateOfBirth: 1751328000000,
-    avatar: "https://res.cloudinary.com/gshop/image/upload/v1752470200/20250714051628_StudentID_Card.jpg",
-    wallet: {
-      id: "3fbb1f6a-351d-23b9-936b-ba30790ba866",
-      balance: 5110000,
-      bankAccounts: null,
-    },
-  },
-  requestType: "OFFLINE",
-  createdAt: "1752573476987",
-  expiredAt: 1752659876975,
-}
+import { Link, useParams } from "react-router-dom"
+import { useCheckingPurchaseRequestMutation, useGetPurchaseRequestDetailQuery } from "@/services/gshopApi"
+import React from "react"
+import PageLoading from "@/components/PageLoading"
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -111,34 +59,6 @@ const formatCurrency = (amount) => {
 }
 
 // Mock API functions - replace with actual API calls
-const assignRequest = async (requestId, adminId) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Simulate API call
-      if (Math.random() > 0.1) {
-        // 90% success rate
-        resolve({ success: true, message: "Request assigned successfully" })
-      } else {
-        reject(new Error("Failed to assign request"))
-      }
-    }, 1000)
-  })
-}
-
-const updateRequestStatus = async (requestId, newStatus) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Simulate API call
-      if (Math.random() > 0.1) {
-        // 90% success rate
-        resolve({ success: true, message: "Status updated successfully" })
-      } else {
-        reject(new Error("Failed to update status"))
-      }
-    }, 1000)
-  })
-}
-
 const requestCustomerUpdate = async (requestId) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -160,11 +80,12 @@ const currentAdmin = {
 }
 
 function AdPurchaseReqDetail() {
-  const [selectedProductId, setSelectedProductId] = useState(req.requestItems[0]?.id)
+  const { id } = useParams();
+  const { data: req, isLoading: isReqLoading, isError: isRequestError } = useGetPurchaseRequestDetailQuery(id)
+  const [selectedProductId, setSelectedProductId] = useState(undefined)
   const [quotePrices, setQuotePrices] = useState({})
   const [notes, setNotes] = useState("")
   const [selectedProducts, setSelectedProducts] = useState(new Set())
-  const [showDetailPanel, setShowDetailPanel] = useState(false)
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false)
   const [groupSeller, setGroupSeller] = useState("")
   const [groupPlatform, setGroupPlatform] = useState("")
@@ -175,10 +96,22 @@ function AdPurchaseReqDetail() {
   const [assignmentError, setAssignmentError] = useState("")
   const [updateRequestError, setUpdateRequestError] = useState("")
   const [updateRequested, setUpdateRequested] = useState(false)
-  const [currentStatus, setCurrentStatus] = useState(req.status)
-  const [assignedAdmin, setAssignedAdmin] = useState(req.admin)
+  const [currentStatus, setCurrentStatus] = useState(undefined)
+  const [assignedAdmin, setAssignedAdmin] = useState(undefined)
+  const [checking, { isLoading: isCheckLoading }] = useCheckingPurchaseRequestMutation();
 
-  const selectedProduct = req.requestItems.find((item) => item.id === selectedProductId)
+  // Set initial state when req is loaded
+  React.useEffect(() => {
+    if (req) {
+      setCurrentStatus(req.status)
+      setAssignedAdmin(req.admin)
+      if (req.items && req.items.length > 0) {
+        setSelectedProductId(req.items[0].id)
+      }
+    }
+  }, [req])
+
+  const selectedProduct = req && req.items ? req.items.find((item) => item.id === selectedProductId) : undefined
   const completedQuotes = Object.keys(quotePrices).filter((id) => quotePrices[id]).length
 
   const handlePriceChange = (productId, price) => {
@@ -203,11 +136,6 @@ function AdPurchaseReqDetail() {
 
   const handleProductClick = (productId) => {
     setSelectedProductId(productId)
-    setShowDetailPanel(true)
-  }
-
-  const closeDetailPanel = () => {
-    setShowDetailPanel(false)
   }
 
   const handleCreateGroup = () => {
@@ -215,19 +143,16 @@ function AdPurchaseReqDetail() {
   }
 
   const handleAssignToMe = async () => {
-    setIsAssigning(true)
-    setAssignmentError("")
-
+    setIsAssigning(true);
+    setAssignmentError("");
     try {
-      await assignRequest(req.id, currentAdmin.id)
-      await updateRequestStatus(req.id, "CHECKING")
-
-      setCurrentStatus("CHECKING")
-      setAssignedAdmin(currentAdmin)
+      await checking(req.id).unwrap();
+      setCurrentStatus("CHECKING");
+      setAssignedAdmin(currentAdmin);
     } catch (error) {
-      setAssignmentError(error.message)
+      setAssignmentError(error?.data?.message || error.message || "Lỗi khi tiếp nhận yêu cầu");
     } finally {
-      setIsAssigning(false)
+      setIsAssigning(false);
     }
   }
 
@@ -245,6 +170,12 @@ function AdPurchaseReqDetail() {
     }
   }
 
+  if (isReqLoading) {
+    return <PageLoading />;
+  }
+  if (isRequestError || !req) {
+    return <div className="min-h-screen flex items-center justify-center text-lg text-red-600">Không thể tải dữ liệu yêu cầu.</div>;
+  }
   return (
     <div className="min-h-screen bg-gray-50/30">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -252,16 +183,18 @@ function AdPurchaseReqDetail() {
         <div className="space-y-4">
           {/* Breadcrumb */}
           <div className="flex items-center text-sm text-muted-foreground">
-            <span>Danh sách yêu cầu mua hàng</span>
+            <span>
+              <Link to="/admin">Danh sách yêu cầu mua hàng</Link>
+            </span>
             <ChevronRight className="h-4 w-4 mx-2" />
             <span className="text-foreground font-medium">
-              Yêu cầu #{req.id} ({completedQuotes}/{req.requestItems.length})
+              Yêu cầu #{req.id}
             </span>
           </div>
 
           {/* Title and Actions */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-2">
+            <div className="space-?y-2">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">Yêu cầu mua hàng</h1>
                 <Badge className={getStatusColor(currentStatus)}>{currentStatus}</Badge>
@@ -290,9 +223,9 @@ function AdPurchaseReqDetail() {
                     variant="default"
                     size="sm"
                     onClick={handleAssignToMe}
-                    disabled={isAssigning || (assignedAdmin && assignedAdmin.id !== currentAdmin.id)}
+                    disabled={isAssigning || isCheckLoading || (assignedAdmin && assignedAdmin.id !== currentAdmin.id)}
                   >
-                    {isAssigning ? "Đang tiếp nhận..." : "Tiếp nhận yêu cầu"}
+                    {isAssigning || isCheckLoading ? "Đang tiếp nhận..." : "Tiếp nhận yêu cầu"}
                   </Button>
                   <Button
                     variant="outline"
@@ -318,7 +251,7 @@ function AdPurchaseReqDetail() {
                 <Users className="h-4 w-4 mr-2" />
                 Tạo Nhóm
               </Button>
-              <Button size="sm" disabled={currentStatus === "SENT" || completedQuotes !== req.requestItems.length}>
+              <Button size="sm" disabled={currentStatus === "SENT" || completedQuotes !== req.items.length}>
                 Gửi Báo Giá
               </Button>
             </div>
@@ -354,14 +287,13 @@ function AdPurchaseReqDetail() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Product List */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Danh sách sản phẩm ({req.requestItems.length})
+                  Danh sách sản phẩm ({req.items.length})
                 </CardTitle>
                 <CardDescription>
                   {currentStatus === "SENT"
@@ -370,14 +302,13 @@ function AdPurchaseReqDetail() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {req.requestItems.map((item, index) => (
+                {req.items.map((item, index) => (
                   <Card
                     key={item.id}
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      selectedProductId === item.id
+                    className={`cursor-pointer transition-all hover:shadow-md py-2 ${selectedProductId === item.id
                         ? "ring-2 ring-primary border-primary bg-primary/5"
                         : "hover:border-gray-300"
-                    }`}
+                      }`}
                     onClick={() => handleProductClick(item.id)}
                   >
                     <CardContent className="p-4">
@@ -387,9 +318,7 @@ function AdPurchaseReqDetail() {
                             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">#{index + 1}</span>
                             <h3 className="font-semibold text-sm">{item.productName}</h3>
                           </div>
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>Số lượng: {item.quantity}</span>
                             <a
                               href={item.productURL}
                               target="_blank"
@@ -405,9 +334,8 @@ function AdPurchaseReqDetail() {
                         <div className="flex items-center gap-3">
                           <button
                             onClick={(e) => toggleProductSelection(item.id, e)}
-                            className={`p-1 hover:bg-gray-100 rounded-full transition-colors ${
-                              currentStatus === "SENT" ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
+                            className={`p-1 hover:bg-gray-100 rounded-full transition-colors ${currentStatus === "SENT" ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
                             disabled={currentStatus === "SENT"}
                           >
                             {selectedProducts.has(item.id) ? (
@@ -433,77 +361,67 @@ function AdPurchaseReqDetail() {
             </Card>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-4">
-            {!showDetailPanel ? (
-              /* Customer Info */
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Thông tin khách hàng
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={req.customer.avatar || "/placeholder.svg"} alt={req.customer.name} />
-                      <AvatarFallback>{req.customer.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+          <div className="space-y-4 grid grid-cols-2 col-span-2 gap-6">
+            <Card className="col-span-1">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Thông tin khách hàng
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={req.customer.avatar || "/placeholder.svg"} alt={req.customer.name} />
+                    <AvatarFallback>{req.customer.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-semibold">{req.customer.name}</div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>{req.customer.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{req.customer.phone}</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div>
-                      <div className="font-semibold">{req.customer.name}</div>
-                      <div className="text-sm text-muted-foreground">ID: {req.customer.id.slice(0, 8)}...</div>
+                      <div className="font-medium">{req.shippingAddress.name}</div>
+                      <div className="text-muted-foreground">{req.shippingAddress.location}</div>
+                      <div className="text-muted-foreground">{req.shippingAddress.phoneNumber}</div>
+                      <Badge variant="secondary" className="mt-1 text-xs">
+                        {req.shippingAddress.tag}
+                      </Badge>
                     </div>
                   </div>
+                </div>
 
-                  <Separator />
+                <Separator />
 
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{req.customer.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{req.customer.phone}</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <div className="font-medium">{req.shippingAddress.name}</div>
-                        <div className="text-muted-foreground">{req.shippingAddress.location}</div>
-                        <div className="text-muted-foreground">{req.shippingAddress.phoneNumber}</div>
-                        <Badge variant="secondary" className="mt-1 text-xs">
-                          {req.shippingAddress.tag}
-                        </Badge>
-                      </div>
-                    </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="text-sm font-medium text-green-800">Số dư ví</div>
+                  <div className="text-lg font-bold text-green-600">
+                    {formatCurrency(req.customer?.wallet?.balance)}
                   </div>
-
-                  <Separator />
-
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="text-sm font-medium text-green-800">Số dư ví</div>
-                    <div className="text-lg font-bold text-green-600">
-                      {formatCurrency(req.customer.wallet.balance)}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              /* Detail Panel */
+                </div>
+              </CardContent>
+            </Card>
+            {
               selectedProduct && (
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
                         <Package className="h-5 w-5" />
                         Chi tiết và báo giá
                       </CardTitle>
-                      <Button variant="ghost" size="sm" onClick={closeDetailPanel}>
-                        ✕
-                      </Button>
-                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
@@ -566,9 +484,6 @@ function AdPurchaseReqDetail() {
                           <Button size="sm" className="flex-1">
                             Lưu báo giá
                           </Button>
-                          <Button variant="outline" size="sm" onClick={closeDetailPanel}>
-                            Đóng
-                          </Button>
                         </div>
                       </>
                     )}
@@ -582,7 +497,7 @@ function AdPurchaseReqDetail() {
                   </CardContent>
                 </Card>
               )
-            )}
+            }
 
             {/* Notes */}
             <Card>
@@ -643,7 +558,7 @@ function AdPurchaseReqDetail() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export default AdPurchaseReqDetail
