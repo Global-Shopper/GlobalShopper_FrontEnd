@@ -57,9 +57,9 @@ const Header = () => {
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-white/10 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-lg shadow-black/5">
-			<div className="container flex h-20 items-center justify-between px-6 md:px-8 lg:px-16 xl:px-24">
+			<div className="container mx-auto flex h-20 items-center justify-between px-6 md:px-8 lg:px-16 xl:px-24 max-w-8xl">
 				{/* Logo Section */}
-				<div className="flex-shrink-0">
+				<div className="flex-shrink-0 w-64">
 					<Link
 						to="/"
 						className="group flex items-center space-x-3 transition-transform hover:scale-105 duration-300"
@@ -82,9 +82,9 @@ const Header = () => {
 					</Link>
 				</div>
 
-				{/* Navigation */}
-				<div className="flex-1 flex justify-center">
-					<nav className="hidden lg:flex items-center space-x-10">
+				{/* Navigation - Center */}
+				<div className="flex-1 flex justify-center max-w-4xl">
+					<nav className="hidden lg:flex items-center space-x-8 xl:space-x-10">
 						<Link
 							to="/"
 							className="relative text-base font-medium text-slate-700 hover:text-blue-600 transition-all duration-300 group py-2"
@@ -226,7 +226,7 @@ const Header = () => {
 				</div>
 
 				{/* Auth Section */}
-				<div className="flex-shrink-0">
+				<div className="flex-shrink-0 w-64 flex justify-end ml-12">
 					<div className="flex items-center space-x-4">
 						{!isLoggedIn ? (
 							<div className="flex items-center space-x-3">
