@@ -54,7 +54,9 @@ export function AdminSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild
+                  isActive={location.pathname === item.url}
+                  >
                     {item.url === "/login" ? (
                       <Link onClick={() => dispatch(signout())} to={item.url}>
                         <item.icon />

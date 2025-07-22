@@ -25,6 +25,8 @@ import { Link, useParams } from "react-router-dom"
 import { useCheckingPurchaseRequestMutation, useGetPurchaseRequestDetailQuery } from "@/services/gshopApi"
 import React from "react"
 import PageLoading from "@/components/PageLoading"
+import { toast } from "sonner"
+import { getStatusText } from "@/utils/statusHandler"
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -60,23 +62,7 @@ const formatCurrency = (amount) => {
 
 // Mock API functions - replace with actual API calls
 const requestCustomerUpdate = async (requestId) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Simulate API call
-      if (Math.random() > 0.1) {
-        // 90% success rate
-        resolve({ success: true, message: "Customer update request sent" })
-      } else {
-        reject(new Error("Failed to send update request"))
-      }
-    }, 1000)
-  })
-}
-
-// Mock current admin - replace with actual admin data
-const currentAdmin = {
-  id: "admin-123",
-  name: "Admin User",
+ console.log("first")
 }
 
 function AdPurchaseReqDetail() {
@@ -90,29 +76,11 @@ function AdPurchaseReqDetail() {
   const [groupSeller, setGroupSeller] = useState("")
   const [groupPlatform, setGroupPlatform] = useState("")
   const [groupAddress, setGroupAddress] = useState("")
-
-  const [isAssigning, setIsAssigning] = useState(false)
   const [isRequestingUpdate, setIsRequestingUpdate] = useState(false)
-  const [assignmentError, setAssignmentError] = useState("")
-  const [updateRequestError, setUpdateRequestError] = useState("")
   const [updateRequested, setUpdateRequested] = useState(false)
-  const [currentStatus, setCurrentStatus] = useState(undefined)
-  const [assignedAdmin, setAssignedAdmin] = useState(undefined)
   const [checking, { isLoading: isCheckLoading }] = useCheckingPurchaseRequestMutation();
 
-  // Set initial state when req is loaded
-  React.useEffect(() => {
-    if (req) {
-      setCurrentStatus(req.status)
-      setAssignedAdmin(req.admin)
-      if (req.items && req.items.length > 0) {
-        setSelectedProductId(req.items[0].id)
-      }
-    }
-  }, [req])
-
-  const selectedProduct = req && req.items ? req.items.find((item) => item.id === selectedProductId) : undefined
-  const completedQuotes = Object.keys(quotePrices).filter((id) => quotePrices[id]).length
+  const selectedProduct = req && req.requestItems ? req.requestItems.find((item) => item.id === selectedProductId) : undefined
 
   const handlePriceChange = (productId, price) => {
     setQuotePrices((prev) => ({
@@ -143,28 +111,24 @@ function AdPurchaseReqDetail() {
   }
 
   const handleAssignToMe = async () => {
-    setIsAssigning(true);
-    setAssignmentError("");
     try {
-      await checking(req.id).unwrap();
-      setCurrentStatus("CHECKING");
-      setAssignedAdmin(currentAdmin);
+      await checking(req.id).unwrap()
+      .then(() => {
+        toast.success("Yêu cầu đã được tiếp nhận thành công.");
+      })
     } catch (error) {
-      setAssignmentError(error?.data?.message || error.message || "Lỗi khi tiếp nhận yêu cầu");
-    } finally {
-      setIsAssigning(false);
+      toast.error(`Lỗi khi tiếp nhận yêu cầu: ${error.message}`);
     }
   }
 
   const handleRequestCustomerUpdate = async () => {
     setIsRequestingUpdate(true)
-    setUpdateRequestError("")
 
     try {
       await requestCustomerUpdate(req.id)
       setUpdateRequested(true)
     } catch (error) {
-      setUpdateRequestError(error.message)
+      toast.error(`Lỗi khi gửi yêu cầu cập nhật: ${error.message}`);
     } finally {
       setIsRequestingUpdate(false)
     }
@@ -174,7 +138,7 @@ function AdPurchaseReqDetail() {
     return <PageLoading />;
   }
   if (isRequestError || !req) {
-    return <div className="min-h-screen flex items-center justify-center text-lg text-red-600">Không thể tải dữ liệu yêu cầu.</div>;
+    return <div className="min-h-screen flex requestItems-center justify-center text-lg text-red-600">Không thể tải dữ liệu yêu cầu.</div>;
   }
   return (
     <div className="min-h-screen bg-gray-50/30">
@@ -182,7 +146,7 @@ function AdPurchaseReqDetail() {
         {/* Header */}
         <div className="space-y-4">
           {/* Breadcrumb */}
-          <div className="flex items-center text-sm text-muted-foreground">
+          <div className="flex requestItems-center text-sm text-muted-foreground">
             <span>
               <Link to="/admin">Danh sách yêu cầu mua hàng</Link>
             </span>
@@ -193,23 +157,25 @@ function AdPurchaseReqDetail() {
           </div>
 
           {/* Title and Actions */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col lg:flex-row lg:requestItems-center lg:justify-between gap-4">
             <div className="space-?y-2">
-              <div className="flex items-center gap-3">
+              <div className="flex requestItems-center gap-3">
                 <h1 className="text-2xl font-bold">Yêu cầu mua hàng</h1>
-                <Badge className={getStatusColor(currentStatus)}>{currentStatus}</Badge>
-                {assignedAdmin && (
+                <span className={`px-2 py-2 rounded-full text-xs font-medium ${getStatusColor(req.status)}`}>
+                {getStatusText(req.status)}
+              </span>
+                {req.status == "CHECKING" && (
                   <Badge variant="outline" className="text-xs">
-                    Assigned to: {assignedAdmin.name}
+                    Assigned to: {req?.admin?.name}
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
+              <div className="flex requestItems-center gap-4 text-sm text-muted-foreground">
+                <div className="flex requestItems-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span>Tạo: {formatDate(req.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex requestItems-center gap-1">
                   <Clock className="h-4 w-4" />
                   <span>Hết hạn: {formatDate(req.expiredAt)}</span>
                 </div>
@@ -217,15 +183,15 @@ function AdPurchaseReqDetail() {
             </div>
 
             <div className="flex gap-2">
-              {currentStatus === "SENT" && (
+              {req.status === "SENT" && (
                 <>
                   <Button
                     variant="default"
                     size="sm"
                     onClick={handleAssignToMe}
-                    disabled={isAssigning || isCheckLoading || (assignedAdmin && assignedAdmin.id !== currentAdmin.id)}
+                    disabled={isCheckLoading}
                   >
-                    {isAssigning || isCheckLoading ? "Đang tiếp nhận..." : "Tiếp nhận yêu cầu"}
+                    {isCheckLoading ? "Đang tiếp nhận..." : "Tiếp nhận yêu cầu"}
                   </Button>
                   <Button
                     variant="outline"
@@ -245,118 +211,138 @@ function AdPurchaseReqDetail() {
               <Button
                 variant="outline"
                 size="sm"
-                disabled={currentStatus === "SENT"}
+                disabled={req.status === "SENT"}
                 onClick={() => setShowCreateGroupModal(true)}
               >
                 <Users className="h-4 w-4 mr-2" />
                 Tạo Nhóm
               </Button>
-              <Button size="sm" disabled={currentStatus === "SENT" || completedQuotes !== req.items.length}>
+              <Button size="sm" disabled={req.status === "SENT"}>
                 Gửi Báo Giá
               </Button>
             </div>
           </div>
-
-          {/* Error Messages */}
-          {assignmentError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">Assignment Error:</p>
-              <p className="text-sm">{assignmentError}</p>
-            </div>
-          )}
-
-          {updateRequestError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">Update Request Error:</p>
-              <p className="text-sm">{updateRequestError}</p>
-            </div>
-          )}
-
-          {updateRequested && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">Update Request Sent</p>
-              <p className="text-sm">Customer has been notified to update the product information.</p>
-            </div>
-          )}
-
-          {currentStatus === "SENT" && assignedAdmin && assignedAdmin.id !== currentAdmin.id && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">Request Already Assigned</p>
-              <p className="text-sm">This request is already assigned to {assignedAdmin.name}.</p>
-            </div>
-          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex requestItems-center gap-2">
                   <Package className="h-5 w-5" />
-                  Danh sách sản phẩm ({req.items.length})
+                  Danh sách sản phẩm
                 </CardTitle>
                 <CardDescription>
-                  {currentStatus === "SENT"
+                  {req.status === "SENT"
                     ? "Xem thông tin sản phẩm trong yêu cầu mua hàng"
                     : "Chọn sản phẩm để xem chi tiết và nhập giá báo giá"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {req.items.map((item, index) => (
-                  <Card
-                    key={item.id}
-                    className={`cursor-pointer transition-all hover:shadow-md py-2 ${selectedProductId === item.id
-                        ? "ring-2 ring-primary border-primary bg-primary/5"
-                        : "hover:border-gray-300"
-                      }`}
-                    onClick={() => handleProductClick(item.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">#{index + 1}</span>
-                            <h3 className="font-semibold text-sm">{item.productName}</h3>
+                {req?.requestItems?.length > 0 ? (
+                  req?.requestItems.map(item => (
+                    <Card
+                      key={item.id}
+                      className={`cursor-pointer transition-all hover:shadow-md py-2 ${selectedProductId === item.id
+                          ? "ring-2 ring-primary border-primary bg-primary/5"
+                          : "hover:border-gray-300"
+                        }`}
+                      onClick={() => handleProductClick(item.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          {/* Left: Index and Name */}
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded shrink-0">#{req.requestItems.indexOf(item) + 1}</span>
+                            <span className="font-semibold text-base truncate">{item.productName}</span>
                           </div>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <a
-                              href={item.productURL}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline"
-                              onClick={(e) => e.stopPropagation()}
+                          {/* Right: Quantity and Select */}
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-lg">×{item.quantity}</span>
+                            <button
+                              onClick={(e) => toggleProductSelection(item.id, e)}
+                              className={`p-1 hover:bg-gray-100 rounded-full transition-colors ${req.status === "SENT" ? "opacity-50 cursor-not-allowed" : ""}`}
+                              disabled={req.status === "SENT"}
                             >
-                              <ExternalLink className="h-3 w-3" />
-                              Xem sản phẩm
-                            </a>
+                              {selectedProducts.has(item.id) ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <Circle className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                              )}
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={(e) => toggleProductSelection(item.id, e)}
-                            className={`p-1 hover:bg-gray-100 rounded-full transition-colors ${currentStatus === "SENT" ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
-                            disabled={currentStatus === "SENT"}
+                        {/* Link below */}
+                        <div className="mt-2">
+                          <a
+                            href={item.productURL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-blue-600 hover:underline text-sm"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            {selectedProducts.has(item.id) ? (
-                              <CheckCircle2 className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <Circle className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                            )}
-                          </button>
-                          <div className="text-right">
-                            <div className="text-lg font-bold">×{item.quantity}</div>
-                            {quotePrices[item.id] && (
-                              <div className="text-sm text-green-600 font-medium">
-                                {formatCurrency(Number(quotePrices[item.id]) * item.quantity)}
-                              </div>
-                            )}
-                          </div>
+                            <ExternalLink className="h-4 w-4" />
+                            Xem sản phẩm
+                          </a>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  //render subrequests if no request items
+                  req.subRequests?.map((sub) => (
+                    
+                    <div key={sub} className="mb-6">
+                      {/* Items */}
+                      {sub.requestItems?.map(item => (
+                        <Card
+                          key={item.id}
+                          className={`cursor-pointer transition-all hover:shadow-md py-2 ${selectedProductId === item.id
+                              ? "ring-2 ring-primary border-primary bg-primary/5"
+                              : "hover:border-gray-300"
+                            }`}
+                          onClick={() => handleProductClick(item.id)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded shrink-0">#{sub.requestItems.indexOf(item) + 1}</span>
+                                <span className="font-semibold text-base truncate">{item.productName}</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="font-bold text-lg">×{item.quantity}</span>
+                                <button
+                                  onClick={(e) => toggleProductSelection(item.id, e)}
+                                  className={`p-1 hover:bg-gray-100 rounded-full transition-colors ${req.status === "SENT" ? "opacity-50 cursor-not-allowed" : ""}`}
+                                  disabled={req.status === "SENT"}
+                                >
+                                  {selectedProducts.has(item.id) ? (
+                                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                  ) : (
+                                    <Circle className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                            {/* Link below */}
+                            <div className="mt-2">
+                              <a
+                                href={item.productURL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-blue-600 hover:underline text-sm"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                Xem sản phẩm
+                              </a>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
           </div>
@@ -364,13 +350,13 @@ function AdPurchaseReqDetail() {
           <div className="space-y-4 grid grid-cols-2 col-span-2 gap-6">
             <Card className="col-span-1">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex requestItems-center gap-2">
                   <User className="h-5 w-5" />
                   Thông tin khách hàng
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
+                <div className="flex requestItems-center gap-3">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={req.customer.avatar || "/placeholder.svg"} alt={req.customer.name} />
                     <AvatarFallback>{req.customer.name.charAt(0)}</AvatarFallback>
@@ -381,17 +367,17 @@ function AdPurchaseReqDetail() {
                 </div>
 
                 <Separator />
-
+                {/* customer info */}
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2">
+                  <div className="flex requestItems-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
                     <span>{req.customer.email}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex requestItems-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <span>{req.customer.phone}</span>
                   </div>
-                  <div className="flex items-start gap-2">
+                  <div className="flex requestItems-start gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div>
                       <div className="font-medium">{req.shippingAddress.name}</div>
@@ -418,7 +404,7 @@ function AdPurchaseReqDetail() {
               selectedProduct && (
                 <Card>
                   <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex requestItems-center gap-2">
                         <Package className="h-5 w-5" />
                         Chi tiết và báo giá
                       </CardTitle>
@@ -450,7 +436,7 @@ function AdPurchaseReqDetail() {
 
                     <Separator />
 
-                    {currentStatus === "CHECKING" && (
+                    {req.status === "CHECKING" && (
                       <>
                         <div className="space-y-3">
                           <Label htmlFor="quote-price" className="text-sm font-medium">
@@ -488,7 +474,7 @@ function AdPurchaseReqDetail() {
                       </>
                     )}
 
-                    {currentStatus === "SENT" && (
+                    {req.status === "SENT" && (
                       <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md">
                         <p className="text-sm font-medium">Chức năng báo giá chưa khả dụng</p>
                         <p className="text-sm">Vui lòng assign yêu cầu này để bắt đầu quá trình báo giá.</p>
@@ -506,11 +492,11 @@ function AdPurchaseReqDetail() {
               </CardHeader>
               <CardContent>
                 <Textarea
-                  placeholder={currentStatus === "SENT" ? "Xem ghi chú..." : "Thêm ghi chú cho báo giá..."}
+                  placeholder={req.status === "SENT" ? "Xem ghi chú..." : "Thêm ghi chú cho báo giá..."}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  disabled={currentStatus === "SENT"}
+                  disabled={req.status === "SENT"}
                 />
               </CardContent>
             </Card>
@@ -518,7 +504,7 @@ function AdPurchaseReqDetail() {
         </div>
 
         {showCreateGroupModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex requestItems-center justify-center z-50">
             <Card className="w-96 max-w-md">
               <CardHeader>
                 <CardTitle>Thông tin của đơn hàng</CardTitle>
