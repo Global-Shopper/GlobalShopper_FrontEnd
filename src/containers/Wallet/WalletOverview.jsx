@@ -1,83 +1,77 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Wallet, 
-  Plus, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
+import {
+  Wallet,
+  Plus,
+  ArrowUpRight,
+  ArrowDownLeft,
+  DollarSign,
+  BanknoteArrowUp,
+  BanknoteArrowDown,
   Clock,
-  CheckCircle,
-  XCircle,
-  DollarSign
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useGetWalletQuery } from '@/services/gshopApi'
+import { useGetWalletQuery, useTransactionHistoryQuery } from '@/services/gshopApi'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'sonner'
+import PageLoading from '@/components/PageLoading'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationEllipsis,
+} from '@/components/ui/pagination'
+import { generatePaginationItems, getPaginationInfo, shouldShowPagination } from '@/utils/Pagination'
+
+const getTransactionIcon = (type, status) => {
+  if (type === 'DEPOSIT') {
+    return {
+      icon: BanknoteArrowUp,
+      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
+      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
+    }
+  } else if (type === 'WITHDRAW') {
+    return {
+      icon: BanknoteArrowDown,
+      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
+      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
+    }
+  }
+  return {
+    icon: Clock,
+    color: 'text-gray-600',
+    bg: 'bg-gray-100'
+  }
+}
 
 const WalletOverview = () => {
+  const [currentPage, setCurrentPage] = useState(0)
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
+  const { data: transactionsRes, isLoading: isTransactionLoading, isError: isTransactionError } =
+    useTransactionHistoryQuery({ page: currentPage, size: 10, direction: 'ASC' })
+
+  const query = new URLSearchParams(location.search)
+  const vnpResponseCode = query.get("vnp_ResponseCode")
+  useEffect(() => {
+    if (vnpResponseCode === "00") {
+      toast.success("Giao dịch đã được xử lý")
+    } else if (vnpResponseCode) {
+      toast.error("Giao dịch thất bại", {
+        description:
+          vnpResponseCode === "24"
+            ? "Bạn đã hủy giao dịch nạp tiền. Vui lòng thử lại nếu cần."
+            : "Có lỗi xảy ra trong quá trình xử lý giao dịch. Vui lòng thử lại sau.",
+      })
+    }
+  }, [vnpResponseCode])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount || 0)
-  }
-
-  // Mock transaction history - in real app this would come from API
-  const mockTransactions = [
-    {
-      id: 1,
-      type: 'deposit',
-      amount: 500000,
-      status: 'completed',
-      date: '2024-01-15T10:30:00Z',
-      description: 'Nạp tiền qua chuyển khoản ngân hàng'
-    },
-    {
-      id: 2,
-      type: 'withdrawal',
-      amount: 200000,
-      status: 'completed',
-      date: '2024-01-14T15:45:00Z',
-      description: 'Thanh toán đơn hàng #12345'
-    },
-    {
-      id: 3,
-      type: 'deposit',
-      amount: 1000000,
-      status: 'pending',
-      date: '2024-01-13T09:20:00Z',
-      description: 'Nạp tiền qua thẻ tín dụng'
-    }
-  ]
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'pending':
-        return <Clock className="h-4 w-4 text-yellow-600" />
-      case 'failed':
-        return <XCircle className="h-4 w-4 text-red-600" />
-      default:
-        return <Clock className="h-4 w-4 text-gray-400" />
-    }
-  }
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'completed':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Hoàn thành</Badge>
-      case 'pending':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Đang xử lý</Badge>
-      case 'failed':
-        return <Badge variant="destructive">Thất bại</Badge>
-      default:
-        return <Badge variant="outline">Không xác định</Badge>
-    }
   }
 
   const formatDate = (dateString) => {
@@ -89,6 +83,14 @@ const WalletOverview = () => {
       minute: '2-digit'
     })
   }
+
+  if (isTransactionLoading) return <PageLoading />
+  if (isTransactionError || !transactionsRes?.content) {
+    return <div className="min-h-screen flex items-center justify-center text-lg text-red-600">Không thể tải dữ liệu yêu cầu.</div>
+  }
+
+  const transactions = transactionsRes.content
+  const pagination = getPaginationInfo(transactionsRes.pageable, transactionsRes.totalPages, transactionsRes.totalElements)
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -138,7 +140,7 @@ const WalletOverview = () => {
                     <p className="text-sm text-gray-600">
                       Số dư khả dụng trong ví
                     </p>
-                    
+
                     <div className="pt-4 space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Tổng nạp:</span>
@@ -194,67 +196,50 @@ const WalletOverview = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockTransactions.map((transaction) => (
-                    <div
-                      key={transaction.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${
-                          transaction.type === 'deposit' 
-                            ? 'bg-green-100' 
-                            : 'bg-red-100'
-                        }`}>
-                          {transaction.type === 'deposit' ? (
-                            <ArrowUpRight className={`h-4 w-4 ${
-                              transaction.type === 'deposit' 
-                                ? 'text-green-600' 
-                                : 'text-red-600'
-                            }`} />
-                          ) : (
-                            <ArrowDownLeft className="h-4 w-4 text-red-600" />
-                          )}
-                        </div>
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-gray-900">
-                              {transaction.description}
-                            </p>
-                            {getStatusIcon(transaction.status)}
+                  {transactions.map((transaction) => {
+                    const { icon: Icon, color, bg } = getTransactionIcon(transaction.type, transaction.status)
+
+                    return (
+                      <div
+                        key={transaction.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${bg}`}>
+                            <Icon className={`h-4 w-4 ${color}`} />
                           </div>
-                          <p className="text-sm text-gray-600">
-                            {formatDate(transaction.date)}
-                          </p>
+                          <div>
+                            <p className="font-medium text-gray-900">{transaction.description}</p>
+                            <p className="text-sm text-gray-600">{formatDate(transaction.updatedAt)}</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className={`font-semibold ${
-                          transaction.type === 'deposit' 
-                            ? 'text-green-600' 
-                            : 'text-red-600'
-                        }`}>
-                          {transaction.type === 'deposit' ? '+' : '-'}
+                        <div className={`font-semibold ${transaction.type === 'DEPOSIT' ? 'text-green-600' : 'text-red-600'}`}>
+                          {transaction.type === 'DEPOSIT' ? '+' : '-'}
                           {formatCurrency(transaction.amount)}
                         </div>
-                        {getStatusBadge(transaction.status)}
                       </div>
-                    </div>
-                  ))}
-                  
-                  {mockTransactions.length === 0 && (
+                    )
+                  })}
+
+                  {transactions.length === 0 && (
                     <div className="text-center py-8">
                       <Wallet className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600">Chưa có giao dịch nào</p>
                       <Button asChild className="mt-4">
-                        <Link to="/wallet/deposit">
-                          Nạp tiền ngay
-                        </Link>
+                        <Link to="/wallet/deposit">Nạp tiền ngay</Link>
                       </Button>
                     </div>
                   )}
                 </div>
+
+                {/* Pagination */}
+                {shouldShowPagination(pagination.totalPages) && (
+                  <Pagination className="mt-6">
+                    <PaginationContent>
+                      {generatePaginationItems(pagination.totalPages, pagination.currentPage, setCurrentPage)}
+                    </PaginationContent>
+                  </Pagination>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -264,4 +249,4 @@ const WalletOverview = () => {
   )
 }
 
-export default WalletOverview 
+export default WalletOverview

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import GShopLogo from "@/assets/LOGO_Gshop.png";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const Header = () => {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery();
 	const isLoggedIn = useSelector(
 		(state) => state.rootReducer?.user?.isLoggedIn
@@ -46,6 +47,7 @@ const Header = () => {
 
 	const handleSignout = () => {
 		dispatch(signout());
+		navigate("/");
 	};
 
 	const formatCurrency = (amount) => {

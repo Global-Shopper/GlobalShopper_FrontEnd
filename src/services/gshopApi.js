@@ -199,13 +199,20 @@ const gshopApi = createApi({
         method: 'POST',
       }),
     }),
-    checkPayment: builder.query({
+    transactionHistory: builder.query({
       query: (data) => ({
         params: data,
-        url: endpoints.CHECKPAYMENT,
+        url: endpoints.TRANSACTION_HITORY,
         method: 'GET',
       }),
     }),
+    // checkPayment: builder.query({
+    //   query: (data) => ({
+    //     params: data,
+    //     url: endpoints.CHECKPAYMENT,
+    //     method: 'GET',
+    //   }),
+    // }),
   }),
 });
 
@@ -233,9 +240,10 @@ export const {
   useCreateWithoutLinkPurchaseRequestMutation,
   useGetWalletQuery,
   useDepositWalletMutation,
-  useLazyCheckPaymentQuery,
+  // useLazyCheckPaymentQuery,
   useCheckingPurchaseRequestMutation,
-  useGetPurchaseRequestDetailQuery
+  useGetPurchaseRequestDetailQuery,
+  useTransactionHistoryQuery,
 } = gshopApi;
 
 export default gshopApi;
