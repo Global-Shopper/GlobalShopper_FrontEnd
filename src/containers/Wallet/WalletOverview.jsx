@@ -25,27 +25,6 @@ import {
 } from '@/components/ui/pagination'
 import { generatePaginationItems, getPaginationInfo, shouldShowPagination } from '@/utils/Pagination'
 
-const getTransactionIcon = (type, status) => {
-  if (type === 'DEPOSIT') {
-    return {
-      icon: BanknoteArrowUp,
-      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
-      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
-    }
-  } else if (type === 'WITHDRAW') {
-    return {
-      icon: BanknoteArrowDown,
-      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
-      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
-    }
-  }
-  return {
-    icon: Clock,
-    color: 'text-gray-600',
-    bg: 'bg-gray-100'
-  }
-}
-
 const WalletOverview = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
@@ -83,6 +62,56 @@ const WalletOverview = () => {
       minute: '2-digit'
     })
   }
+  
+const getTransactionIcon = (type, status) => {
+  if (type === 'DEPOSIT') {
+    return {
+      icon: BanknoteArrowUp,
+      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
+      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
+    }
+  } else if (type === 'WITHDRAW') {
+    return {
+      icon: BanknoteArrowDown,
+      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
+      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
+    }
+  }
+  return {
+    icon: Clock,
+    color: 'text-gray-600',
+    bg: 'bg-gray-100'
+  }
+}
+
+const getCreditUpdateText = (type, amount, status) => {
+  const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  if (type === 'DEPOSIT') {
+    if (status === 'SUCCESS') {
+      return <span className="text-green-600">+{formattedAmount}</span>;
+    } else {
+      return (
+        <span className="text-red-600 flex flex-col items-start">
+          <span>Thất bại</span>
+          <span>{formattedAmount}</span>
+        </span>
+      );
+    }
+  } else if (type === 'WITHDRAW') {
+    if (status === 'SUCCESS') {
+      return <span className="text-green-600">-{formattedAmount}</span>;
+    } else {
+      return (
+        <span className="text-red-600 flex flex-col items-start">
+          <span>Thất bại</span>
+          <span>-{formattedAmount}</span>
+        </span>
+      );
+    }
+  }
+  // fallback for unknown type
+  return <span className="text-gray-500">{formattedAmount}</span>;
+}
 
   if (isTransactionLoading) return <PageLoading />
   if (isTransactionError || !transactionsRes?.content) {
@@ -213,9 +242,8 @@ const WalletOverview = () => {
                             <p className="text-sm text-gray-600">{formatDate(transaction.updatedAt)}</p>
                           </div>
                         </div>
-                        <div className={`font-semibold ${transaction.type === 'DEPOSIT' ? 'text-green-600' : 'text-red-600'}`}>
-                          {transaction.type === 'DEPOSIT' ? '+' : '-'}
-                          {formatCurrency(transaction.amount)}
+                        <div>
+                          {getCreditUpdateText(transaction.type,transaction.amount, transaction.status)}
                         </div>
                       </div>
                     )
