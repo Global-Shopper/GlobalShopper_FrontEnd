@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 // Menu items with proper routing
 const items = [
 	{
-		title: "Hồ sơ cá nhân",
+		title: "Thông tin tài khoản",
 		url: "/account-center",
 		icon: User,
 	},
