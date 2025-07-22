@@ -108,62 +108,90 @@ export default function ForgotPwOTP() {
 	};
 
 	return (
-		<div className="space-y-4">
-			<Label
-				htmlFor="otp"
-				className="text-center block text-sm font-semibold text-slate-700"
-			>
-				Nhập mã xác thực
-			</Label>
-			<div className="flex justify-center items-center gap-3">
+		<div className="space-y-6">
+			<div className="text-center space-y-3">
+				<div className="space-y-1">
+					<Label
+						htmlFor="otp"
+						className="text-xl font-bold text-slate-800"
+					>
+						Nhập mã xác thực
+					</Label>
+					<p className="text-sm text-slate-500 leading-relaxed">
+						Chúng tôi đã gửi mã 6 chữ số đến email của bạn
+					</p>
+				</div>
+				<div className="flex items-center justify-center space-x-2 text-xs text-slate-400">
+					<div className="w-8 h-px bg-slate-200"></div>
+					<span className="px-2 bg-white">OTP</span>
+					<div className="w-8 h-px bg-slate-200"></div>
+				</div>
+			</div>
+
+			<div className="flex justify-center items-center gap-4">
 				<InputOTP
 					maxLength={6}
 					value={otp}
 					onChange={handleOTPChange}
 					disabled={isVerifyLoading}
 				>
-					<InputOTPGroup className="gap-3">
+					<InputOTPGroup className="gap-4">
 						{[0, 1, 2, 3, 4, 5].map((i) => (
 							<InputOTPSlot
 								key={i}
 								index={i}
-								className="w-14 h-14 text-xl font-bold border-2 border-slate-200 bg-slate-50 rounded-xl focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all duration-300 shadow-sm hover:shadow-md"
+								className="w-16 h-16 text-2xl font-bold border-2 border-slate-200 bg-slate-50/50 rounded-2xl focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100/60 transition-all duration-300 shadow-sm hover:shadow-lg hover:border-slate-300 backdrop-blur-sm"
 							/>
 						))}
 					</InputOTPGroup>
 				</InputOTP>
 				{verifyRes?.success && (
-					<CheckCircle className="h-6 w-6 text-green-600 ml-2" />
+					<div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
+						<CheckCircle className="h-6 w-6 text-green-600" />
+					</div>
 				)}
 				{isVerifyError && (
-					<XCircle className="h-6 w-6 text-red-600 ml-2" />
+					<div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
+						<XCircle className="h-6 w-6 text-red-600" />
+					</div>
 				)}
 			</div>
 			<Button
 				onClick={() => handleVerifyOTP(otp)}
-				className="w-full h-11 bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+				className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:ring-4 focus:ring-blue-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
 				disabled={isVerifyLoading || otp.length !== 6}
 			>
-				{isVerifyLoading ? "Đang xác thực..." : "Xác thực OTP"}
+				{isVerifyLoading ? (
+					<div className="flex items-center justify-center">
+						<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+						Đang xác thực...
+					</div>
+				) : (
+					"Xác thực OTP"
+				)}
 			</Button>
-			<div className="text-center space-y-3 mt-4">
-				<p className="text-sm text-slate-600">Không nhận được mã?</p>
+
+			<div className="text-center space-y-4 pt-2">
+				<div className="w-20 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent mx-auto"></div>
+				<p className="text-sm text-slate-600 font-medium">
+					Không nhận được mã?
+				</p>
 				<Button
 					variant="outline"
 					onClick={handleResend}
 					disabled={isResendLoading}
-					className="h-10 border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200"
+					className="h-11 px-6 border-2 border-slate-200 text-slate-700 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 rounded-xl shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
 				>
 					{isResendLoading ? (
-						<>
+						<div className="flex items-center justify-center">
 							<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
 							Đang gửi...
-						</>
+						</div>
 					) : (
-						<>
+						<div className="flex items-center">
 							<Mail className="mr-2 h-4 w-4" />
 							Gửi lại mã
-						</>
+						</div>
 					)}
 				</Button>
 			</div>

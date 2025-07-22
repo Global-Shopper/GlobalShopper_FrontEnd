@@ -189,10 +189,6 @@ export default function ForgotPassword() {
 
 							{/* Help Text */}
 							<div className="text-center space-y-3">
-								<p className="text-xs text-slate-500">
-									Kiểm tra thư mục spam nếu bạn không thấy
-									email
-								</p>
 								{step === "email" && (
 									<p className="text-sm text-slate-600">
 										Nhớ mật khẩu?{" "}
