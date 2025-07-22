@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { replace, useNavigate } from 'react-router-dom'
 import {
   Table,
   TableBody,
@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input"
 import PageLoading from "@/components/PageLoading";
 import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { getStatusColor, getStatusText } from '@/utils/statusHandler'
 
 const TABS = [
   { value: "assigned", label: "Yêu cầu đã nhận" },
@@ -34,7 +35,7 @@ const TABS = [
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50]
 
 const AdPurchaseReqList = () => {
-  const [tab, setTab] = useState("unassigned")
+  const [tab, setTab] = useState("assigned")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [searchTerm, setSearchTerm] = useState("")
@@ -59,66 +60,27 @@ const AdPurchaseReqList = () => {
     }
   }
 
-  // Helper functions
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'SENT':
-        return 'bg-blue-100 text-blue-800'
-      case 'PROCESSING':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'QUOTED':
-        return 'bg-green-100 text-green-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'SENT':
-        return 'Đang xử lý'
-      case 'CHECKING':
-        return 'Đã xác nhận'
-      case 'QUOTED':
-        return 'Đã báo giá'
-      case 'CANCELLED':
-        return 'Đã hủy'
-      default:
-        return status
-    }
-  }
-
   // Table rendering function
-  const renderTable = (requests, assigned) => (
+  const renderTable = (requests) => (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-20">ID</TableHead>
-          <TableHead>Tên Khách Hàng</TableHead>
-          <TableHead>Tên Cửa Hàng</TableHead>
+          <TableHead className="w-20">Mã Yêu Cầu</TableHead>
+          <TableHead>Khách Hàng</TableHead>
+          <TableHead>Cửa Hàng</TableHead>
           <TableHead>Số Điện Thoại</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Trạng Thái</TableHead>
           <TableHead className="text-center">Số Sản Phẩm</TableHead>
           <TableHead className="text-center">Ngày tạo yêu cầu</TableHead>
           <TableHead className="text-center">Ngày hết hạn</TableHead>
-          <TableHead className="text-center" colSpan={2}>Tiện ích</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {requests.map((request) => (
-          <TableRow key={request.id}>
+          <TableRow className="cursor-pointer" key={request.id} onClick={() => navigate(`purchase-request/${request.id}`)}>
             <TableCell className="font-medium text-xs w-20">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-help">{request.id?.substring(0, 13)}...</span>
-                </TooltipTrigger>
-                <TooltipContent>
                   <p>{request.id}</p>
-                </TooltipContent>
-              </Tooltip>
             </TableCell>
             <TableCell className="font-medium">{request.customer?.name}</TableCell>
             <TableCell>{request.shop?.name || "-"}</TableCell>
@@ -143,61 +105,6 @@ const AdPurchaseReqList = () => {
               {request.expiredAt
                 ? new Date(Number(request.expiredAt)).toLocaleDateString("vi-VN")
                 : "-"}
-            </TableCell>
-            <TableCell className="text-center" colSpan={2}>
-              <div className="flex items-center justify-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 cursor-help"
-                    onClick={() => navigate(`/admin/purchase-request/${request.id}`)}
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">Xem chi tiết</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Xem chi tiết</p>
-                  </TooltipContent>
-                </Tooltip>
-                {assigned ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        loading={isCheckLoading}
-                        onClick={() => handleChecking(request.id)}
-                        className="h-8 w-8 p-0 cursor-help"
-                      >
-                        <Receipt className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Nhận yêu cầu</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        loading={isCheckLoading}
-                        onClick={() => handleChecking(request.id)}
-                        className="h-8 w-8 p-0 cursor-help"
-                      >
-                        <PackageCheck className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Tạo báo giá</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
             </TableCell>
           </TableRow>
         ))}
