@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,8 @@ import { Check, X } from 'lucide-react'
 import { useCreateShippingAddressMutation } from '@/services/gshopApi'
 import { toast } from 'sonner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getDistricts, getProvinces, getWards } from '@/services/vnGeoAPI'
+import { LocationCombobox } from '@/components/LocationCombobox'
 
 // Predefined tag options (same as ShippingAddress component)
 const TAG_OPTIONS = [
@@ -29,18 +31,6 @@ const AddressValidationSchema = Yup.object().shape({
     .min(5, 'Địa chỉ đường phải có ít nhất 5 ký tự')
     .max(100, 'Địa chỉ đường không được quá 100 ký tự')
     .required('Địa chỉ đường là bắt buộc'),
-  ward: Yup.string()
-    .min(2, 'Phường/Xã phải có ít nhất 2 ký tự')
-    .max(50, 'Phường/Xã không được quá 50 ký tự')
-    .required('Phường/Xã là bắt buộc'),
-  district: Yup.string()
-    .min(2, 'Quận/Huyện phải có ít nhất 2 ký tự')
-    .max(50, 'Quận/Huyện không được quá 50 ký tự')
-    .required('Quận/Huyện là bắt buộc'),
-  province: Yup.string()
-    .min(2, 'Tỉnh/Thành phố phải có ít nhất 2 ký tự')
-    .max(50, 'Tỉnh/Thành phố không được quá 50 ký tự')
-    .required('Tỉnh/Thành phố là bắt buộc'),
   phoneNumber: Yup.string()
     .matches(/^[0-9+\-\s()]+$/, 'Số điện thoại không hợp lệ')
     .min(10, 'Số điện thoại phải có ít nhất 10 số')
@@ -52,39 +42,47 @@ const AddressValidationSchema = Yup.object().shape({
   default: Yup.boolean()
 })
 
+
 const CreateAddressForm = ({ onClose, onSuccess }) => {
   const [createShippingAddress] = useCreateShippingAddressMutation()
   const [customTag, setCustomTag] = useState('')
 
-  // Function to combine location components into string
-  const combineLocation = (streetAddress, ward, district, province) => {
-    const parts = [streetAddress, ward, district, province].filter(part => part && part.trim())
-    return parts.join(', ')
-  }
-
+  // Use arrays for options
+  const [provinces, setProvinces] = useState([])
+  const [districts, setDistricts] = useState([])
+  const [wards, setWards] = useState([])
+  // Selected objects
+  const [selectedProvince, setSelectedProvince] = useState(null)
+  const [selectedDistrict, setSelectedDistrict] = useState(null)
+  const [selectedWard, setSelectedWard] = useState(null)
+  console.log(selectedProvince)
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      const locationString = combineLocation(
-        values.streetAddress,
-        values.ward,
-        values.district,
-        values.province
-      )
-
       const finalTag = values.tag === 'Khác' ? customTag : values.tag
-      
+      // Combine location fields into a single string for the 'location' field
+      const locationParts = [
+        values.streetAddress,
+        selectedWard ? selectedWard.full_name : "",
+        selectedDistrict ? selectedDistrict.full_name : "",
+        selectedProvince ? selectedProvince.full_name : ""
+      ].filter(Boolean)
+      const combinedLocation = locationParts.join(", ")
       await createShippingAddress({
         name: values.name,
-        location: locationString,
+        location: combinedLocation,
+        addressLine: values.streetAddress,
+        provinceCode: selectedProvince ? selectedProvince.id : "",
+        districtCode: selectedDistrict ? selectedDistrict.id : "",
+        wardCode: selectedWard ? selectedWard.id : "",
         phoneNumber: values.phoneNumber,
         tag: finalTag,
         default: values.default
       }).unwrap()
-      
+
       toast.success("Thêm địa chỉ thành công", {
         description: "Địa chỉ mới đã được thêm thành công.",
       })
-      
+
       if (onSuccess) {
         onSuccess()
       }
@@ -104,8 +102,33 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
     onClose()
   }
 
+  useEffect(() => {
+    getProvinces().then(setProvinces).catch(() => toast.error("Không thể tải danh sách tỉnh/thành phố", { description: "Vui lòng thử lại sau." }))
+  }, [])
+
+  useEffect(() => {
+    if (selectedProvince) {
+      getDistricts(selectedProvince.id).then(setDistricts).catch(() => toast.error("Không thể tải danh sách quận/huyện", { description: "Vui lòng thử lại sau." }))
+      setSelectedDistrict(null)
+      setSelectedWard(null)
+      setWards([])
+    } else {
+      setDistricts([])
+      setWards([])
+    }
+  }, [selectedProvince])
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      getWards(selectedDistrict.id).then(setWards).catch(() => toast.error("Không thể tải danh sách phường/xã", { description: "Vui lòng thử lại sau." }))
+      setSelectedWard(null)
+    } else {
+      setWards([])
+    }
+  }, [selectedDistrict])
+
   return (
-    <PopoverContent className="p-6 w-[500px] max-h-[80vh] overflow-y-auto">
+    <PopoverContent className="p-6 w-[660px] max-h-[85vh] overflow-y-auto">
       <Formik
         initialValues={{
           name: '',
@@ -125,7 +148,7 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
             <h2 className="font-semibold text-lg mb-4">
               Thêm địa chỉ mới
             </h2>
-            
+
             <div className="space-y-4">
               {/* Recipient Name */}
               <div className="space-y-2">
@@ -144,7 +167,7 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
               {/* Location Fields */}
               <div className="space-y-4">
                 <h4 className="font-medium text-sm text-muted-foreground">Thông tin địa chỉ</h4>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="streetAddress">Địa chỉ đường/Số nhà *</Label>
                   <Field
@@ -159,43 +182,56 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Province Combobox */}
                   <div className="space-y-2">
-                    <Label htmlFor="ward">Phường/Xã *</Label>
-                    <Field
-                      as={Input}
-                      id="ward"
-                      name="ward"
-                      placeholder="Ví dụ: Phường 1"
-                      className={`${errors.ward && touched.ward ? "border-destructive" : ""}`}
-                      disabled={isSubmitting}
-                    />
-                    <ErrorMessage name="ward" component="div" className="text-red-500 text-sm" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="district">Quận/Huyện *</Label>
-                    <Field
-                      as={Input}
-                      id="district"
-                      name="district"
-                      placeholder="Ví dụ: Quận 1"
-                      className={`${errors.district && touched.district ? "border-destructive" : ""}`}
-                      disabled={isSubmitting}
-                    />
-                    <ErrorMessage name="district" component="div" className="text-red-500 text-sm" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="province">Tỉnh/Thành phố *</Label>
-                    <Field
-                      as={Input}
-                      id="province"
-                      name="province"
-                      placeholder="Ví dụ: TP. HCM"
-                      className={`${errors.province && touched.province ? "border-destructive" : ""}`}
+                    <LocationCombobox
+                      label="Tỉnh/Thành phố *"
+                      placeholder="Chọn tỉnh/thành phố"
+                      options={provinces}
+                      value={selectedProvince}
+                      onChange={province => {
+                        setSelectedProvince(province)
+                        setFieldValue('province', province ? province.full_name : '')
+                        setSelectedDistrict(null)
+                        setFieldValue('district', '')
+                        setSelectedWard(null)
+                        setFieldValue('ward', '')
+                      }}
                       disabled={isSubmitting}
                     />
                     <ErrorMessage name="province" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  {/* District Combobox */}
+                  <div className="space-y-2">
+                    <LocationCombobox
+                      label="Quận/Huyện *"
+                      placeholder="Chọn quận/huyện"
+                      options={districts}
+                      value={selectedDistrict}
+                      onChange={district => {
+                        setSelectedDistrict(district)
+                        setFieldValue('district', district ? district.full_name : '')
+                        setSelectedWard(null)
+                        setFieldValue('ward', '')
+                      }}
+                      disabled={!selectedProvince || isSubmitting}
+                    />
+                    <ErrorMessage name="district" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  {/* Ward Combobox */}
+                  <div className="space-y-2">
+                    <LocationCombobox
+                      label="Phường/Xã *"
+                      placeholder="Chọn phường/xã"
+                      options={wards}
+                      value={selectedWard}
+                      onChange={ward => {
+                        setSelectedWard(ward)
+                        setFieldValue('ward', ward ? ward.full_name : '')
+                      }}
+                      disabled={!selectedDistrict || isSubmitting}
+                    />
+                    <ErrorMessage name="ward" component="div" className="text-red-500 text-sm" />
                   </div>
                 </div>
               </div>
@@ -261,7 +297,7 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
               </div>
 
               {/* Default Address Checkbox */}
-              <div className="flex items-center space-x-2 pt-2">
+              <div className="flex items-center space-x-2">
                 <Field name="default" type="checkbox">
                   {({ field }) => (
                     <input
@@ -281,17 +317,17 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
 
             {/* Action Buttons */}
             <div className="flex gap-3 mt-6">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="flex items-center gap-2 flex-1"
                 disabled={isSubmitting}
               >
                 <Check className="h-4 w-4" />
                 {isSubmitting ? "Đang xử lý..." : "Thêm địa chỉ"}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={handleCancel}
                 className="flex items-center gap-2"
                 disabled={isSubmitting}

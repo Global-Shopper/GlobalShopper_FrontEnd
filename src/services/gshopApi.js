@@ -2,7 +2,6 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from './baseRequest';
 import endpoints from '../const/endpoints';
 
-//Lưu ý khi cho dev, cần phải sửa lại baseURL trong file baseRequest.js
 const gshopApi = createApi({
   reducerPath: 'gshopApi',
   tagTypes: [
@@ -11,7 +10,7 @@ const gshopApi = createApi({
     'PurchaseRequest',
     'Wallet',
   ],
-  baseQuery: axiosBaseQuery(), // Adjust base URL as needed
+  baseQuery: axiosBaseQuery(),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (data) => ({
@@ -202,7 +201,7 @@ const gshopApi = createApi({
     transactionHistory: builder.query({
       query: (data) => ({
         params: data,
-        url: endpoints.TRANSACTION_HITORY,
+        url: endpoints.TRANSACTION_HISTORY,
         method: 'GET',
       }),
     }),
