@@ -181,9 +181,9 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
                   <ErrorMessage name="streetAddress" component="div" className="text-red-500 text-sm" />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
                   {/* Province Combobox */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:col-span-3">
                     <LocationCombobox
                       label="Tỉnh/Thành phố *"
                       placeholder="Chọn tỉnh/thành phố"
@@ -202,7 +202,7 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
                     <ErrorMessage name="province" component="div" className="text-red-500 text-sm" />
                   </div>
                   {/* District Combobox */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:col-span-3">
                     <LocationCombobox
                       label="Quận/Huyện *"
                       placeholder="Chọn quận/huyện"
@@ -219,7 +219,7 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
                     <ErrorMessage name="district" component="div" className="text-red-500 text-sm" />
                   </div>
                   {/* Ward Combobox */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:col-span-2">
                     <LocationCombobox
                       label="Phường/Xã *"
                       placeholder="Chọn phường/xã"
