@@ -4,15 +4,8 @@ import { Plus, ShoppingCart } from "lucide-react"
 import RequestCard from "@/components/RequestCard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationNext, 
-  PaginationPrevious 
-} from "@/components/ui/pagination"
 import { useGetPurchaseRequestQuery } from "@/services/gshopApi"
-import { generatePaginationItems, getPaginationInfo, shouldShowPagination } from "@/utils/Pagination"
+import { getPaginationInfo, PaginationBar } from "@/utils/Pagination"
 
 export default function RequestDashboard() {
   const navigate = useNavigate()
@@ -22,7 +15,7 @@ export default function RequestDashboard() {
   // Get purchase requests with pagination
   const { data: purchaseRequestsData, isLoading: isRequestLoading, isError: isRequestError } = useGetPurchaseRequestQuery({
     page: currentPage,
-    size: pageSize,
+    size: Number(pageSize),
     type: "assigned"
   })
 
@@ -138,29 +131,7 @@ export default function RequestDashboard() {
               </div>
 
               {/* Pagination */}
-              {shouldShowPagination(totalPages) && (
-                <div className="flex justify-center mt-8">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
-                          className={currentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-                      
-                      {generatePaginationItems(totalPages, currentPage, handlePageChange)}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
-                          className={currentPage === totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
+              <PaginationBar totalPages={purchaseRequestsData.totalPages} currentPage={currentPage} handlePageChange={setCurrentPage} />
             </>
           )}
         </div>

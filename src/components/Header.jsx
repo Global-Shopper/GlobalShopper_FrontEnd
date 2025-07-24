@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { signout } from "@/features/user";
 import defaultAvt from "@/assets/defaultAvt.jpg";
-import { useGetWalletQuery } from "@/services/gshopApi";
+import gshopApi, { useGetWalletQuery } from "@/services/gshopApi";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Header = () => {
@@ -46,6 +46,7 @@ const Header = () => {
 	const avatar = useSelector((state) => state.rootReducer?.user?.avatar);
 
 	const handleSignout = () => {
+		dispatch(gshopApi.util.resetApiState());
 		dispatch(signout());
 		navigate("/");
 	};
@@ -364,7 +365,7 @@ const Header = () => {
 												icon: User,
 											},
 											{
-												to: "/wallet/transactions",
+												to: "/wallet",
 												text: "Lịch sử thanh toán",
 												icon: ArrowDownUp,
 											},

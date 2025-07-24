@@ -16,20 +16,13 @@ import { useGetWalletQuery, useTransactionHistoryQuery } from '@/services/gshopA
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import PageLoading from '@/components/PageLoading'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationEllipsis,
-} from '@/components/ui/pagination'
-import { generatePaginationItems, getPaginationInfo, shouldShowPagination } from '@/utils/Pagination'
+import { getPaginationInfo, PaginationBar } from '@/utils/Pagination'
 
 const WalletOverview = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
   const { data: transactionsRes, isLoading: isTransactionLoading, isError: isTransactionError } =
-    useTransactionHistoryQuery({ page: currentPage, size: 10, direction: 'ASC' })
+    useTransactionHistoryQuery({ page: currentPage, size: 10, direction: 'DESC' })
 
   const query = new URLSearchParams(location.search)
   const vnpResponseCode = query.get("vnp_ResponseCode")
@@ -67,49 +60,83 @@ const getTransactionIcon = (type, status) => {
   if (type === 'DEPOSIT') {
     return {
       icon: BanknoteArrowUp,
-      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
-      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
+      color:
+        status === 'SUCCESS'
+          ? 'text-green-600'
+          : status === 'FAIL'
+          ? 'text-gray-500'
+          : status === 'PENDING'
+          ? 'text-yellow-600'
+          : 'text-red-600',
+      bg:
+        status === 'SUCCESS'
+          ? 'bg-green-100'
+          : status === 'FAIL'
+          ? 'bg-gray-100'
+          : status === 'PENDING'
+          ? 'bg-yellow-100'
+          : 'bg-red-100',
     }
   } else if (type === 'WITHDRAW') {
     return {
       icon: BanknoteArrowDown,
-      color: status === 'SUCCESS' ? 'text-green-600' : 'text-red-600',
-      bg: status === 'SUCCESS' ? 'bg-green-100' : 'bg-red-100'
+      color:
+        status === 'SUCCESS'
+          ? 'text-red-600'
+          : status === 'FAIL'
+          ? 'text-gray-500'
+          : status === 'PENDING'
+          ? 'text-yellow-600'
+          : 'text-green-600',
+      bg:
+        status === 'SUCCESS'
+          ? 'bg-red-100'
+          : status === 'FAIL'
+          ? 'bg-gray-100'
+          : status === 'PENDING'
+          ? 'bg-yellow-100'
+          : 'bg-green-100',
     }
   }
   return {
     icon: Clock,
     color: 'text-gray-600',
-    bg: 'bg-gray-100'
+    bg: 'bg-gray-100',
   }
 }
 
+// Refactored getCreditUpdateText for new color logic and clarity
 const getCreditUpdateText = (type, amount, status) => {
   const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  if (status === 'FAIL') {
+    return (
+      <span className="flex flex-col items-start text-gray-500">
+        <span>Thất bại</span>
+        <span>{formattedAmount}</span>
+      </span>
+    );
+  }
+  if (status === 'PENDING') {
+    return (
+      <span className="flex flex-col items-start text-yellow-600">
+        <span>Đang xử lý</span>
+        <span>{formattedAmount}</span>
+      </span>
+    );
+  }
   if (type === 'DEPOSIT') {
     if (status === 'SUCCESS') {
       return <span className="text-green-600">+{formattedAmount}</span>;
     } else {
-      return (
-        <span className="text-red-600 flex flex-col items-start">
-          <span>Thất bại</span>
-          <span>{formattedAmount}</span>
-        </span>
-      );
+      return <span className="text-red-600">+{formattedAmount}</span>;
     }
   } else if (type === 'WITHDRAW') {
     if (status === 'SUCCESS') {
-      return <span className="text-green-600">-{formattedAmount}</span>;
+      return <span className="text-red-600">-{formattedAmount}</span>;
     } else {
-      return (
-        <span className="text-red-600 flex flex-col items-start">
-          <span>Thất bại</span>
-          <span>-{formattedAmount}</span>
-        </span>
-      );
+      return <span className="text-green-600">-{formattedAmount}</span>;
     }
   }
-  // fallback for unknown type
   return <span className="text-gray-500">{formattedAmount}</span>;
 }
 
@@ -165,24 +192,6 @@ const getCreditUpdateText = (type, amount, status) => {
                   <div className="space-y-4">
                     <div className="text-3xl font-bold text-gray-900">
                       {formatCurrency(wallet?.balance)}
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Số dư khả dụng trong ví
-                    </p>
-
-                    <div className="pt-4 space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Tổng nạp:</span>
-                        <span className="font-medium text-green-600">
-                          {formatCurrency(wallet?.totalDeposited || 0)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Tổng chi:</span>
-                        <span className="font-medium text-red-600">
-                          {formatCurrency(wallet?.totalSpent || 0)}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -261,13 +270,7 @@ const getCreditUpdateText = (type, amount, status) => {
                 </div>
 
                 {/* Pagination */}
-                {shouldShowPagination(pagination.totalPages) && (
-                  <Pagination className="mt-6">
-                    <PaginationContent>
-                      {generatePaginationItems(pagination.totalPages, pagination.currentPage, setCurrentPage)}
-                    </PaginationContent>
-                  </Pagination>
-                )}
+                <PaginationBar totalPages={pagination.totalPages} currentPage={currentPage} handlePageChange={setCurrentPage} />
               </CardContent>
             </Card>
           </div>

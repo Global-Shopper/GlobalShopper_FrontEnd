@@ -1,7 +1,11 @@
-import { 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationEllipsis 
+import {
+  PaginationItem,
+  PaginationLink,
+  PaginationEllipsis,
+  Pagination,
+  PaginationContent,
+  PaginationPrevious,
+  PaginationNext
 } from "@/components/ui/pagination"
 
 /**
@@ -113,11 +117,33 @@ export const getPaginationInfo = (pageable, totalPages, totalElements) => {
   }
 }
 
-/**
- * Check if pagination should be shown
- * @param {number} totalPages - Total number of pages
- * @returns {boolean} Whether pagination should be displayed
- */
-export const shouldShowPagination = (totalPages) => {
-  return totalPages > 1
-} 
+export const PaginationBar = ({ totalPages, currentPage, handlePageChange }) => {
+  return (
+    <>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
+                  className={currentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+
+              {generatePaginationItems(totalPages, currentPage, handlePageChange)}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+                  className={currentPage === totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+    </>
+
+  )
+}
