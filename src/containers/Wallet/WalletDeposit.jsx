@@ -44,7 +44,7 @@ const WalletDeposit = () => {
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
 
   const formatCurrency = (amount) => {
-    return `${new Intl.NumberFormat("vi-VN").format(amount)} VNĐ`
+    return `${new Intl.NumberFormat("vi-VN").format(amount)}`
   }
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -126,7 +126,7 @@ const WalletDeposit = () => {
                         {/* Amount Input */}
                         <div className="space-y-4">
                           <Label htmlFor="amount" className="text-base font-medium">
-                            Số tiền nạp *
+                            Số tiền nạp (VNĐ) *
                           </Label>
 
                           <div className="space-y-3">
