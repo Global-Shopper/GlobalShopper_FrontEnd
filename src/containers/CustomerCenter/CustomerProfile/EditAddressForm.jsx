@@ -12,6 +12,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { LocationCombobox } from "@/components/LocationCombobox";
+import { getProvinces, getDistricts, getWards } from '@/services/vnGeoAPI';
+import { useUpdateShippingAddressMutation } from '@/services/gshopApi';
+import { toast } from 'sonner';
 
 // Predefined tag options
 const TAG_OPTIONS = ["Nhà riêng", "Công ty", "Trường học", "Bệnh viện", "Khác"];
@@ -19,57 +23,121 @@ const TAG_OPTIONS = ["Nhà riêng", "Công ty", "Trường học", "Bệnh việ
 const EditAddressForm = ({
 	address,
 	validationSchema,
-	onSave,
 	onCancel,
+	onSuccess,
 }) => {
 	const [customTag, setCustomTag] = useState("");
+	const [provinces, setProvinces] = useState([]);
+	const [districts, setDistricts] = useState([]);
+	const [wards, setWards] = useState([]);
+	const [selectedProvince, setSelectedProvince] = useState(null);
+	const [selectedDistrict, setSelectedDistrict] = useState(null);
+	const [selectedWard, setSelectedWard] = useState(null);
+	const [updateShippingAddress] = useUpdateShippingAddressMutation();
 
 	useEffect(() => {
-		if (address && address.tag && !TAG_OPTIONS.includes(address.tag)) {
+		(async () => {
+			const provs = await getProvinces();
+			setProvinces(provs);
+			if (address?.provinceCode) {
+				const foundProvince = provs.find(p => p.id === address.provinceCode || p.full_name === address.province);
+				if (foundProvince) {
+					setSelectedProvince(foundProvince);
+					const dists = await getDistricts(foundProvince.id);
+					setDistricts(dists);
+					if (address?.districtCode) {
+						const foundDistrict = dists.find(d => d.id === address.districtCode || d.full_name === address.district);
+						if (foundDistrict) {
+							setSelectedDistrict(foundDistrict);
+							const ws = await getWards(foundDistrict.id);
+							setWards(ws);
+							if (address?.wardCode) {
+								const foundWard = ws.find(w => w.id === address.wardCode || w.full_name === address.ward);
+								if (foundWard) setSelectedWard(foundWard);
+							}
+						}
+					}
+				}
+			}
+		})();
+		if (address?.tag && !TAG_OPTIONS.includes(address.tag)) {
 			setCustomTag(address.tag);
 		} else {
 			setCustomTag("");
 		}
 	}, [address]);
 
-	// Helper to parse location string
-	const parseLocation = (locationString) => {
-		if (!locationString)
-			return { streetAddress: "", ward: "", district: "", province: "" };
-		const parts = locationString.split(",").map((part) => part.trim());
-		if (parts.length >= 4) {
-			return {
-				streetAddress: parts[0] || "",
-				ward: parts[1] || "",
-				district: parts[2] || "",
-				province: parts[3] || "",
-			};
-		} else if (parts.length === 3) {
-			return {
-				streetAddress: parts[0] || "",
-				ward: parts[1] || "",
-				district: parts[2] || "",
-				province: "",
-			};
+	useEffect(() => {
+		if (selectedProvince) {
+			getDistricts(selectedProvince.id).then(setDistricts);
+			setSelectedDistrict(null);
+			setSelectedWard(null);
+			setWards([]);
 		} else {
-			return {
-				streetAddress: locationString,
-				ward: "",
-				district: "",
-				province: "",
-			};
+			setDistricts([]);
+			setWards([]);
 		}
-	};
+	}, [selectedProvince]);
+
+	useEffect(() => {
+		if (selectedDistrict) {
+			getWards(selectedDistrict.id).then(setWards);
+			setSelectedWard(null);
+		} else {
+			setWards([]);
+		}
+	}, [selectedDistrict]);
 
 	const initialValues = {
+		id: address?.id || "",
 		name: address?.name || "",
-		streetAddress: parseLocation(address?.location).streetAddress,
-		ward: parseLocation(address?.location).ward,
-		district: parseLocation(address?.location).district,
-		province: parseLocation(address?.location).province,
+		addressLine: address?.addressLine || address?.streetAddress || "",
+		streetAddress: address?.addressLine || address?.streetAddress || "",
+		ward: address?.ward || "",
+		district: address?.district || "",
+		province: address?.province || "",
 		phoneNumber: address?.phoneNumber || "",
 		tag: TAG_OPTIONS.includes(address?.tag) ? address?.tag : "Khác",
 		default: address?.default || false,
+	};
+
+	const handleSubmit = async (values, actions) => {
+		const locationParts = [
+			values.addressLine,
+			selectedWard ? selectedWard.full_name : values.ward,
+			selectedDistrict ? selectedDistrict.full_name : values.district,
+			selectedProvince ? selectedProvince.full_name : values.province
+		].filter(Boolean);
+		const combinedLocation = locationParts.join(", ");
+		const finalTag = values.tag === "Khác" ? customTag : values.tag;
+		try {
+			await updateShippingAddress({
+				id: values.id,
+				name: values.name,
+				tag: finalTag,
+				phoneNumber: values.phoneNumber,
+				location: combinedLocation,
+				provinceCode: selectedProvince ? selectedProvince.id : address?.provinceCode || "",
+				districtCode: selectedDistrict ? selectedDistrict.id : address?.districtCode || "",
+				wardCode: selectedWard ? selectedWard.id : address?.wardCode || "",
+				addressLine: values.addressLine,
+				default: values.default,
+			}).unwrap();
+			toast.success("Cập nhật địa chỉ thành công", {
+				description: "Địa chỉ đã được cập nhật thành công.",
+			});
+			if (onSuccess) onSuccess();
+			if (onCancel) onCancel();
+			actions.resetForm();
+		} catch (e) {
+			toast.error("Cập nhật địa chỉ thất bại", {
+				description:
+					JSON.stringify(e?.data?.messages) ||
+					"Đã xảy ra lỗi khi cập nhật địa chỉ. Vui lòng thử lại sau.",
+			});
+		} finally {
+			actions.setSubmitting(false);
+		}
 	};
 
 	return (
@@ -77,9 +145,7 @@ const EditAddressForm = ({
 			initialValues={initialValues}
 			validationSchema={validationSchema}
 			enableReinitialize
-			onSubmit={(values, actions) =>
-				onSave(values, actions, customTag)
-			}
+			onSubmit={handleSubmit}
 		>
 			{({ isSubmitting, values, errors, touched, setFieldValue }) => (
 				<Form className="space-y-4">
@@ -106,59 +172,73 @@ const EditAddressForm = ({
 							<p className="text-xs text-slate-500 mt-1">Nhập đầy đủ thông tin địa chỉ giao hàng</p>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="streetAddress" className="text-sm font-semibold text-slate-700">
+							<Label htmlFor="addressLine" className="text-sm font-semibold text-slate-700">
 								Địa chỉ đường/Số nhà
 							</Label>
 							<Field
 								as={Input}
-								id="streetAddress"
-								name="streetAddress"
+								id="addressLine"
+								name="addressLine"
 								placeholder="Ví dụ: 123 Đường ABC"
-								className={`h-11 border rounded-lg transition-all duration-200 ${errors.streetAddress && touched.streetAddress ? "border-red-400 focus:border-red-500" : "border-slate-300 focus:border-sky-400"}`}
+								className={`h-11 border rounded-lg transition-all duration-200 ${errors.addressLine && touched.addressLine ? "border-red-400 focus:border-red-500" : "border-slate-300 focus:border-sky-400"}`}
 								disabled={isSubmitting}
 							/>
-							<ErrorMessage name="streetAddress" component="div" className="text-red-500 text-sm" />
+							<ErrorMessage name="addressLine" component="div" className="text-red-500 text-sm" />
 						</div>
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<div className="space-y-2">
-								<Label htmlFor="ward" className="text-sm font-semibold text-slate-700">Phường/Xã</Label>
-								<Field
-									as={Input}
-									id="ward"
-									name="ward"
-									placeholder="Ví dụ: Phường 1"
-									className={`h-11 border rounded-lg transition-all duration-200 ${errors.ward && touched.ward ? "border-red-400 focus:border-red-500" : "border-slate-300 focus:border-sky-400"}`}
-									disabled={isSubmitting}
-								/>
-								<ErrorMessage name="ward" component="div" className="text-red-500 text-sm" />
-							</div>
-							<div className="space-y-2">
-								<Label htmlFor="district" className="text-sm font-semibold text-slate-700">Quận/Huyện</Label>
-								<Field
-									as={Input}
-									id="district"
-									name="district"
-									placeholder="Ví dụ: Quận 1"
-									className={`h-11 border rounded-lg transition-all duration-200 ${errors.district && touched.district ? "border-red-400 focus:border-red-500" : "border-slate-300 focus:border-sky-400"}`}
-									disabled={isSubmitting}
-								/>
-								<ErrorMessage name="district" component="div" className="text-red-500 text-sm" />
-							</div>
-							<div className="space-y-2">
-								<Label htmlFor="province" className="text-sm font-semibold text-slate-700">Tỉnh/Thành phố</Label>
-								<Field
-									as={Input}
-									id="province"
-									name="province"
-									placeholder="Ví dụ: TP. HCM"
-									className={`h-11 border rounded-lg transition-all duration-200 ${errors.province && touched.province ? "border-red-400 focus:border-red-500" : "border-slate-300 focus:border-sky-400"}`}
+						<div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+							{/* Province Combobox */}
+							<div className="space-y-2 md:col-span-3">
+								<LocationCombobox
+									label="Tỉnh/Thành phố *"
+									placeholder="Chọn tỉnh/thành phố"
+									options={provinces}
+									value={selectedProvince}
+									onChange={province => {
+										setSelectedProvince(province);
+										setFieldValue('province', province ? province.full_name : '');
+										setSelectedDistrict(null);
+										setFieldValue('district', '');
+										setSelectedWard(null);
+										setFieldValue('ward', '');
+									}}
 									disabled={isSubmitting}
 								/>
 								<ErrorMessage name="province" component="div" className="text-red-500 text-sm" />
 							</div>
+							{/* District Combobox */}
+							<div className="space-y-2 md:col-span-3">
+								<LocationCombobox
+									label="Quận/Huyện *"
+									placeholder="Chọn quận/huyện"
+									options={districts}
+									value={selectedDistrict}
+									onChange={district => {
+										setSelectedDistrict(district);
+										setFieldValue('district', district ? district.full_name : '');
+										setSelectedWard(null);
+										setFieldValue('ward', '');
+									}}
+									disabled={!selectedProvince || isSubmitting}
+								/>
+								<ErrorMessage name="district" component="div" className="text-red-500 text-sm" />
+							</div>
+							{/* Ward Combobox */}
+							<div className="space-y-2 md:col-span-2">
+								<LocationCombobox
+									label="Phường/Xã *"
+									placeholder="Chọn phường/xã"
+									options={wards}
+									value={selectedWard}
+									onChange={ward => {
+										setSelectedWard(ward);
+										setFieldValue('ward', ward ? ward.full_name : '');
+									}}
+									disabled={!selectedDistrict || isSubmitting}
+								/>
+								<ErrorMessage name="ward" component="div" className="text-red-500 text-sm" />
+							</div>
 						</div>
 					</div>
-				</div>
 
 				{/* Phone Number */}
 				<div className="space-y-2">
@@ -263,7 +343,7 @@ const EditAddressForm = ({
 						</Button>
 					</div>
 				</CardFooter>
-			</Form>
+				</Form>
 			)}
 		</Formik>
 	);
