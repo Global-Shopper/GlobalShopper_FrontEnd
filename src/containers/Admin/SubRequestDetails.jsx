@@ -63,7 +63,14 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
 
   const validationSchema = Yup.object({
     note: Yup.string().required("Vui lòng nhập ghi chú cho nhóm."),
-    shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm.")
+    shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm."),
+    details: Yup.array().of(Yup.object({
+      basePrice: Yup.number().required("Giá gốc là bắt buộc"),
+      hsCodeId: Yup.string().required("HS Code là bắt buộc"),
+      region: Yup.string().required("Khu vực là bắt buộc"),
+      serviceFee: Yup.number().required("Phí dịch vụ là bắt buộc"),
+      currency: Yup.string().required("Tiền tệ là bắt buộc"),
+    }))
   });
 
   return (
