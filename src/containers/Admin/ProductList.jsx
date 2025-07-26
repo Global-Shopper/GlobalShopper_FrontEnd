@@ -1,18 +1,19 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
-import { Package, ExternalLink, CheckCircle2, Circle } from "lucide-react"
+import { Package, ExternalLink } from "lucide-react"
 import { SubRequestDetails } from "./SubRequestDetails"
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { QuotationForm } from "./QuotationForm";
 
 export function ProductList({
   requestItems,
   subRequests,
   selectedProductId,
-  selectedProducts,
   expandedSubRequest,
   status,
   onProductClick,
-  onToggleProductSelection,
   onToggleSubRequestExpansion,
-  requestType
+  requestType,
 }) {
   const renderProductCard = (item, index, isSubRequest = false) => (
     <Card
@@ -27,7 +28,7 @@ export function ProductList({
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <span
               className={`text-xs px-2 py-1 rounded shrink-0 ${
-                isSubRequest ? "bg-orange-100 text-orange-600" : "bg-gray-100 text-gray-600"
+                isSubRequest ? "bg-orange-100 text-orange-600" : "bg-gray-100 text-orange-600"
               }`}
             >
               #{index + 1}
@@ -38,27 +39,14 @@ export function ProductList({
             <span className={`font-bold text-lg ${isSubRequest ? "text-orange-600" : "text-blue-600"}`}>
               ×{item.quantity}
             </span>
-            <button
-              onClick={(e) => onToggleProductSelection(item.id, e)}
-              className={`p-1 hover:bg-gray-100 rounded-full transition-colors ${
-                status === "SENT" ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={status === "SENT"}
-            >
-              {selectedProducts.has(item.id) ? (
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
-              ) : (
-                <Circle className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-              )}
-            </button>
           </div>
         </div>
-        <div className="mt-3">
+        <div className="flex justify-start mt-3">
           <a
             href={item.productURL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-blue-600 hover:underline text-sm"
+            className="flex items-center justify-start gap-1 text-blue-600 hover:underline text-sm"
             onClick={(e) => e.stopPropagation()}
           >
             <ExternalLink className="h-4 w-4" />
@@ -86,7 +74,7 @@ export function ProductList({
         {/* Render main requestItems if any */}
         {requestItems?.length > 0 && (
           <div>
-            <h3 className="font-semibold mb-3 text-lg">Sản phẩm chính</h3>
+            <h3 className="font-semibold mb-3 text-lg">Sản phẩm chưa được tạo nhóm</h3>
             <div className="space-y-2">{requestItems.map((item, index) => renderProductCard(item, index, false))}</div>
           </div>
         )}

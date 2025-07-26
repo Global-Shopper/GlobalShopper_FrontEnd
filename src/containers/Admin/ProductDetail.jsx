@@ -20,7 +20,6 @@ export function ProductDetail({ product, status, quotePrice, onPriceChange, form
         <div>
           <h3 className="font-semibold mb-2">{product.productName}</h3>
           <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
-
           {/* Product Images */}
           {product.images && product.images.length > 0 && (
             <div className="mb-3">
@@ -71,42 +70,7 @@ export function ProductDetail({ product, status, quotePrice, onPriceChange, form
             )}
           </div>
         </div>
-
         <Separator />
-        {status === "CHECKING" && (
-          <>
-            <div className="space-y-3">
-              <Label htmlFor="quote-price" className="text-sm font-medium">
-                Báo giá (VND/sản phẩm)
-              </Label>
-              <Input
-                id="quote-price"
-                type="number"
-                placeholder="Nhập giá..."
-                value={quotePrice}
-                onChange={(e) => onPriceChange(product.id, e.target.value)}
-              />
-              {quotePrice && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground">Tổng: </span>
-                  <span className="font-semibold text-green-600">
-                    {formatCurrency(Number(quotePrice) * product.quantity)}
-                  </span>
-                </div>
-              )}
-            </div>
-            <Separator />
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Ghi chú sản phẩm</Label>
-              <Textarea placeholder="Thêm ghi chú cho sản phẩm này..." rows={3} />
-            </div>
-            <div className="flex gap-2 pt-2">
-              <Button size="sm" className="flex-1">
-                Lưu báo giá
-              </Button>
-            </div>
-          </>
-        )}
         {status === "SENT" && (
           <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md">
             <p className="text-sm font-medium">Chức năng báo giá chưa khả dụng</p>

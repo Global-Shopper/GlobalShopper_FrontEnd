@@ -184,6 +184,13 @@ const gshopApi = createApi({
       }),
       providesTags: ['PurchaseRequest'],
     }),
+    createQuotation: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.QUOTATION,
+        method: 'POST',
+      }),
+    }),
     getWallet: builder.query({
       query: () => ({
         url: endpoints.WALLET,
@@ -239,6 +246,7 @@ export const {
   useCreateWithoutLinkPurchaseRequestMutation,
   useGetWalletQuery,
   useDepositWalletMutation,
+  useCreateQuotationMutation,
   // useLazyCheckPaymentQuery,
   useCheckingPurchaseRequestMutation,
   useGetPurchaseRequestDetailQuery,

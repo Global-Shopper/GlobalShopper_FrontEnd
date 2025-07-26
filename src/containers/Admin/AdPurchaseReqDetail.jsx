@@ -48,7 +48,7 @@ const formatCurrency = (amount) => {
 }
 
 // Mock API functions - replace with actual API calls
-const requestCustomerUpdate = async (requestId) => {
+const requestCustomerUpdate = async () => {
   console.log("first")
 }
 
@@ -58,7 +58,6 @@ function AdPurchaseReqDetail() {
   const [selectedProductId, setSelectedProductId] = useState(undefined)
   const [quotePrices, setQuotePrices] = useState({})
   const [notes, setNotes] = useState("")
-  const [selectedProducts, setSelectedProducts] = useState(new Set())
   const [expandedSubRequest, setExpandedSubRequest] = useState(null)
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false)
   const [groupSeller, setGroupSeller] = useState("")
@@ -74,7 +73,7 @@ function AdPurchaseReqDetail() {
       console.log(selectItem)
       if (selectItem) return selectItem
     }
-    
+
     if (req?.subRequests?.length > 0) {
       console.log("Checking subrequests for selected product ID:", selectedProductId)
       for (const subReq of req.subRequests) {
@@ -82,7 +81,7 @@ function AdPurchaseReqDetail() {
         if (selectItem) return selectItem
       }
     }
-    
+
     return undefined
   }, [req, selectedProductId])
 
@@ -91,19 +90,6 @@ function AdPurchaseReqDetail() {
       ...prev,
       [productId]: price,
     }))
-  }
-
-  const toggleProductSelection = (productId, e) => {
-    e.stopPropagation()
-    setSelectedProducts((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(productId)) {
-        newSet.delete(productId)
-      } else {
-        newSet.add(productId)
-      }
-      return newSet
-    })
   }
 
   const handleProductClick = (productId) => {
@@ -184,41 +170,45 @@ function AdPurchaseReqDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-2 space-y-4">
             {/* Product List */}
-            <ProductList
-              requestItems={req.requestItems || []}
-              subRequests={req.subRequests || []}
-              selectedProductId={selectedProductId}
-              selectedProducts={selectedProducts}
-              expandedSubRequest={expandedSubRequest}
-              status={req.status}
-              onProductClick={handleProductClick}
-              onToggleProductSelection={toggleProductSelection}
-              onToggleSubRequestExpansion={toggleSubRequestExpansion}
-              requestType={req.requestType}
-            />
+            <div className="h-auto overflow-y-auto">
+              <ProductList
+                requestItems={req.requestItems || []}
+                subRequests={req.subRequests || []}
+                selectedProductId={selectedProductId}
+                expandedSubRequest={expandedSubRequest}
+                status={req.status}
+                onProductClick={handleProductClick}
+                onToggleSubRequestExpansion={toggleSubRequestExpansion}
+                requestType={req.requestType}
+              />
+            </div>
+            {/* Notes */}
+            <div className="h-auto overflow-y-auto">
+              <NotesSection notes={notes} status={req.status} onNotesChange={setNotes} />
+            </div>
           </div>
 
           <div className="space-y-4 grid grid-cols-2 col-span-2 gap-6">
-            {/* Customer Info */}
-            <CustomerInfoCard
-              customer={req.customer}
-              shippingAddress={req.shippingAddress}
-              formatCurrency={formatCurrency}
-            />
-
-            {/* Product Detail */}
+            {/* Product Detail (sticky) */}
             {selectedProduct && (
-              <ProductDetail
-                product={selectedProduct}
-                status={req.status}
-                quotePrice={quotePrices[selectedProduct.id] || ""}
-                onPriceChange={handlePriceChange}
+              <div className="sticky top-4 self-start">
+                <ProductDetail
+                  product={selectedProduct}
+                  status={req.status}
+                  quotePrice={quotePrices[selectedProduct.id] || ""}
+                  onPriceChange={handlePriceChange}
+                  formatCurrency={formatCurrency}
+                />
+              </div>
+            )}
+            {/* Customer Info (sticky) */}
+            <div className="sticky top-4 self-start">
+              <CustomerInfoCard
+                customer={req.customer}
+                shippingAddress={req.shippingAddress}
                 formatCurrency={formatCurrency}
               />
-            )}
-
-            {/* Notes */}
-            <NotesSection notes={notes} status={req.status} onNotesChange={setNotes} />
+            </div>
           </div>
         </div>
 

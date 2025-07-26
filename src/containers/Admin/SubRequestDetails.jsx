@@ -1,16 +1,70 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronUp, Store, Contact } from "lucide-react"
+import { Formik } from "formik"
+import { useCreateQuotationMutation } from "@/services/gshopApi"
+import * as Yup from "yup"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  setItemDetail,
+  setGroupNote,
+  setShippingEstimate,
+  toggleExpandQuotation,
+  initializeSubRequest
+} from "@/features/quotation"
+import { QuotationForm } from "./QuotationForm"
+
 
 export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
-  // Get the first contact info as title, fallback to seller name
   const getDisplayTitle = () => {
     if (subRequest.contactInfo && subRequest.contactInfo.length > 0) {
       return subRequest.contactInfo[0]
     }
     return subRequest.seller
   }
+
+  const dispatch = useDispatch();
+  const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
+  // API mutation (must be above early return)
+  const [createQuotation, { isLoading: isQuotationLoading }] = useCreateQuotationMutation();
+
+  useEffect(() => {
+    if (!quotationState) {
+      dispatch(initializeSubRequest({
+        subRequestId: subRequest.id,
+        itemDetails: subRequest.requestItems.map(item => ({
+          requestItemId: item.id,
+          hsCodeId: "",
+          region: "",
+          basePrice: "",
+          serviceFee: "100000",
+          note: "",
+          currency: "VND"
+        }))
+      }));
+    }
+    // eslint-disable-next-line
+  }, [dispatch, subRequest.id]);
+
+  if (!quotationState) return null;
+
+  const { itemDetails, note, shippingEstimate, expanded } = quotationState;
+  console.log(quotationState)
+  const initialValues = {
+    details: itemDetails,
+    note: note || "",
+    shippingEstimate: shippingEstimate || ""
+  };
+
+  const validationSchema = Yup.object({
+    note: Yup.string().required("Vui lòng nhập ghi chú cho nhóm."),
+    shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm.")
+  });
 
   return (
     <Card className="border-l-4 border-l-blue-500">
@@ -59,6 +113,112 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
 
       <CardContent className="pt-0">
         <div className="space-y-2">{children}</div>
+        <Button
+          type="button"
+          variant="link"
+          className="text-blue-600 font-medium mt-2"
+          onClick={() => dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }))}
+        >
+          {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
+        </Button>
+        {expanded && (
+          <Formik
+            enableReinitialize
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={async (values, actions) => {
+              // Build details from itemDetails state
+              const details = itemDetails.map((detail) => ({
+                ...detail,
+              }));
+              const payload = {
+                subRequestId: subRequest.id,
+                note: values.note,
+                shippingEstimate: Number(values.shippingEstimate),
+                details,
+                expiredDate: 1
+              };
+              try {
+                await createQuotation(payload).unwrap()
+                .then(() => toast.success("Gửi báo giá thành công!"))
+                dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }));
+              } catch (err) {
+                toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
+              }
+              actions.setSubmitting(false);
+            }}
+          >
+             {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                {/* Render QuotationForm for each item in itemDetails */}
+                {itemDetails.map((item, idx) => (
+                  <QuotationForm
+                  key={item.requestItemId}
+                  index={idx}
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                  handleChange={e => {
+                      handleChange(e);
+                      // Also update Redux for each field
+                      const fieldName = e.target.name.match(/details\[(\d+)\]\.(\w+)/);
+                      if (fieldName) {
+                        const [, itemIdx, field] = fieldName;
+                        console.log(fieldName);
+                        dispatch(setItemDetail({
+                          subRequestId: subRequest.id,
+                          itemIndex: Number(itemIdx),
+                          field,
+                          value: e.target.value
+                        }));
+                      }
+                    }}
+                    handleBlur={handleBlur}
+                  />
+                ))}
+
+                <div>
+                  <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
+                  <Textarea
+                    name="note"
+                    placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
+                    value={values.note}
+                    onChange={e => {
+                      handleChange(e);
+                      dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
+                    }}
+                    onBlur={handleBlur}
+                  />
+                  {touched.note && errors.note && (
+                    <div className="text-red-500 text-xs">{errors.note}</div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">Ước tính phí vận chuyển cho đơn hàng</label>
+                  <Input
+                    name="shippingEstimate"
+                    type="number"
+                    placeholder="Nhập phí vận chuyển"
+                    value={values.shippingEstimate}
+                    onChange={e => {
+                      handleChange(e);
+                      dispatch(setShippingEstimate({ subRequestId: subRequest.id, shippingEstimate: e.target.value }));
+                    }}
+                    onBlur={handleBlur}
+                  />
+                  {touched.shippingEstimate && errors.shippingEstimate && (
+                    <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 mt-4">
+                  <Button type="submit" disabled={isSubmitting}>Gửi báo giá</Button>
+                </div>
+              </form>
+            )}
+          </Formik>
+        )}
       </CardContent>
     </Card>
   )
