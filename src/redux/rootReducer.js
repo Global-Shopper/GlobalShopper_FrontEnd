@@ -3,6 +3,7 @@ import persistReducer from "redux-persist/lib/persistReducer";
 import appReducer from "../features/app";
 import userReducer from "../features/user";
 import authReducer from "../features/auth";
+import quotationReducer from "../features/quotation";
 import storage from "redux-persist/lib/storage";
 
 const userPersistConfig = {
@@ -15,6 +16,7 @@ const combinedReducer = combineReducers({
   app: appReducer,
   auth: authReducer,
   user: persistReducer(userPersistConfig, userReducer),
+  quotation: quotationReducer,
 });
 
 const rootReducer = (state, action) => {

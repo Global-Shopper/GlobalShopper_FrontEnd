@@ -19,6 +19,7 @@ const endpoints = {
   CHECKING_PURCHASE_REQUEST: '/purchase-request/checking',
   WALLET: '/wallet',
   TRANSACTION_HISTORY: '/transactions/current-user',
+  QUOTATION: '/quotation',
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
 
 }
