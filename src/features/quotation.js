@@ -66,6 +66,11 @@ const quotationSlice = createSlice({
         state.expandedProductForms[requestItemId] = !current;
       }
     },
+    resetQuotationById(state, action) {
+      const { subRequestId } = action.payload;
+      if (!state.subRequests[subRequestId]) return;
+      state.subRequests[subRequestId] = {};
+    },
     resetQuotationState(state) {
       state.subRequests = {};
     },
@@ -78,6 +83,7 @@ export const {
   setShippingEstimate,
   toggleExpandQuotation,
   initializeSubRequest,
+  resetQuotationById,
   resetQuotationState,
   toggleExpandProductQuotation,
 } = quotationSlice.actions;
