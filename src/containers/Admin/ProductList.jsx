@@ -21,7 +21,7 @@ export function ProductList({
   const quotationState = useSelector(state => state.rootReducer.quotation);
 
   // Render a single product card, always with explicit subRequestId
-  const renderProductCard = (item, index, subRequestId) => {
+  const renderProductCard = (item, index, subRequestId, status) => {
     // Use subRequestId directly for Redux selectors and actions
     const expandedProductForms = subRequestId
       ? quotationState?.subRequests?.[subRequestId]?.expandedProductForms || {}
@@ -77,35 +77,38 @@ export function ProductList({
             </a>
           </div>
           {/* Quote button and inline form */}
-          <div className="flex justify-end mt-3">
-            <Button
-              variant={isProductFormOpen ? "secondary" : "outline"}
-              size="sm"
-              type="button"
-              onClick={e => {
-                e.stopPropagation();
-                dispatch(toggleExpandProductQuotation({ subRequestId, requestItemId }))
-              }}
-            >
-              {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
-            </Button>
-          </div>
-          {isProductFormOpen && (
-            <div className="mt-3">
-              <QuotationForm
-                product={product}
-                errors={productErrors}
-                onChange={(field, value) => {
-                  dispatch(setItemDetail({
-                    subRequestId,
-                    itemIndex: productIndex,
-                    field,
-                    value
-                  }));
+          {status === "CHECKING" && 
+          <>
+            <div className="flex justify-end mt-3">
+              <Button
+                variant={isProductFormOpen ? "secondary" : "outline"}
+                size="sm"
+                type="button"
+                onClick={e => {
+                  e.stopPropagation();
+                  dispatch(toggleExpandProductQuotation({ subRequestId, requestItemId }))
                 }}
-              />
+              >
+                {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
+              </Button>
             </div>
-          )}
+            {isProductFormOpen && (
+              <div className="mt-3">
+                <QuotationForm
+                  product={product}
+                  errors={productErrors}
+                  onChange={(field, value) => {
+                    dispatch(setItemDetail({
+                      subRequestId,
+                      itemIndex: productIndex,
+                      field,
+                      value
+                    }));
+                  }}
+                />
+              </div>
+            )}
+          </>}
         </CardContent>
       </Card>
     );
@@ -129,7 +132,7 @@ export function ProductList({
         {requestItems?.length > 0 && (
           <div>
             <h3 className="font-semibold mb-3 text-lg">Sản phẩm chưa được tạo nhóm</h3>
-            <div className="space-y-2">{requestItems.map((item, index) => renderProductCard(item, index, null))}</div>
+            <div className="space-y-2">{requestItems.map((item, index) => renderProductCard(item, index, null, status))}</div>
           </div>
         )}
 
@@ -143,7 +146,7 @@ export function ProductList({
             onToggleExpansion={onToggleSubRequestExpansion}
             requestType={requestType}
           >
-            {sub.requestItems.map((item, itemIndex) => renderProductCard(item, itemIndex, sub.id))}
+            {sub.requestItems.map((item, itemIndex) => renderProductCard(item, itemIndex, sub.id, status))}
           </SubRequestDetails>
         ))}
       </CardContent>
