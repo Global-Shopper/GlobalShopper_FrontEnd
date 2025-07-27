@@ -15,7 +15,7 @@ import {
   setShippingEstimate,
   toggleExpandQuotation,
   initializeSubRequest,
-  resetQuotationState,
+  resetQuotationById,
 } from "@/features/quotation"
 
 export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
@@ -136,9 +136,8 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
               try {
                 await createQuotation(payload).unwrap()
                 .then(() => {
-                  dispatch(resetQuotationState());
+                  dispatch(resetQuotationById({ subRequestId: subRequest.id }));
                   toast.success("Gửi báo giá thành công!")})
-                dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }));
               } catch (err) {
                 toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
               }
