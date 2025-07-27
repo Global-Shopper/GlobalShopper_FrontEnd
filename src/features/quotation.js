@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 /**
  subRequests: {
   [subRequestId]: {
-    itemDetails: [],
+    quotationDetails: [],
     note: '',
     shippingEstimate: '',
     expanded: false,
@@ -25,7 +25,7 @@ const quotationSlice = createSlice({
     setItemDetail(state, action) {
       const { subRequestId, itemIndex, field, value } = action.payload;
       if (!state.subRequests[subRequestId]) return;
-      state.subRequests[subRequestId].itemDetails[itemIndex][field] = value;
+      state.subRequests[subRequestId].quotationDetails[itemIndex][field] = value;
     },
     setGroupNote(state, action) {
       const { subRequestId, note } = action.payload;
@@ -44,9 +44,9 @@ const quotationSlice = createSlice({
     },
     initializeSubRequest(state, action) {
       // Should be called when subrequests are loaded
-      const { subRequestId, itemDetails } = action.payload;
+      const { subRequestId, quotationDetails } = action.payload;
       state.subRequests[subRequestId] = {
-        itemDetails: itemDetails || [],
+        quotationDetails: quotationDetails || [],
         note: '',
         shippingEstimate: '',
         expanded: false,

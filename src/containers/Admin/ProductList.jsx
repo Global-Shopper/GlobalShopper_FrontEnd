@@ -21,22 +21,24 @@ export function ProductList({
   const quotationState = useSelector(state => state.rootReducer.quotation);
 
   // Render a single product card, always with explicit subRequestId
-  const renderProductCard = (item, index, subRequestId, status) => {
+  const renderProductCard = (item, subRequestId, status, requestItems) => {
+    // Compute order number based on position in parentArray
+    const itemIndexNumber = requestItems ? requestItems.findIndex(i => i.id === item.id) : 0;
+    const orderNumber = itemIndexNumber + 1;
     // Use subRequestId directly for Redux selectors and actions
     const expandedProductForms = subRequestId
       ? quotationState?.subRequests?.[subRequestId]?.expandedProductForms || {}
       : quotationState?.expandedProductForms || {};
     // Use item.requestItemId for subrequest items, item.id for main
-    const requestItemId = item.requestItemId || item.id;
+    const requestItemId = item.id;
     const isProductFormOpen = expandedProductForms[requestItemId];
-    // Get product object and index from Redux
-    let product = item;
-    let productIndex = index;
-    if (subRequestId && quotationState?.subRequests?.[subRequestId]?.itemDetails) {
-      productIndex = quotationState.subRequests[subRequestId].itemDetails.findIndex(
+    // Get product object from Redux for SUB REQUEST item
+    let quotationDetails = item;
+    if (subRequestId && quotationState?.subRequests?.[subRequestId]?.quotationDetails) {
+      const foundIdx = quotationState.subRequests[subRequestId].quotationDetails.findIndex(
         d => d.requestItemId === requestItemId || d.id === requestItemId
       );
-      product = quotationState.subRequests[subRequestId].itemDetails[productIndex] || item;
+      quotationDetails = quotationState.subRequests[subRequestId].quotationDetails[foundIdx] || item;
     }
     // No validation for now
     const productErrors = {};
@@ -54,7 +56,7 @@ export function ProductList({
                   subRequestId ? "bg-orange-100 text-orange-600" : "bg-gray-100 text-orange-600"
                 }`}
               >
-                #{index + 1}
+                #{orderNumber}
               </span>
               <span className="font-semibold text-base truncate">{item.productName}</span>
             </div>
@@ -94,13 +96,14 @@ export function ProductList({
             </div>
             {isProductFormOpen && (
               <div className="mt-3">
+                {console.log(itemIndexNumber)}
                 <QuotationForm
-                  product={product}
+                  product={quotationDetails}
                   errors={productErrors}
                   onChange={(field, value) => {
                     dispatch(setItemDetail({
                       subRequestId,
-                      itemIndex: productIndex,
+                      itemIndex: itemIndexNumber,
                       field,
                       value
                     }));
@@ -132,12 +135,12 @@ export function ProductList({
         {requestItems?.length > 0 && (
           <div>
             <h3 className="font-semibold mb-3 text-lg">Sản phẩm chưa được tạo nhóm</h3>
-            <div className="space-y-2">{requestItems.map((item, index) => renderProductCard(item, index, null, status))}</div>
+            <div className="space-y-2">{requestItems.map((item) => renderProductCard(item, null, status, requestItems))}</div>
           </div>
         )}
 
         {/* Consolidated SubRequests */}
-        {subRequests?.map((sub, idx) => (
+        {subRequests?.length > 0 && subRequests.map((sub, idx) => (
           <SubRequestDetails
             key={idx}
             subRequest={sub}
@@ -145,8 +148,9 @@ export function ProductList({
             isExpanded={expandedSubRequest === idx}
             onToggleExpansion={onToggleSubRequestExpansion}
             requestType={requestType}
+            requestStatus={status}
           >
-            {sub.requestItems.map((item, itemIndex) => renderProductCard(item, itemIndex, sub.id, status))}
+            {sub.requestItems.map((item) => renderProductCard(item, sub.id, status, sub.requestItems))}
           </SubRequestDetails>
         ))}
       </CardContent>
