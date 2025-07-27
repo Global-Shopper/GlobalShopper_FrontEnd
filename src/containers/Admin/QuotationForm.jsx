@@ -5,77 +5,73 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function QuotationForm({
-  index,
-  values,
-  errors,
-  touched,
-  handleChange,
-  handleBlur
+  product,
+  errors = {},
+  onChange
 }) {
   return (
     <div className="p-4 rounded space-y-2">
       <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <Label>{product?.productName || 'Sản phẩm'}</Label>
+        </div>
+
         <div>
           <Label>Giá gốc</Label>
           <Input
-            name={`details[${index}].basePrice`}
+            name="basePrice"
             placeholder="Giá gốc"
             type="number"
-            value={values?.details[index].basePrice}
-            onChange={handleChange}
-            onBlur={handleBlur}
+            value={product?.basePrice || ''}
+            onChange={e => onChange('basePrice', e.target.value)}
           />
-          {touched?.details?.[index]?.basePrice && errors.details?.[index]?.basePrice && (
-            <div className="text-red-500 text-xs">{errors.details[index].basePrice}</div>
+          {errors?.basePrice && (
+            <div className="text-red-500 text-xs">{errors.basePrice}</div>
           )}
         </div>
         <div>
           <Label>HS Code</Label>
           <Input
-            name={`details[${index}].hsCodeId`}
+            name="hsCodeId"
             placeholder="HS Code"
-            value={values?.details[index].hsCodeId}
-            onChange={handleChange}
-            onBlur={handleBlur}
+            value={product?.hsCodeId || ''}
+            onChange={e => onChange('hsCodeId', e.target.value)}
           />
-          {touched?.details?.[index]?.hsCodeId && errors.details?.[index]?.hsCodeId && (
-            <div className="text-red-500 text-xs">{errors.details[index].hsCodeId}</div>
+          {errors?.hsCodeId && (
+            <div className="text-red-500 text-xs">{errors.hsCodeId}</div>
           )}
         </div>
         <div>
           <Label>Khu vực</Label>
           <Input
-            name={`details[${index}].region`}
+            name="region"
             placeholder="VD: UK"
-            value={values?.details[index].region}
-            onChange={handleChange}
-            onBlur={handleBlur}
+            value={product?.region || ''}
+            onChange={e => onChange('region', e.target.value)}
           />
-          {touched?.details?.[index]?.region && errors.details?.[index]?.region && (
-            <div className="text-red-500 text-xs">{errors.details[index].region}</div>
+          {errors?.region && (
+            <div className="text-red-500 text-xs">{errors.region}</div>
           )}
         </div>
         <div>
           <Label>Phí dịch vụ</Label>
           <Input
-            name={`details[${index}].serviceFee`}
+            name="serviceFee"
             placeholder="Phí dịch vụ"
             type="number"
-            value={values?.details[index].serviceFee}
-            onChange={handleChange}
-            onBlur={handleBlur}
+            value={product?.serviceFee || ''}
+            onChange={e => onChange('serviceFee', e.target.value)}
           />
-          {touched?.details?.[index]?.serviceFee && errors?.details?.[index]?.serviceFee && (
-            <div className="text-red-500 text-xs">{errors.details[index].serviceFee}</div>
+          {errors?.serviceFee && (
+            <div className="text-red-500 text-xs">{errors.serviceFee}</div>
           )}
         </div>
         <div>
           <Label>Tiền tệ</Label>
           <select
-            name={`details[${index}].currency`}
-            value={values?.details[index].currency}
-            onChange={handleChange}
-            onBlur={handleBlur}
+            name="currency"
+            value={product?.currency || ''}
+            onChange={e => onChange('currency', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded"
           >
             <option value="">Chọn tiền tệ</option>
@@ -83,22 +79,21 @@ export function QuotationForm({
             <option value="EUR">EUR</option>
             <option value="VND">VND</option>
           </select>
-          {touched?.details?.[index]?.currency && errors?.details?.[index]?.currency && (
-            <div className="text-red-500 text-xs">{errors.details[index].currency}</div>
+          {errors?.currency && (
+            <div className="text-red-500 text-xs">{errors.currency}</div>
           )}
         </div>
       </div>
       <div>
         <Label>Ghi chú sản phẩm</Label>
         <Textarea
-          name={`details[${index}].note`}
+          name="note"
           placeholder="Ghi chú cho sản phẩm này..."
-          value={values?.details[index].note}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          value={product?.note || ''}
+          onChange={e => onChange('note', e.target.value)}
         />
-        {touched?.details?.[index]?.note && errors?.details?.[index]?.note && (
-          <div className="text-red-500 text-xs">{errors.details[index].note}</div>
+        {errors?.note && (
+          <div className="text-red-500 text-xs">{errors.note}</div>
         )}
       </div>
     </div>

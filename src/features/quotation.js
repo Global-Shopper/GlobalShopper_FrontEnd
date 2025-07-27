@@ -1,7 +1,20 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+/**
+ subRequests: {
+  [subRequestId]: {
+    itemDetails: [],
+    note: '',
+    shippingEstimate: '',
+    expanded: false,
+    expandedProductForms: {
+      [requestItemId]: true | false
+    }
+  },
+  ...
+}
+ */
 const initialState = {
-  // Structure: { [subRequestId]: { itemDetails: [], note: '', shippingEstimate: '', expanded: false } }
   subRequests: {},
 };
 
@@ -37,7 +50,21 @@ const quotationSlice = createSlice({
         note: '',
         shippingEstimate: '',
         expanded: false,
+        expandedProductForms: {}, // NEW: { [requestItemId]: boolean }
       };
+    },
+    toggleExpandProductQuotation(state, action) {
+      const { subRequestId, requestItemId } = action.payload;
+      if (subRequestId) {
+        if (!state.subRequests[subRequestId]) return;
+        const current = state.subRequests[subRequestId].expandedProductForms[requestItemId];
+        state.subRequests[subRequestId].expandedProductForms[requestItemId] = !current;
+      } else {
+        // For main request items, store at root level
+        if (!state.expandedProductForms) state.expandedProductForms = {};
+        const current = state.expandedProductForms[requestItemId];
+        state.expandedProductForms[requestItemId] = !current;
+      }
     },
     resetQuotationState(state) {
       state.subRequests = {};
@@ -52,6 +79,7 @@ export const {
   toggleExpandQuotation,
   initializeSubRequest,
   resetQuotationState,
+  toggleExpandProductQuotation,
 } = quotationSlice.actions;
 
 export default quotationSlice.reducer;

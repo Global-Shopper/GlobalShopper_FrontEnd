@@ -11,14 +11,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import {
-  setItemDetail,
   setGroupNote,
   setShippingEstimate,
   toggleExpandQuotation,
-  initializeSubRequest
+  initializeSubRequest,
+  resetQuotationState,
 } from "@/features/quotation"
-import { QuotationForm } from "./QuotationForm"
-
 
 export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
   const getDisplayTitle = () => {
@@ -35,6 +33,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
 
   useEffect(() => {
     if (!quotationState) {
+      console.log(subRequest)
       dispatch(initializeSubRequest({
         subRequestId: subRequest.id,
         itemDetails: subRequest.requestItems.map(item => ({
@@ -54,23 +53,14 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
   if (!quotationState) return null;
 
   const { itemDetails, note, shippingEstimate, expanded } = quotationState;
-  console.log(quotationState)
   const initialValues = {
-    details: itemDetails,
     note: note || "",
     shippingEstimate: shippingEstimate || ""
   };
 
   const validationSchema = Yup.object({
     note: Yup.string().required("Vui lòng nhập ghi chú cho nhóm."),
-    shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm."),
-    details: Yup.array().of(Yup.object({
-      basePrice: Yup.number().required("Giá gốc là bắt buộc"),
-      hsCodeId: Yup.string().required("HS Code là bắt buộc"),
-      region: Yup.string().required("Khu vực là bắt buộc"),
-      serviceFee: Yup.number().required("Phí dịch vụ là bắt buộc"),
-      currency: Yup.string().required("Tiền tệ là bắt buộc"),
-    }))
+    shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm.")
   });
 
   return (
@@ -134,10 +124,8 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={async (values, actions) => {
-              // Build details from itemDetails state
-              const details = itemDetails.map((detail) => ({
-                ...detail,
-              }));
+              // Build details from latest Redux state
+              const details = itemDetails.map((detail) => ({ ...detail }));
               const payload = {
                 subRequestId: subRequest.id,
                 note: values.note,
@@ -147,7 +135,9 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
               };
               try {
                 await createQuotation(payload).unwrap()
-                .then(() => toast.success("Gửi báo giá thành công!"))
+                .then(() => {
+                  dispatch(resetQuotationState());
+                  toast.success("Gửi báo giá thành công!")})
                 dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }));
               } catch (err) {
                 toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
@@ -155,35 +145,8 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
               actions.setSubmitting(false);
             }}
           >
-             {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+            {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                {/* Render QuotationForm for each item in itemDetails */}
-                {itemDetails.map((item, idx) => (
-                  <QuotationForm
-                  key={item.requestItemId}
-                  index={idx}
-                  values={values}
-                  errors={errors}
-                  touched={touched}
-                  handleChange={e => {
-                      handleChange(e);
-                      // Also update Redux for each field
-                      const fieldName = e.target.name.match(/details\[(\d+)\]\.(\w+)/);
-                      if (fieldName) {
-                        const [, itemIdx, field] = fieldName;
-                        console.log(fieldName);
-                        dispatch(setItemDetail({
-                          subRequestId: subRequest.id,
-                          itemIndex: Number(itemIdx),
-                          field,
-                          value: e.target.value
-                        }));
-                      }
-                    }}
-                    handleBlur={handleBlur}
-                  />
-                ))}
-
                 <div>
                   <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
                   <Textarea
@@ -217,6 +180,26 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
                   {touched.shippingEstimate && errors.shippingEstimate && (
                     <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
                   )}
+                </div>
+
+                {/* Display product quotation details (read-only) */}
+                <div className="mt-6">
+                  <div className="font-semibold mb-2">Chi tiết sản phẩm báo giá</div>
+                  <div className="space-y-2">
+                    {itemDetails.map((detail, idx) => (
+                      <div key={detail.requestItemId || detail.id || idx} className="p-3 bg-gray-50 rounded border">
+                        <div className="flex flex-wrap gap-4">
+                          <div><span className="font-medium">Sản phẩm:</span> {subRequest.requestItems[idx]?.productName || detail.requestItemId}</div>
+                          <div><span className="font-medium">Giá gốc:</span> {detail.basePrice}</div>
+                          <div><span className="font-medium">HS Code:</span> {detail.hsCodeId}</div>
+                          <div><span className="font-medium">Khu vực:</span> {detail.region}</div>
+                          <div><span className="font-medium">Phí dịch vụ:</span> {detail.serviceFee}</div>
+                          <div><span className="font-medium">Tiền tệ:</span> {detail.currency}</div>
+                          <div><span className="font-medium">Ghi chú:</span> {detail.note}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex gap-2 mt-4">
