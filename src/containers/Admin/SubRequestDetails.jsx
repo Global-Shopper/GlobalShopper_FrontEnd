@@ -18,7 +18,7 @@ import {
   resetQuotationById,
 } from "@/features/quotation"
 
-export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
+export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, requestStatus, children }) {
   const getDisplayTitle = () => {
     if (subRequest.contactInfo && subRequest.contactInfo.length > 0) {
       return subRequest.contactInfo[0]
@@ -36,12 +36,12 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
       console.log(subRequest)
       dispatch(initializeSubRequest({
         subRequestId: subRequest.id,
-        itemDetails: subRequest.requestItems.map(item => ({
+        quotationDetails: subRequest.requestItems.map(item => ({
           requestItemId: item.id,
           hsCodeId: "",
           region: "",
-          basePrice: "",
-          serviceFee: "100000",
+          basePrice: 0,
+          serviceFee: 100000,
           note: "",
           currency: "VND"
         }))
@@ -52,7 +52,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
 
   if (!quotationState) return null;
 
-  const { itemDetails, note, shippingEstimate, expanded } = quotationState;
+  const { quotationDetails, note, shippingEstimate, expanded } = quotationState;
   const initialValues = {
     note: note || "",
     shippingEstimate: shippingEstimate || ""
@@ -116,7 +116,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
           className="text-blue-600 font-medium mt-2"
           onClick={() => dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }))}
         >
-          {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
+          {requestStatus == "CHECKING" && isExpanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
         </Button>
         {expanded && (
           <Formik
@@ -125,7 +125,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
             validationSchema={validationSchema}
             onSubmit={async (values, actions) => {
               // Build details from latest Redux state
-              const details = itemDetails.map((detail) => ({ ...detail }));
+              const details = quotationDetails.map((detail) => ({ ...detail }));
               const payload = {
                 subRequestId: subRequest.id,
                 note: values.note,
@@ -185,7 +185,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
                 <div className="mt-6">
                   <div className="font-semibold mb-2">Chi tiết sản phẩm báo giá</div>
                   <div className="space-y-2">
-                    {itemDetails.map((detail, idx) => (
+                    {quotationDetails.map((detail, idx) => (
                       <div key={detail.requestItemId || detail.id || idx} className="p-3 bg-gray-50 rounded border">
                         <div className="flex flex-wrap gap-4">
                           <div><span className="font-medium">Sản phẩm:</span> {subRequest.requestItems[idx]?.productName || detail.requestItemId}</div>
