@@ -50,7 +50,7 @@ const quotationSlice = createSlice({
         note: '',
         shippingEstimate: '',
         expanded: false,
-        expandedProductForms: {}, // NEW: { [requestItemId]: boolean }
+        expandedProductForms: {},
       };
     },
     toggleExpandProductQuotation(state, action) {
