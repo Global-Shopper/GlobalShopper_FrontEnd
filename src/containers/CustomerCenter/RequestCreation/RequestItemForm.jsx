@@ -289,7 +289,7 @@ export default function RequestItemForm({ items, onItemsChange, onNext, onBack }
                 value={currentRequestItem?.quantity}
                 onChange={e => {
                   let value = Number.parseInt(e.target.value) || 1;
-                  if (value > 10) value = 10;
+                  if (value > 10) value = Number.parseInt(e.nativeEvent.data);
                   setCurrentRequestItem(prev => ({ ...prev, quantity: value }));
                 }}
                 className="h-12"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,8 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useDepositWalletMutation, useGetWalletQuery, useLazyCheckPaymentQuery } from '@/services/gshopApi'
+import { useDepositWalletMutation, useGetWalletQuery } from '@/services/gshopApi'
+import { REDIRECT_URI } from '@/const/urlconst'
 
 // Predefined amount options
 const AMOUNT_OPTIONS = [
@@ -38,35 +39,20 @@ const DepositValidationSchema = Yup.object().shape({
 
 const WalletDeposit = () => {
   const navigate = useNavigate()
-  const [checkPayment] = useLazyCheckPaymentQuery()
+  // const [checkPayment] = useLazyCheckPaymentQuery()
   const [depositWallet, { isLoading: isDepositing }] = useDepositWalletMutation()
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
-  const query = new URLSearchParams(location.search);
-  const email = query.get("email");
-  const vnpAmount = query.get("vnp_Amount");
-  const vnpResponseCode = query.get("vnp_ResponseCode");
 
-  if (email & vnpAmount && vnpResponseCode != "24") {
-    checkPayment({
-      email: email,
-      vnp_Amount: vnpAmount,
-      vnp_ResponseCode: vnpResponseCode
-    })
-  } else if (vnpResponseCode == 24) {
-    toast.error("Giao dịch đã bị hủy", {
-      description: "Bạn đã hủy giao dịch nạp tiền. Vui lòng thử lại nếu cần.",
-    })
-  }
-  
   const formatCurrency = (amount) => {
-    return `${new Intl.NumberFormat("vi-VN").format(amount)} VNĐ`
+    return `${new Intl.NumberFormat("vi-VN").format(amount)}`
   }
-  
+
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       console.log(values)
       await depositWallet({
-        balance: values.amount
+        balance: values.amount,
+        redirectUri: REDIRECT_URI
       }).unwrap()
         .then((res) => {
           toast.success("Yêu cầu nạp tiền thành công", {
@@ -87,7 +73,7 @@ const WalletDeposit = () => {
   }
 
   const handleBack = () => {
-    navigate(-1)
+    navigate('/wallet')
   }
 
 
@@ -140,7 +126,7 @@ const WalletDeposit = () => {
                         {/* Amount Input */}
                         <div className="space-y-4">
                           <Label htmlFor="amount" className="text-base font-medium">
-                            Số tiền nạp *
+                            Số tiền nạp (VNĐ) *
                           </Label>
 
                           <div className="space-y-3">

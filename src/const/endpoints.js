@@ -18,7 +18,10 @@ const endpoints = {
   WITHOUT_LINK_PURCHASE_REQUEST: '/purchase-request/offline-request',
   CHECKING_PURCHASE_REQUEST: '/purchase-request/checking',
   WALLET: '/wallet',
-  CHECKPAYMENT: '/wallet/check-payment-vnpay',
+  TRANSACTION_HISTORY: '/transactions/current-user',
+  QUOTATION: '/quotation',
+  // CHECKPAYMENT: '/wallet/check-payment-vnpay',
+
 }
 export default endpoints
 

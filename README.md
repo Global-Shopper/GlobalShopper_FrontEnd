@@ -1,12 +1,30 @@
-# React + Vite
+React-based e-commerce frontend application called "GlobalShopper" built with modern web technologies. Key characteristics:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Tech Stack:**
+- React 19.1.0 with Vite as build tool
+- Redux Toolkit for state management with Redux Persist
+- React Router DOM for routing
+- Tailwind CSS for styling
+- Radix UI components for accessible UI elements
+- Formik + Yup for form handling and validation
 
-Currently, two official plugins are available:
+**Project Structure:**
+- `/src/components` - Reusable UI components (Footer, Header, Sidebars, etc.)
+- `/src/containers` - Page-level components organized by feature (Admin, Auth, CustomerCenter, Home, Wallet)
+- `/src/routes` - Routing configuration
+- `/src/redux` & `/src/store` - State management
+- `/src/services` - API services
+- `/src/utils` - Utility functions
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Main Features:**
+- Authentication system (Login, Signup, OTP verification, Password reset)
+- Customer account center with purchase requests, quotes, orders, refunds
+- Admin panel for managing purchase requests
+- Wallet system for deposits and balance management
+- Multi-role based routing (Customer vs Admin)
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Key Pages:**
+- Homepage with product browsing
+- Customer dashboard for managing requests and orders
+- Admin panel for request management
+- Wallet management system

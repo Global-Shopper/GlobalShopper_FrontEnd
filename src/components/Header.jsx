@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import GShopLogo from "@/assets/LOGO_Gshop.png";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,11 +30,12 @@ import {
 } from "lucide-react";
 import { signout } from "@/features/user";
 import defaultAvt from "@/assets/defaultAvt.jpg";
-import { useGetWalletQuery } from "@/services/gshopApi";
+import gshopApi, { useGetWalletQuery } from "@/services/gshopApi";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Header = () => {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery();
 	const isLoggedIn = useSelector(
 		(state) => state.rootReducer?.user?.isLoggedIn
@@ -45,7 +46,9 @@ const Header = () => {
 	const avatar = useSelector((state) => state.rootReducer?.user?.avatar);
 
 	const handleSignout = () => {
+		dispatch(gshopApi.util.resetApiState());
 		dispatch(signout());
+		navigate("/");
 	};
 
 	const formatCurrency = (amount) => {
@@ -362,7 +365,7 @@ const Header = () => {
 												icon: User,
 											},
 											{
-												to: "/wallet/transactions",
+												to: "/wallet",
 												text: "Lịch sử thanh toán",
 												icon: ArrowDownUp,
 											},

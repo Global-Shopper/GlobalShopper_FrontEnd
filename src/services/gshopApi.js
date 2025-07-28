@@ -2,7 +2,6 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from './baseRequest';
 import endpoints from '../const/endpoints';
 
-//Lưu ý khi cho dev, cần phải sửa lại baseURL trong file baseRequest.js
 const gshopApi = createApi({
   reducerPath: 'gshopApi',
   tagTypes: [
@@ -11,7 +10,7 @@ const gshopApi = createApi({
     'PurchaseRequest',
     'Wallet',
   ],
-  baseQuery: axiosBaseQuery(), // Adjust base URL as needed
+  baseQuery: axiosBaseQuery(),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (data) => ({
@@ -185,6 +184,13 @@ const gshopApi = createApi({
       }),
       providesTags: ['PurchaseRequest'],
     }),
+    createQuotation: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.QUOTATION,
+        method: 'POST',
+      }),
+    }),
     getWallet: builder.query({
       query: () => ({
         url: endpoints.WALLET,
@@ -199,13 +205,20 @@ const gshopApi = createApi({
         method: 'POST',
       }),
     }),
-    checkPayment: builder.query({
+    transactionHistory: builder.query({
       query: (data) => ({
         params: data,
-        url: endpoints.CHECKPAYMENT,
+        url: endpoints.TRANSACTION_HISTORY,
         method: 'GET',
       }),
     }),
+    // checkPayment: builder.query({
+    //   query: (data) => ({
+    //     params: data,
+    //     url: endpoints.CHECKPAYMENT,
+    //     method: 'GET',
+    //   }),
+    // }),
   }),
 });
 
@@ -233,9 +246,11 @@ export const {
   useCreateWithoutLinkPurchaseRequestMutation,
   useGetWalletQuery,
   useDepositWalletMutation,
-  useLazyCheckPaymentQuery,
+  useCreateQuotationMutation,
+  // useLazyCheckPaymentQuery,
   useCheckingPurchaseRequestMutation,
-  useGetPurchaseRequestDetailQuery
+  useGetPurchaseRequestDetailQuery,
+  useTransactionHistoryQuery,
 } = gshopApi;
 
 export default gshopApi;

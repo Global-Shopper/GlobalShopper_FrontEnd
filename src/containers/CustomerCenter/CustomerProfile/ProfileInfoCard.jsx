@@ -18,7 +18,6 @@ import {
 	Eye,
 	EyeOff,
 	Check,
-	Mail,
 	Camera,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -28,14 +27,12 @@ import {
 	useGetCustomerInfoQuery,
 	useUpdateCustomerProfileMutation,
 	useUploadAvatarMutation,
-	useVerifyChangeEmailMutation,
 } from "@/services/gshopApi";
 import { toast } from "sonner";
 import {
 	setAccessToken,
 	setAvatar,
 	setCustomerBaseInfo,
-	setEmail,
 	setUserInfo,
 } from "@/features/user";
 import * as Yup from "yup";
@@ -230,6 +227,7 @@ const ProfileInfoCard = () => {
 							phone: editBasicInfo.phone,
 							gender: editBasicInfo.gender,
 							dateOfBirth: editBasicInfo.dateOfBirth,
+							avatar: customerInfo?.avatar,
 						})
 					);
 					setIsEditingBasic(false);

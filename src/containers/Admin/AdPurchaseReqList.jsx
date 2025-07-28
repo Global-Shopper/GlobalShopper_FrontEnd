@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { replace, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
 	Table,
 	TableBody,
@@ -8,23 +8,14 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Eye, PackageCheck, Receipt, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
 	useCheckingPurchaseRequestMutation,
 	useGetPurchaseRequestQuery,
 } from "@/services/gshopApi";
 import {
-	Pagination,
-	PaginationContent,
-	PaginationItem,
-	PaginationNext,
-	PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-	generatePaginationItems,
-	shouldShowPagination,
+	PaginationBar,
 } from "@/utils/Pagination";
 import {
 	Select,
@@ -36,11 +27,6 @@ import {
 import { Input } from "@/components/ui/input";
 import PageLoading from "@/components/PageLoading";
 import { toast } from "sonner";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 
 const TABS = [
@@ -52,7 +38,7 @@ const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 const AdPurchaseReqList = () => {
 	const [tab, setTab] = useState("assigned");
-	const [currentPage, setCurrentPage] = useState(1);
+	const [currentPage, setCurrentPage] = useState(0);
 	const [pageSize, setPageSize] = useState(10);
 	const [searchTerm, setSearchTerm] = useState("");
 	const searchInputRef = useRef(null);
@@ -63,7 +49,7 @@ const AdPurchaseReqList = () => {
 		isFetching: isRequestLoading,
 		isError: isRequestError,
 	} = useGetPurchaseRequestQuery({
-		page: currentPage - 1,
+		page: currentPage,
 		size: pageSize,
 		type: tab,
 	});
@@ -80,7 +66,7 @@ const AdPurchaseReqList = () => {
 		} catch (error) {
 			toast.error(
 				"Lỗi khi kiểm tra yêu cầu: " +
-					(error?.data?.message || "Vui lòng thử lại.")
+				(error?.data?.message || "Vui lòng thử lại.")
 			);
 		}
 	};
@@ -109,7 +95,7 @@ const AdPurchaseReqList = () => {
 						Trạng thái
 					</TableHead>
 					<TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
-						Số lượng sản phẩm
+						Số loại sản phẩm
 					</TableHead>
 					<TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
 						Ngày tạo
@@ -135,7 +121,7 @@ const AdPurchaseReqList = () => {
 							{request.customer?.name}
 						</TableCell>
 						<TableCell className="py-3">
-							{request.shop?.name || "-"}
+							{request.subRequests?.map((sub) => (sub.contactInfo[0]).split(":")[1]) || "-"}
 						</TableCell>
 						<TableCell className="py-3">
 							{request.customer?.phone}
@@ -154,21 +140,18 @@ const AdPurchaseReqList = () => {
 						</TableCell>
 						<TableCell className="text-center py-3">
 							<span className="text-sm font-medium">
-								{request.requestItems?.length || 0}
+								{request.requestItems?.length || request.subRequests?.length || 0}
 							</span>
 						</TableCell>
 						<TableCell className="text-center py-3">
+							{console.log(request.createdAt)}
 							{request.createdAt
-								? new Date(
-										Number(request.createdAt)
-								  ).toLocaleDateString("vi-VN")
+								? new Date(request.createdAt).toLocaleDateString("vi-VN")
 								: "-"}
 						</TableCell>
 						<TableCell className="text-center py-3">
 							{request.expiredAt
-								? new Date(
-										Number(request.expiredAt)
-								  ).toLocaleDateString("vi-VN")
+								? new Date(request.expiredAt).toLocaleDateString("vi-VN")
 								: "-"}
 						</TableCell>
 					</TableRow>
@@ -179,17 +162,15 @@ const AdPurchaseReqList = () => {
 
 	// Pagination controls
 	const totalPages = requestsData?.totalPages || 1;
-	const pageFromApi = requestsData?.number ?? currentPage - 1;
-	const currentPageDisplay = pageFromApi + 1;
 
 	const handleTabChange = (value) => {
 		setTab(value);
-		setCurrentPage(1);
+		setCurrentPage(0);
 	};
 
 	const handlePageSizeChange = (value) => {
-		setPageSize(value);
-		setCurrentPage(1);
+		setPageSize(Number(value));
+		setCurrentPage(0);
 	};
 
 	// Handle search input change
@@ -295,53 +276,8 @@ const AdPurchaseReqList = () => {
 						)}
 					</TabsContent>
 				</div>
-				{shouldShowPagination(totalPages) && (
-					<div className="flex justify-center mt-4 mb-2">
-						<Pagination className="rounded-lg shadow bg-white px-4 py-2">
-							<PaginationContent className="gap-1">
-								<PaginationItem>
-									<PaginationPrevious
-										onClick={() =>
-											setCurrentPage(
-												Math.max(
-													1,
-													currentPageDisplay - 1
-												)
-											)
-										}
-										className={
-											currentPageDisplay === 1
-												? "pointer-events-none opacity-50 rounded-lg"
-												: "cursor-pointer rounded-lg hover:bg-blue-100"
-										}
-									/>
-								</PaginationItem>
-								{generatePaginationItems(
-									totalPages,
-									currentPageDisplay - 1,
-									(page) => setCurrentPage(page + 1)
-								)}
-								<PaginationItem>
-									<PaginationNext
-										onClick={() =>
-											setCurrentPage(
-												Math.min(
-													totalPages,
-													currentPageDisplay + 1
-												)
-											)
-										}
-										className={
-											currentPageDisplay === totalPages
-												? "pointer-events-none opacity-50 rounded-lg"
-												: "cursor-pointer rounded-lg hover:bg-blue-100"
-										}
-									/>
-								</PaginationItem>
-							</PaginationContent>
-						</Pagination>
-					</div>
-				)}
+				{console.log(currentPage, pageSize, totalPages)}
+				<PaginationBar totalPages={totalPages} currentPage={currentPage} handlePageChange={setCurrentPage} />
 			</Tabs>
 		</div>
 	);

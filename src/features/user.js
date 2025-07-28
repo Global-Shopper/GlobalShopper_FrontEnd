@@ -57,11 +57,12 @@ const userSlice = createSlice({
 			state.isLoggedIn = true;
 		},
 		setCustomerBaseInfo(state, action) {
-			const { name, phone, dateOfBirth, gender } = action.payload;
+			const { name, phone, dateOfBirth, gender, avatar } = action.payload;
 			state.name = name || state.name;
 			state.phone = phone || state.phone;
 			state.dateOfBirth = dateOfBirth || state.dateOfBirth;
 			state.gender = gender || state.gender
+			state.avatar = avatar || state.avatar;
 		},
 		signout() {
 			return initialState

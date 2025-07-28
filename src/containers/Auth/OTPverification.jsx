@@ -1,21 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import {
 	InputOTP,
 	InputOTPGroup,
 	InputOTPSlot,
 } from "@/components/ui/input-otp";
 import {
-	ArrowLeft,
 	Mail,
-	ShoppingCart,
 	CheckCircle,
 	XCircle,
 	Clock,
-	BlocksIcon,
-	BanIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
