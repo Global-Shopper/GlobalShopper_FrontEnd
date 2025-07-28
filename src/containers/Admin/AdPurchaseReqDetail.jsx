@@ -167,8 +167,8 @@ function AdPurchaseReqDetail() {
           formatDate={formatDate}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
+          <div className="lg:col-span-3 space-y-4">
             {/* Product List */}
             <div className="h-auto overflow-y-auto">
               <ProductList
@@ -188,10 +188,10 @@ function AdPurchaseReqDetail() {
             </div>
           </div>
 
-          <div className="space-y-4 grid grid-cols-2 col-span-2 gap-6">
+          <div className="space-y-4 grid grid-cols-5 col-span-4 gap-6">
             {/* Product Detail (sticky) */}
             {selectedProduct && (
-              <div className="sticky top-4 self-start">
+              <div className="sticky top-4 self-start col-span-3">
                 <ProductDetail
                   product={selectedProduct}
                   status={req.status}
@@ -202,7 +202,7 @@ function AdPurchaseReqDetail() {
               </div>
             )}
             {/* Customer Info (sticky) */}
-            <div className="sticky top-4 self-start">
+            <div className="sticky top-4 self-start col-span-2">
               <CustomerInfoCard
                 customer={req.customer}
                 shippingAddress={req.shippingAddress}
