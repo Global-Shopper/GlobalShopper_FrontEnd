@@ -34,7 +34,7 @@ export function CustomerInfoCard({ customer, shippingAddress, formatCurrency }) 
             <span>{customer.phone}</span>
           </div>
           <div className="flex items-start gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+            <MapPin className="flex-shrink-0 h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
               <div className="font-medium">{shippingAddress.name}</div>
               <div className="text-muted-foreground">{shippingAddress.location}</div>
