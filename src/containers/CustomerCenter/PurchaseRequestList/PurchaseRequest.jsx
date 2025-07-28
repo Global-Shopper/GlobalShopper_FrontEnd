@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ShoppingCart } from "lucide-react";
 import RequestCard from "@/components/RequestCard";
+import RequestFilters from "./RequestFilters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGetPurchaseRequestQuery } from "@/services/gshopApi";
@@ -10,7 +11,21 @@ import { PaginationBar } from "@/utils/Pagination";
 export default function RequestDashboard() {
 	const navigate = useNavigate();
 	const [currentPage, setCurrentPage] = useState(0);
-	const [pageSize] = useState(5);
+	const [pageSize] = useState(10);
+
+	// Filter states
+	const [filters, setFilters] = useState({
+		search: "",
+		status: "all",
+		type: "all",
+		dateRange: "all",
+	});
+
+	// Sort states
+	const [sort, setSort] = useState({
+		field: "createdAt",
+		direction: "desc",
+	});
 
 	// Get purchase requests with pagination
 	const {
@@ -21,6 +36,7 @@ export default function RequestDashboard() {
 		page: currentPage,
 		size: Number(pageSize),
 		type: "assigned",
+		// TODO: Add filter and sort parameters to API call
 	});
 
 	// Extract data from API response
@@ -33,8 +49,8 @@ export default function RequestDashboard() {
 	// Loading state
 	if (isRequestLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-				<div className="max-w-7xl mx-auto px-3 py-6 space-y-8">
+			<div className="min-h-screen bg-white">
+				<div className="max-w-7xl mx-auto px-3 py-6 space-y-4">
 					<div className="animate-pulse space-y-4">
 						<div className="h-8 bg-gray-200 rounded w-1/3"></div>
 						<div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -55,7 +71,7 @@ export default function RequestDashboard() {
 	// Error state
 	if (isRequestError) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+			<div className="min-h-screen bg-white">
 				<div className="max-w-7xl mx-auto px-3 py-6">
 					<Card className="shadow-sm">
 						<CardContent className="p-12 text-center">
@@ -83,13 +99,13 @@ export default function RequestDashboard() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-			<div className="max-w-7xl mx-auto px-3 py-6 space-y-8">
+		<div className="min-h-screen bg-white">
+			<div className="max-w-7xl mx-auto px-3 py-6 space-y-4">
 				{/* Header */}
 				<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 					<div className="space-y-2">
 						<h1 className="text-3xl font-bold text-gray-900">
-							Danh sách yêu cầu mua hàng
+							Yêu cầu mua hàng
 						</h1>
 						<p className="text-gray-600">
 							Theo dõi tất cả yêu cầu mua hàng của bạn
@@ -103,6 +119,14 @@ export default function RequestDashboard() {
 						Tạo yêu cầu mới
 					</Button>
 				</div>
+
+				{/* Filters */}
+				<RequestFilters
+					filters={filters}
+					onFiltersChange={setFilters}
+					sort={sort}
+					onSortChange={setSort}
+				/>
 
 				{/* Request List */}
 				<div className="space-y-4">
