@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ShoppingCart } from "lucide-react";
 import RequestCard from "@/components/RequestCard";
@@ -27,7 +27,6 @@ export default function RequestDashboard() {
 		direction: "desc",
 	});
 
-	// Get purchase requests with pagination
 	const {
 		data: purchaseRequestsData,
 		isLoading: isRequestLoading,
@@ -36,15 +35,107 @@ export default function RequestDashboard() {
 		page: currentPage,
 		size: Number(pageSize),
 		type: "assigned",
-		// TODO: Add filter and sort parameters to API call
 	});
 
-	// Extract data from API response
-	const requests = purchaseRequestsData?.content || [];
+	const allRequests = purchaseRequestsData?.content || [];
+
+	// Client-side filtering (temporary solution until backend filtering is confirmed)
+	const filteredRequests = allRequests.filter((request) => {
+		// Search filter
+		if (filters.search) {
+			const searchLower = filters.search.toLowerCase();
+			const matchesSearch =
+				request.id?.toString().includes(searchLower) ||
+				request.requestItems?.some((item) =>
+					item.productName?.toLowerCase().includes(searchLower)
+				) ||
+				request.shippingAddress?.name
+					?.toLowerCase()
+					.includes(searchLower);
+			if (!matchesSearch) return false;
+		}
+
+		// Status filter
+		if (filters.status !== "all" && request.status !== filters.status) {
+			return false;
+		}
+
+		// Type filter
+		if (filters.type !== "all" && request.requestType !== filters.type) {
+			return false;
+		}
+
+		// Date range filter (simplified)
+		if (filters.dateRange !== "all") {
+			const requestDate = new Date(parseInt(request.createdAt));
+			const now = new Date();
+
+			switch (filters.dateRange) {
+				case "today": {
+					if (requestDate.toDateString() !== now.toDateString())
+						return false;
+					break;
+				}
+				case "week": {
+					const weekAgo = new Date(
+						now.getTime() - 7 * 24 * 60 * 60 * 1000
+					);
+					if (requestDate < weekAgo) return false;
+					break;
+				}
+				case "month": {
+					const monthAgo = new Date(
+						now.getTime() - 30 * 24 * 60 * 60 * 1000
+					);
+					if (requestDate < monthAgo) return false;
+					break;
+				}
+			}
+		}
+
+		return true;
+	});
+
+	// Client-side sorting
+	const sortedRequests = [...filteredRequests].sort((a, b) => {
+		let aValue, bValue;
+
+		switch (sort.field) {
+			case "createdAt":
+			case "updatedAt":
+				aValue = new Date(parseInt(a[sort.field]));
+				bValue = new Date(parseInt(b[sort.field]));
+				break;
+			case "totalProducts":
+				aValue = a.requestItems?.length || 0;
+				bValue = b.requestItems?.length || 0;
+				break;
+			case "status":
+				aValue = a.status || "";
+				bValue = b.status || "";
+				break;
+			default:
+				aValue = a[sort.field] || "";
+				bValue = b[sort.field] || "";
+		}
+
+		if (sort.direction === "asc") {
+			return aValue > bValue ? 1 : -1;
+		} else {
+			return aValue < bValue ? 1 : -1;
+		}
+	});
+
+	const requests = sortedRequests;
 
 	const handleCreateRequest = () => {
 		navigate("/account-center/create-request");
 	};
+
+	// Reset page when filters change
+	useEffect(() => {
+		setCurrentPage(0);
+	}, [filters, sort]);
 
 	// Loading state
 	if (isRequestLoading) {
@@ -143,13 +234,6 @@ export default function RequestDashboard() {
 									Bạn chưa có yêu cầu mua hàng nào. Hãy tạo
 									yêu cầu đầu tiên để bắt đầu!
 								</p>
-								<Button
-									onClick={handleCreateRequest}
-									className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 h-12 px-6 shadow-lg hover:shadow-xl transition-all duration-200"
-								>
-									<Plus className="h-5 w-5 mr-2" />
-									Tạo yêu cầu mới
-								</Button>
 							</CardContent>
 						</Card>
 					) : (

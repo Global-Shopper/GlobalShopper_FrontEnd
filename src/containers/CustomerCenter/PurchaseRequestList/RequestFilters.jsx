@@ -64,9 +64,7 @@ export default function RequestFilters({
 							<SelectItem value="all">Tất cả </SelectItem>
 							<SelectItem value="DRAFT">Nháp</SelectItem>
 							<SelectItem value="SENT">Đã gửi</SelectItem>
-							<SelectItem value="CHECKING">
-								Đang kiểm tra
-							</SelectItem>
+							<SelectItem value="CHECKING">Đang xử lý</SelectItem>
 							<SelectItem value="INSUFFICIENT">
 								Cập nhật thông tin
 							</SelectItem>
