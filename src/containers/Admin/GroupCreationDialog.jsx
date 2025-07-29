@@ -34,18 +34,7 @@ export function GroupCreationDialog({
 }) {
   const [createGroup, { isLoading }] = useCreateGroupMutation();
   // Common options for dropdowns
-  const commonPlatforms = [
-    "Amazon",
-    "eBay",
-    "Shopee",
-    "Lazada",
-    "Tiki",
-    "Sendo",
-    "AliExpress",
-    "Taobao",
-    "1688",
-    "Other",
-  ];
+  const commonPlatforms = ["Amazon", "eBay", "Taobao", "Other"];
 
   // Formik + Yup validation
   const formik = useFormik({
