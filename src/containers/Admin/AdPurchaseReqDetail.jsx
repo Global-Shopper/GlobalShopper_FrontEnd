@@ -1,34 +1,37 @@
-import { useState } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useParams } from "react-router-dom"
-import { useCheckingPurchaseRequestMutation, useGetPurchaseRequestDetailQuery } from "@/services/gshopApi"
-import PageLoading from "@/components/PageLoading"
-import { toast } from "sonner"
-import { getStatusText } from "@/utils/statusHandler"
-import React from "react"
-import { PurchaseRequestHeader } from "./PurchaseRequestHeader"
-import { CustomerInfoCard } from "./CustomerInfoCard"
-import { ProductDetail } from "./ProductDetail"
-import { NotesSection } from "./NotesSection"
-import { ProductList } from "./ProductList"
+import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useParams } from "react-router-dom";
+import {
+  useCheckingPurchaseRequestMutation,
+  useGetPurchaseRequestDetailQuery,
+} from "@/services/gshopApi";
+import PageLoading from "@/components/PageLoading";
+import { toast } from "sonner";
+import { getStatusText } from "@/utils/statusHandler";
+import React from "react";
+import { PurchaseRequestHeader } from "./PurchaseRequestHeader";
+import { CustomerInfoCard } from "./CustomerInfoCard";
+import { ProductDetail } from "./ProductDetail";
+import { NotesSection } from "./NotesSection";
+import { ProductList } from "./ProductList";
 
 const getStatusColor = (status) => {
   switch (status) {
     case "SENT":
-      return "bg-blue-100 text-blue-800 border-blue-200"
+      return "bg-blue-100 text-blue-800 border-blue-200";
     case "PENDING":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
     case "APPROVED":
-      return "bg-green-100 text-green-800 border-green-200"
+      return "bg-green-100 text-green-800 border-green-200";
     case "REJECTED":
-      return "bg-red-100 text-red-800 border-red-200"
+      return "bg-red-100 text-red-800 border-red-200";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
-}
+};
 
 const formatDate = (timestamp) => {
   return new Date(timestamp).toLocaleDateString("vi-VN", {
@@ -37,104 +40,104 @@ const formatDate = (timestamp) => {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  })
-}
+  });
+};
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
-  }).format(amount)
-}
+  }).format(amount);
+};
 
 // Mock API functions - replace with actual API calls
 const requestCustomerUpdate = async () => {
-  console.log("first")
-}
+  console.log("first");
+};
 
 function AdPurchaseReqDetail() {
-  const { id } = useParams()
-  const { data: req, isLoading: isReqLoading, isError: isRequestError } = useGetPurchaseRequestDetailQuery(id)
-  const [selectedProductId, setSelectedProductId] = useState(undefined)
-  const [quotePrices, setQuotePrices] = useState({})
-  const [notes, setNotes] = useState("")
-  const [expandedSubRequest, setExpandedSubRequest] = useState(null)
-  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false)
-  const [groupSeller, setGroupSeller] = useState("")
-  const [groupPlatform, setGroupPlatform] = useState("")
-  const [groupAddress, setGroupAddress] = useState("")
-  const [isRequestingUpdate, setIsRequestingUpdate] = useState(false)
-  const [updateRequested, setUpdateRequested] = useState(false)
-  const [checking, { isLoading: isCheckLoading }] = useCheckingPurchaseRequestMutation()
+  const { id } = useParams();
+  const {
+    data: req,
+    isLoading: isReqLoading,
+    isError: isRequestError,
+  } = useGetPurchaseRequestDetailQuery(id);
+  const [selectedProductId, setSelectedProductId] = useState(undefined);
+  const [quotePrices, setQuotePrices] = useState({});
+  const [notes, setNotes] = useState("");
+  const [expandedSubRequest, setExpandedSubRequest] = useState(null);
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [groupSeller, setGroupSeller] = useState("");
+  const [groupPlatform, setGroupPlatform] = useState("");
+  const [groupAddress, setGroupAddress] = useState("");
+  const [isRequestingUpdate, setIsRequestingUpdate] = useState(false);
+  const [updateRequested, setUpdateRequested] = useState(false);
 
   const selectedProduct = React.useMemo(() => {
     if (req?.requestItems?.length > 0) {
-      const selectItem = req.requestItems.find((item) => item.id === selectedProductId)
-      console.log(selectItem)
-      if (selectItem) return selectItem
+      const selectItem = req.requestItems.find(
+        (item) => item.id === selectedProductId
+      );
+      console.log(selectItem);
+      if (selectItem) return selectItem;
     }
 
     if (req?.subRequests?.length > 0) {
-      console.log("Checking subrequests for selected product ID:", selectedProductId)
+      console.log(
+        "Checking subrequests for selected product ID:",
+        selectedProductId
+      );
       for (const subReq of req.subRequests) {
-        const selectItem = subReq.requestItems.find((item) => item.id === selectedProductId)
-        if (selectItem) return selectItem
+        const selectItem = subReq.requestItems.find(
+          (item) => item.id === selectedProductId
+        );
+        if (selectItem) return selectItem;
       }
     }
 
-    return undefined
-  }, [req, selectedProductId])
+    return undefined;
+  }, [req, selectedProductId]);
 
   const handlePriceChange = (productId, price) => {
     setQuotePrices((prev) => ({
       ...prev,
       [productId]: price,
-    }))
-  }
+    }));
+  };
 
   const handleProductClick = (productId) => {
-    setSelectedProductId(productId)
-  }
+    setSelectedProductId(productId);
+  };
 
   const toggleSubRequestExpansion = (subRequestIndex) => {
-    setExpandedSubRequest(expandedSubRequest === subRequestIndex ? null : subRequestIndex)
-  }
+    setExpandedSubRequest(
+      expandedSubRequest === subRequestIndex ? null : subRequestIndex
+    );
+  };
 
   const handleCreateGroup = () => {
-    setShowCreateGroupModal(true)
-  }
-
-  const handleAssignToMe = async () => {
-    try {
-      await checking(req.id)
-        .unwrap()
-        .then(() => {
-          toast.success("Yêu cầu đã được tiếp nhận thành công.")
-        })
-    } catch (error) {
-      toast.error(`Lỗi khi tiếp nhận yêu cầu: ${error.message}`)
-    }
-  }
+    setShowCreateGroupModal(true);
+  };
 
   const handleRequestCustomerUpdate = async () => {
-    setIsRequestingUpdate(true)
+    setIsRequestingUpdate(true);
     try {
-      await requestCustomerUpdate(req.id)
-      setUpdateRequested(true)
+      await requestCustomerUpdate(req.id);
+      setUpdateRequested(true);
     } catch (error) {
-      toast.error(`Lỗi khi gửi yêu cầu cập nhật: ${error.message}`)
+      toast.error(`Lỗi khi gửi yêu cầu cập nhật: ${error.message}`);
     } finally {
-      setIsRequestingUpdate(false)
+      setIsRequestingUpdate(false);
     }
-  }
+  };
 
   const handleCreateGroupSubmit = () => {
     /* logic here */
-    setShowCreateGroupModal(false)
-  }
+    setShowCreateGroupModal(false);
+  };
 
   if (isReqLoading) {
-    return <PageLoading />
+    return <PageLoading />;
   }
 
   if (isRequestError || !req) {
@@ -142,7 +145,7 @@ function AdPurchaseReqDetail() {
       <div className="min-h-screen flex items-center justify-center text-lg text-red-600">
         Không thể tải dữ liệu yêu cầu.
       </div>
-    )
+    );
   }
 
   return (
@@ -156,10 +159,8 @@ function AdPurchaseReqDetail() {
           adminName={req?.admin?.name}
           createdAt={req.createdAt}
           expiredAt={req.expiredAt}
-          isCheckLoading={isCheckLoading}
           isRequestingUpdate={isRequestingUpdate}
           updateRequested={updateRequested}
-          onAssignToMe={handleAssignToMe}
           onRequestCustomerUpdate={handleRequestCustomerUpdate}
           onCreateGroup={handleCreateGroup}
           getStatusColor={getStatusColor}
@@ -184,7 +185,11 @@ function AdPurchaseReqDetail() {
             </div>
             {/* Notes */}
             <div className="h-auto overflow-y-auto">
-              <NotesSection notes={notes} status={req.status} onNotesChange={setNotes} />
+              <NotesSection
+                notes={notes}
+                status={req.status}
+                onNotesChange={setNotes}
+              />
             </div>
           </div>
 
@@ -197,7 +202,6 @@ function AdPurchaseReqDetail() {
                   status={req.status}
                   quotePrice={quotePrices[selectedProduct.id] || ""}
                   onPriceChange={handlePriceChange}
-                  formatCurrency={formatCurrency}
                 />
               </div>
             )}
@@ -238,13 +242,20 @@ function AdPurchaseReqDetail() {
                 </div>
                 <div className="space-y-2">
                   <Label>Address</Label>
-                  <Input placeholder="Paris" value={groupAddress} onChange={(e) => setGroupAddress(e.target.value)} />
+                  <Input
+                    placeholder="Paris"
+                    value={groupAddress}
+                    onChange={(e) => setGroupAddress(e.target.value)}
+                  />
                 </div>
                 <div className="flex gap-2 pt-4">
                   <Button onClick={handleCreateGroupSubmit} className="flex-1">
                     Tạo nhóm
                   </Button>
-                  <Button variant="outline" onClick={() => setShowCreateGroupModal(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCreateGroupModal(false)}
+                  >
                     Hủy
                   </Button>
                 </div>
@@ -254,7 +265,7 @@ function AdPurchaseReqDetail() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default AdPurchaseReqDetail
+export default AdPurchaseReqDetail;
