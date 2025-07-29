@@ -3,11 +3,17 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useParams } from "react-router-dom";
 import {
-  useCheckingPurchaseRequestMutation,
-  useGetPurchaseRequestDetailQuery,
-} from "@/services/gshopApi";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X, Plus } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { useGetPurchaseRequestDetailQuery } from "@/services/gshopApi";
 import PageLoading from "@/components/PageLoading";
 import { toast } from "sonner";
 import { getStatusText } from "@/utils/statusHandler";
@@ -67,11 +73,49 @@ function AdPurchaseReqDetail() {
   const [notes, setNotes] = useState("");
   const [expandedSubRequest, setExpandedSubRequest] = useState(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
-  const [groupSeller, setGroupSeller] = useState("");
-  const [groupPlatform, setGroupPlatform] = useState("");
-  const [groupAddress, setGroupAddress] = useState("");
+
+  // Enhanced form state
+  const [formData, setFormData] = useState({
+    seller: "",
+    ecommercePlatform: "",
+    contactInfo: [],
+    customSeller: "",
+    customPlatform: "",
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const [newContactInfo, setNewContactInfo] = useState("");
+
   const [isRequestingUpdate, setIsRequestingUpdate] = useState(false);
   const [updateRequested, setUpdateRequested] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedItemsForGroup, setSelectedItemsForGroup] = useState([]);
+
+  // Common options for dropdowns
+  const commonSellers = [
+    "Amazon Official",
+    "Loreal Paris",
+    "Nike Store",
+    "Apple Store",
+    "Samsung Official",
+    "Adidas",
+    "Uniqlo",
+    "Zara",
+    "H&M",
+    "Other",
+  ];
+
+  const commonPlatforms = [
+    "Amazon",
+    "eBay",
+    "Shopee",
+    "Lazada",
+    "Tiki",
+    "Sendo",
+    "AliExpress",
+    "Taobao",
+    "1688",
+    "Other",
+  ];
 
   const selectedProduct = React.useMemo(() => {
     if (req?.requestItems?.length > 0) {
@@ -115,8 +159,15 @@ function AdPurchaseReqDetail() {
     );
   };
 
-  const handleCreateGroup = () => {
-    setShowCreateGroupModal(true);
+  const handleCreateGroup = (items = []) => {
+    if (items.length > 0) {
+      setSelectedItemsForGroup(items);
+      setShowCreateGroupModal(true);
+      setIsSelectionMode(false); // Exit selection mode after creating group
+    } else {
+      // Toggle selection mode
+      setIsSelectionMode(!isSelectionMode);
+    }
   };
 
   const handleRequestCustomerUpdate = async () => {
@@ -131,9 +182,120 @@ function AdPurchaseReqDetail() {
     }
   };
 
-  const handleCreateGroupSubmit = () => {
-    /* logic here */
-    setShowCreateGroupModal(false);
+  // Form validation
+  const validateForm = () => {
+    const errors = {};
+
+    // Validate seller
+    const finalSeller =
+      formData.seller === "Other" ? formData.customSeller : formData.seller;
+    if (!finalSeller?.trim()) {
+      errors.seller = "Seller is required";
+    }
+
+    // Validate platform
+    const finalPlatform =
+      formData.ecommercePlatform === "Other"
+        ? formData.customPlatform
+        : formData.ecommercePlatform;
+    if (!finalPlatform?.trim()) {
+      errors.ecommercePlatform = "Platform is required";
+    }
+
+    // Validate contact info
+    if (formData.contactInfo.length === 0) {
+      errors.contactInfo = "At least one contact info is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      seller: "",
+      ecommercePlatform: "",
+      contactInfo: [],
+      customSeller: "",
+      customPlatform: "",
+    });
+    setFormErrors({});
+    setNewContactInfo("");
+  };
+
+  // Handle form field changes
+  const handleFormChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  // Handle contact info
+  const addContactInfo = () => {
+    if (newContactInfo.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        contactInfo: [...prev.contactInfo, newContactInfo.trim()],
+      }));
+      setNewContactInfo("");
+      if (formErrors.contactInfo) {
+        setFormErrors((prev) => ({ ...prev, contactInfo: "" }));
+      }
+    }
+  };
+
+  const removeContactInfo = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      contactInfo: prev.contactInfo.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleCreateGroupSubmit = async () => {
+    if (!validateForm()) {
+      toast.error("Please fix the form errors before submitting");
+      return;
+    }
+
+    try {
+      // Prepare payload according to API structure
+      const finalSeller =
+        formData.seller === "Other" ? formData.customSeller : formData.seller;
+      const finalPlatform =
+        formData.ecommercePlatform === "Other"
+          ? formData.customPlatform
+          : formData.ecommercePlatform;
+
+      const groupData = {
+        seller: finalSeller,
+        ecommercePlatform: finalPlatform,
+        contactInfo: formData.contactInfo,
+        itemIds: selectedItemsForGroup.map((item) => item.id),
+      };
+
+      console.log("Creating group with data:", groupData);
+
+      // TODO: Replace with actual API call
+      // const response = await createSubRequest(groupData);
+
+      // Reset form and close modal
+      resetForm();
+      setSelectedItemsForGroup([]);
+      setShowCreateGroupModal(false);
+
+      toast.success("Nhóm đã được tạo thành công!");
+
+      // TODO: Trigger refetch of purchase request data
+    } catch (error) {
+      toast.error(`Lỗi khi tạo nhóm: ${error.message}`);
+    }
+  };
+
+  const handleExitSelectionMode = () => {
+    setIsSelectionMode(false);
   };
 
   if (isReqLoading) {
@@ -163,6 +325,7 @@ function AdPurchaseReqDetail() {
           updateRequested={updateRequested}
           onRequestCustomerUpdate={handleRequestCustomerUpdate}
           onCreateGroup={handleCreateGroup}
+          isSelectionMode={isSelectionMode}
           getStatusColor={getStatusColor}
           getStatusText={getStatusText}
           formatDate={formatDate}
@@ -181,6 +344,9 @@ function AdPurchaseReqDetail() {
                 onProductClick={handleProductClick}
                 onToggleSubRequestExpansion={toggleSubRequestExpansion}
                 requestType={req.requestType}
+                isSelectionMode={isSelectionMode}
+                onCreateGroup={handleCreateGroup}
+                onExitSelectionMode={handleExitSelectionMode}
               />
             </div>
             {/* Notes */}
@@ -215,54 +381,6 @@ function AdPurchaseReqDetail() {
             </div>
           </div>
         </div>
-
-        {/* Create Group Modal */}
-        {showCreateGroupModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className="w-96 max-w-md">
-              <CardHeader>
-                <CardTitle>Thông tin của đơn hàng</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Seller</Label>
-                  <Input
-                    placeholder="Loreal Paris"
-                    value={groupSeller}
-                    onChange={(e) => setGroupSeller(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Platform</Label>
-                  <Input
-                    placeholder="Amazon"
-                    value={groupPlatform}
-                    onChange={(e) => setGroupPlatform(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Address</Label>
-                  <Input
-                    placeholder="Paris"
-                    value={groupAddress}
-                    onChange={(e) => setGroupAddress(e.target.value)}
-                  />
-                </div>
-                <div className="flex gap-2 pt-4">
-                  <Button onClick={handleCreateGroupSubmit} className="flex-1">
-                    Tạo nhóm
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowCreateGroupModal(false)}
-                  >
-                    Hủy
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
     </div>
   );

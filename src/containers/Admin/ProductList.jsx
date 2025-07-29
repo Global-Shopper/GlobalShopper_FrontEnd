@@ -1,11 +1,231 @@
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
-import { Package, ExternalLink } from "lucide-react"
-import { SubRequestDetails } from "./SubRequestDetails"
-import React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { Package, ExternalLink, Users, X, Plus } from "lucide-react";
+import { SubRequestDetails } from "./SubRequestDetails";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { QuotationForm } from "./QuotationForm";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleExpandProductQuotation, setItemDetail } from "@/features/quotation";
+import {
+  toggleExpandProductQuotation,
+  setItemDetail,
+} from "@/features/quotation";
+import { Checkbox } from "@/components/ui/checkbox";
+import { GroupCreationDialog } from "./GroupCreationDialog";
+
+// Selectable Product Card Component (only when in selection mode)
+const SelectableProductCard = ({
+  item,
+  subRequestId,
+  status,
+  requestItems,
+  onProductClick,
+  dispatch,
+  quotationState,
+  isSelectionMode,
+  isSelected,
+  onSelectionChange,
+}) => {
+  // Compute order number based on position in parentArray
+  const itemIndexNumber = requestItems
+    ? requestItems.findIndex((i) => i.id === item.id)
+    : 0;
+  const orderNumber = itemIndexNumber + 1;
+
+  // Use subRequestId directly for Redux selectors and actions
+  const expandedProductForms = subRequestId
+    ? quotationState?.subRequests?.[subRequestId]?.expandedProductForms || {}
+    : quotationState?.expandedProductForms || {};
+
+  const requestItemId = item.id;
+  const isProductFormOpen = expandedProductForms[requestItemId];
+
+  // Get product object from Redux for SUB REQUEST item
+  let quotationDetails = item;
+  if (
+    subRequestId &&
+    quotationState?.subRequests?.[subRequestId]?.quotationDetails
+  ) {
+    const foundIdx = quotationState.subRequests[
+      subRequestId
+    ].quotationDetails.findIndex(
+      (d) => d.requestItemId === requestItemId || d.id === requestItemId
+    );
+    quotationDetails =
+      quotationState.subRequests[subRequestId].quotationDetails[foundIdx] ||
+      item;
+  }
+
+  const productErrors = {};
+
+  const handleCardClick = () => {
+    if (isSelectionMode) {
+      onSelectionChange(item.id, !isSelected);
+    } else {
+      onProductClick(item.id);
+    }
+  };
+
+  return (
+    <Card
+      className={`transition-all hover:shadow-md cursor-pointer ${
+        isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
+      } ${
+        isSelectionMode && isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""
+      } ${isSelectionMode ? "border-2 border-dashed border-blue-300" : ""}`}
+      onClick={handleCardClick}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            {isSelectionMode && (
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={(checked) =>
+                  onSelectionChange(item.id, checked)
+                }
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0"
+              />
+            )}
+            <span
+              className={`text-xs px-2 py-1 rounded shrink-0 ${
+                subRequestId
+                  ? "bg-orange-100 text-orange-600"
+                  : "bg-gray-100 text-orange-600"
+              }`}
+            >
+              #{orderNumber}
+            </span>
+            <span className="font-semibold text-base truncate">
+              {item.productName}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span
+              className={`font-bold text-lg ${
+                subRequestId ? "text-orange-600" : "text-blue-600"
+              }`}
+            >
+              ×{item.quantity}
+            </span>
+          </div>
+        </div>
+        {!isSelectionMode && (
+          <>
+            <div className="flex justify-start mt-3">
+              <a
+                href={item.productURL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-start gap-1 text-blue-600 hover:underline text-sm"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Xem sản phẩm
+              </a>
+            </div>
+            {/* Quote button and inline form */}
+            {status === "CHECKING" && (
+              <>
+                <div className="flex justify-end mt-3">
+                  <Button
+                    variant={isProductFormOpen ? "secondary" : "outline"}
+                    size="sm"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(
+                        toggleExpandProductQuotation({
+                          subRequestId,
+                          requestItemId,
+                        })
+                      );
+                    }}
+                  >
+                    {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
+                  </Button>
+                </div>
+                {isProductFormOpen && (
+                  <div className="mt-3">
+                    <QuotationForm
+                      product={quotationDetails}
+                      errors={productErrors}
+                      onChange={(field, value) => {
+                        dispatch(
+                          setItemDetail({
+                            subRequestId,
+                            itemIndex: itemIndexNumber,
+                            field,
+                            value,
+                          })
+                        );
+                      }}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+// Group Creation Controls Component
+const GroupCreationControls = ({
+  selectedCount,
+  onOpenDialog,
+  onClearSelection,
+}) => {
+  return (
+    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-blue-600" />
+          <span className="font-medium text-blue-900">
+            {selectedCount} sản phẩm được chọn
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClearSelection}
+            className="text-gray-600"
+          >
+            Bỏ chọn tất cả
+          </Button>
+          <Button
+            size="sm"
+            onClick={onOpenDialog}
+            disabled={selectedCount === 0}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Users className="h-4 w-4 mr-1" />
+            Nhập thông tin nhóm
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export function ProductList({
   requestItems,
@@ -15,106 +235,41 @@ export function ProductList({
   onToggleSubRequestExpansion,
   requestType,
   onProductClick,
+  isSelectionMode,
+  onCreateGroup,
+  onExitSelectionMode,
 }) {
   // Redux hooks for expanded state
   const dispatch = useDispatch();
-  const quotationState = useSelector(state => state.rootReducer.quotation);
+  const quotationState = useSelector((state) => state.rootReducer.quotation);
 
-  // Render a single product card, always with explicit subRequestId
-  const renderProductCard = (item, subRequestId, status, requestItems) => {
-    // Compute order number based on position in parentArray
-    const itemIndexNumber = requestItems ? requestItems.findIndex(i => i.id === item.id) : 0;
-    const orderNumber = itemIndexNumber + 1;
-    // Use subRequestId directly for Redux selectors and actions
-    const expandedProductForms = subRequestId
-      ? quotationState?.subRequests?.[subRequestId]?.expandedProductForms || {}
-      : quotationState?.expandedProductForms || {};
-    // Use item.requestItemId for subrequest items, item.id for main
-    const requestItemId = item.id;
-    const isProductFormOpen = expandedProductForms[requestItemId];
-    // Get product object from Redux for SUB REQUEST item
-    let quotationDetails = item;
-    if (subRequestId && quotationState?.subRequests?.[subRequestId]?.quotationDetails) {
-      const foundIdx = quotationState.subRequests[subRequestId].quotationDetails.findIndex(
-        d => d.requestItemId === requestItemId || d.id === requestItemId
-      );
-      quotationDetails = quotationState.subRequests[subRequestId].quotationDetails[foundIdx] || item;
+  // Local state for selected items
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Common options for dropdowns
+
+  // Handle item selection
+  const handleSelectionChange = (itemId, isSelected) => {
+    const newSelection = [...selectedItems];
+    if (isSelected) {
+      newSelection.push(itemId);
+    } else {
+      newSelection.splice(newSelection.indexOf(itemId), 1);
     }
-    // No validation for now
-    const productErrors = {};
-    return (
-      <Card
-        key={requestItemId}
-        className={`transition-all hover:shadow-md ${isProductFormOpen ? 'shadow-lg ring-2 ring-blue-200 bg-blue-50' : ''}`}
-        onClick={() => onProductClick(item.id)}
-      >
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <span
-                className={`text-xs px-2 py-1 rounded shrink-0 ${
-                  subRequestId ? "bg-orange-100 text-orange-600" : "bg-gray-100 text-orange-600"
-                }`}
-              >
-                #{orderNumber}
-              </span>
-              <span className="font-semibold text-base truncate">{item.productName}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className={`font-bold text-lg ${subRequestId ? "text-orange-600" : "text-blue-600"}`}>
-                ×{item.quantity}
-              </span>
-            </div>
-          </div>
-          <div className="flex justify-start mt-3">
-            <a
-              href={item.productURL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-start gap-1 text-blue-600 hover:underline text-sm"
-              onClick={e => e.stopPropagation()}
-            >
-              <ExternalLink className="h-4 w-4" />
-              Xem sản phẩm
-            </a>
-          </div>
-          {/* Quote button and inline form */}
-          {status === "CHECKING" && 
-          <>
-            <div className="flex justify-end mt-3">
-              <Button
-                variant={isProductFormOpen ? "secondary" : "outline"}
-                size="sm"
-                type="button"
-                onClick={e => {
-                  e.stopPropagation();
-                  dispatch(toggleExpandProductQuotation({ subRequestId, requestItemId }))
-                }}
-              >
-                {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
-              </Button>
-            </div>
-            {isProductFormOpen && (
-              <div className="mt-3">
-                {console.log(itemIndexNumber)}
-                <QuotationForm
-                  product={quotationDetails}
-                  errors={productErrors}
-                  onChange={(field, value) => {
-                    dispatch(setItemDetail({
-                      subRequestId,
-                      itemIndex: itemIndexNumber,
-                      field,
-                      value
-                    }));
-                  }}
-                />
-              </div>
-            )}
-          </>}
-        </CardContent>
-      </Card>
-    );
+    setSelectedItems(newSelection);
+  };
+
+  // Clear all selections
+  const handleClearSelection = () => {
+    setSelectedItems([]);
+  };
+
+  // Handle opening dialog
+  const handleOpenDialog = () => {
+    if (selectedItems.length > 0) {
+      setIsDialogOpen(true);
+    }
   };
 
   return (
@@ -123,37 +278,101 @@ export function ProductList({
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
           Danh sách sản phẩm
+          {isSelectionMode && (
+            <span className="text-sm font-normal text-blue-600 bg-blue-100 px-2 py-1 rounded">
+              Chế độ chọn nhóm
+            </span>
+          )}
         </CardTitle>
         <CardDescription>
-          {status === "SENT"
+          {isSelectionMode
+            ? "Chọn các sản phẩm bằng checkbox để tạo nhóm"
+            : status === "SENT"
             ? "Xem thông tin sản phẩm trong yêu cầu mua hàng"
             : "Chọn sản phẩm để xem chi tiết và nhập giá báo giá"}
         </CardDescription>
+        {isSelectionMode && (
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onExitSelectionMode}
+              className="text-gray-600"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Thoát chế độ chọn
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Render main requestItems if any */}
         {requestItems?.length > 0 && (
           <div>
-            <h3 className="font-semibold mb-3 text-lg">Sản phẩm chưa được tạo nhóm</h3>
-            <div className="space-y-2">{requestItems.map((item) => renderProductCard(item, null, status, requestItems))}</div>
+            <h3 className="font-semibold mb-3 text-lg">
+              Sản phẩm chưa được tạo nhóm
+            </h3>
+
+            {/* Group creation controls (only in selection mode) */}
+            {isSelectionMode && selectedItems.length > 0 && (
+              <GroupCreationControls
+                selectedCount={selectedItems.length}
+                onOpenDialog={handleOpenDialog}
+                onClearSelection={handleClearSelection}
+              />
+            )}
+
+            {/* Product items */}
+            <div className="space-y-2 mb-4">
+              {requestItems.map((item) => (
+                <SelectableProductCard
+                  key={item.id}
+                  item={item}
+                  subRequestId={null}
+                  status={status}
+                  requestItems={requestItems}
+                  onProductClick={onProductClick}
+                  dispatch={dispatch}
+                  quotationState={quotationState}
+                  isSelectionMode={isSelectionMode}
+                  isSelected={selectedItems.includes(item.id)}
+                  onSelectionChange={handleSelectionChange}
+                />
+              ))}
+            </div>
           </div>
         )}
 
         {/* Consolidated SubRequests */}
-        {subRequests?.length > 0 && subRequests.map((sub, idx) => (
-          <SubRequestDetails
-            key={idx}
-            subRequest={sub}
-            index={idx}
-            isExpanded={expandedSubRequest === idx}
-            onToggleExpansion={onToggleSubRequestExpansion}
-            requestType={requestType}
-            requestStatus={status}
-          >
-            {sub.requestItems.map((item) => renderProductCard(item, sub.id, status, sub.requestItems))}
-          </SubRequestDetails>
-        ))}
+        {subRequests?.length > 0 &&
+          subRequests.map((sub, idx) => (
+            <SubRequestDetails
+              key={idx}
+              subRequest={sub}
+              index={idx}
+              isExpanded={expandedSubRequest === idx}
+              onToggleExpansion={onToggleSubRequestExpansion}
+              requestType={requestType}
+              requestStatus={status}
+            >
+              {sub.requestItems.map((item) =>
+                renderProductCard(item, sub.id, status, sub.requestItems)
+              )}
+            </SubRequestDetails>
+          ))}
       </CardContent>
+
+      <GroupCreationDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        selectedItems={selectedItems}
+        requestItems={requestItems}
+        onCreateGroup={(createdItems) => {
+          setSelectedItems([]);
+          setIsDialogOpen(false);
+          if (onCreateGroup) onCreateGroup(createdItems);
+        }}
+      />
     </Card>
-  )
+  );
 }
