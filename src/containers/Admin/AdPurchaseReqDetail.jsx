@@ -87,35 +87,8 @@ function AdPurchaseReqDetail() {
 
   const [isRequestingUpdate, setIsRequestingUpdate] = useState(false);
   const [updateRequested, setUpdateRequested] = useState(false);
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isGroupingMode, setIsGroupingMode] = useState(false);
   const [selectedItemsForGroup, setSelectedItemsForGroup] = useState([]);
-
-  // Common options for dropdowns
-  const commonSellers = [
-    "Amazon Official",
-    "Loreal Paris",
-    "Nike Store",
-    "Apple Store",
-    "Samsung Official",
-    "Adidas",
-    "Uniqlo",
-    "Zara",
-    "H&M",
-    "Other",
-  ];
-
-  const commonPlatforms = [
-    "Amazon",
-    "eBay",
-    "Shopee",
-    "Lazada",
-    "Tiki",
-    "Sendo",
-    "AliExpress",
-    "Taobao",
-    "1688",
-    "Other",
-  ];
 
   const selectedProduct = React.useMemo(() => {
     if (req?.requestItems?.length > 0) {
@@ -163,10 +136,10 @@ function AdPurchaseReqDetail() {
     if (items.length > 0) {
       setSelectedItemsForGroup(items);
       setShowCreateGroupModal(true);
-      setIsSelectionMode(false); // Exit selection mode after creating group
+      setIsGroupingMode(false); // Exit selection mode after creating group
     } else {
       // Toggle selection mode
-      setIsSelectionMode(!isSelectionMode);
+      setIsGroupingMode(!isGroupingMode);
     }
   };
 
@@ -225,77 +198,11 @@ function AdPurchaseReqDetail() {
   };
 
   // Handle form field changes
-  const handleFormChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (formErrors[field]) {
-      setFormErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
 
   // Handle contact info
-  const addContactInfo = () => {
-    if (newContactInfo.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        contactInfo: [...prev.contactInfo, newContactInfo.trim()],
-      }));
-      setNewContactInfo("");
-      if (formErrors.contactInfo) {
-        setFormErrors((prev) => ({ ...prev, contactInfo: "" }));
-      }
-    }
-  };
 
-  const removeContactInfo = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      contactInfo: prev.contactInfo.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleCreateGroupSubmit = async () => {
-    if (!validateForm()) {
-      toast.error("Please fix the form errors before submitting");
-      return;
-    }
-
-    try {
-      // Prepare payload according to API structure
-      const finalSeller =
-        formData.seller === "Other" ? formData.customSeller : formData.seller;
-      const finalPlatform =
-        formData.ecommercePlatform === "Other"
-          ? formData.customPlatform
-          : formData.ecommercePlatform;
-
-      const groupData = {
-        seller: finalSeller,
-        ecommercePlatform: finalPlatform,
-        contactInfo: formData.contactInfo,
-        itemIds: selectedItemsForGroup.map((item) => item.id),
-      };
-
-      console.log("Creating group with data:", groupData);
-
-      // TODO: Replace with actual API call
-      // const response = await createSubRequest(groupData);
-
-      // Reset form and close modal
-      resetForm();
-      setSelectedItemsForGroup([]);
-      setShowCreateGroupModal(false);
-
-      toast.success("Nhóm đã được tạo thành công!");
-
-      // TODO: Trigger refetch of purchase request data
-    } catch (error) {
-      toast.error(`Lỗi khi tạo nhóm: ${error.message}`);
-    }
-  };
-
-  const handleExitSelectionMode = () => {
-    setIsSelectionMode(false);
+  const handleExitGroupingMode = () => {
+    setIsGroupingMode(false);
   };
 
   if (isReqLoading) {
@@ -325,7 +232,7 @@ function AdPurchaseReqDetail() {
           updateRequested={updateRequested}
           onRequestCustomerUpdate={handleRequestCustomerUpdate}
           onCreateGroup={handleCreateGroup}
-          isSelectionMode={isSelectionMode}
+          isGroupingMode={isGroupingMode}
           getStatusColor={getStatusColor}
           getStatusText={getStatusText}
           formatDate={formatDate}
@@ -344,9 +251,9 @@ function AdPurchaseReqDetail() {
                 onProductClick={handleProductClick}
                 onToggleSubRequestExpansion={toggleSubRequestExpansion}
                 requestType={req.requestType}
-                isSelectionMode={isSelectionMode}
+                isGroupingMode={isGroupingMode}
                 onCreateGroup={handleCreateGroup}
-                onExitSelectionMode={handleExitSelectionMode}
+                onExitGroupingMode={handleExitGroupingMode}
               />
             </div>
             {/* Notes */}

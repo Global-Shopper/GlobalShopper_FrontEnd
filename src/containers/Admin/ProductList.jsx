@@ -5,20 +5,10 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import { Package, ExternalLink, Users, X, Plus } from "lucide-react";
+import { Package, ExternalLink, Users, X } from "lucide-react";
 import { SubRequestDetails } from "./SubRequestDetails";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { QuotationForm } from "./QuotationForm";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,10 +16,19 @@ import {
   setItemDetail,
 } from "@/features/quotation";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { GroupCreationDialog } from "./GroupCreationDialog";
 
 // Selectable Product Card Component (only when in selection mode)
-const SelectableProductCard = ({
+const UnGroupItem = ({
   item,
   subRequestId,
   status,
@@ -37,7 +36,7 @@ const SelectableProductCard = ({
   onProductClick,
   dispatch,
   quotationState,
-  isSelectionMode,
+  isGroupingMode,
   isSelected,
   onSelectionChange,
 }) => {
@@ -74,7 +73,7 @@ const SelectableProductCard = ({
   const productErrors = {};
 
   const handleCardClick = () => {
-    if (isSelectionMode) {
+    if (isGroupingMode) {
       onSelectionChange(item.id, !isSelected);
     } else {
       onProductClick(item.id);
@@ -86,14 +85,14 @@ const SelectableProductCard = ({
       className={`transition-all hover:shadow-md cursor-pointer ${
         isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
       } ${
-        isSelectionMode && isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""
-      } ${isSelectionMode ? "border-2 border-dashed border-blue-300" : ""}`}
+        isGroupingMode && isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""
+      } ${isGroupingMode ? "border-2 border-dashed border-blue-300" : ""}`}
       onClick={handleCardClick}
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            {isSelectionMode && (
+            {isGroupingMode && (
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={(checked) =>
@@ -126,7 +125,7 @@ const SelectableProductCard = ({
             </span>
           </div>
         </div>
-        {!isSelectionMode && (
+        {!isGroupingMode && (
           <>
             <div className="flex justify-start mt-3">
               <a
@@ -190,7 +189,7 @@ const SelectableProductCard = ({
 
 // Group Creation Controls Component
 const GroupCreationControls = ({
-  selectedCount,
+  selectedItems,
   onOpenDialog,
   onClearSelection,
 }) => {
@@ -200,7 +199,7 @@ const GroupCreationControls = ({
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-blue-600" />
           <span className="font-medium text-blue-900">
-            {selectedCount} sản phẩm được chọn
+            {selectedItems.length} sản phẩm được chọn
           </span>
         </div>
         <div className="flex gap-2">
@@ -215,7 +214,7 @@ const GroupCreationControls = ({
           <Button
             size="sm"
             onClick={onOpenDialog}
-            disabled={selectedCount === 0}
+            disabled={selectedItems.length === 0}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Users className="h-4 w-4 mr-1" />
@@ -235,9 +234,9 @@ export function ProductList({
   onToggleSubRequestExpansion,
   requestType,
   onProductClick,
-  isSelectionMode,
+  isGroupingMode,
   onCreateGroup,
-  onExitSelectionMode,
+  onExitGroupingMode,
 }) {
   // Redux hooks for expanded state
   const dispatch = useDispatch();
@@ -246,8 +245,6 @@ export function ProductList({
   // Local state for selected items
   const [selectedItems, setSelectedItems] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Common options for dropdowns
 
   // Handle item selection
   const handleSelectionChange = (itemId, isSelected) => {
@@ -263,6 +260,7 @@ export function ProductList({
   // Clear all selections
   const handleClearSelection = () => {
     setSelectedItems([]);
+    console.log("Selected items cleared");
   };
 
   // Handle opening dialog
@@ -272,31 +270,165 @@ export function ProductList({
     }
   };
 
+  // Handle group creation from dialog
+
+  console.log(selectedItems);
+  // Reset selection when exiting selection mode
+  React.useEffect(() => {
+    if (!isGroupingMode) {
+      setSelectedItems([]);
+    }
+  }, [isGroupingMode]);
+
+  // Render a single product card, always with explicit subRequestId
+  const renderProductCard = (item, subRequestId, status, requestItems) => {
+    // Compute order number based on position in parentArray
+    const itemIndexNumber = requestItems
+      ? requestItems.findIndex((i) => i.id === item.id)
+      : 0;
+    const orderNumber = itemIndexNumber + 1;
+    // Use subRequestId directly for Redux selectors and actions
+    const expandedProductForms = subRequestId
+      ? quotationState?.subRequests?.[subRequestId]?.expandedProductForms || {}
+      : quotationState?.expandedProductForms || {};
+    // Use item.requestItemId for subrequest items, item.id for main
+    const requestItemId = item.id;
+    const isProductFormOpen = expandedProductForms[requestItemId];
+    // Get product object from Redux for SUB REQUEST item
+    let quotationDetails = item;
+    if (
+      subRequestId &&
+      quotationState?.subRequests?.[subRequestId]?.quotationDetails
+    ) {
+      const foundIdx = quotationState.subRequests[
+        subRequestId
+      ].quotationDetails.findIndex(
+        (d) => d.requestItemId === requestItemId || d.id === requestItemId
+      );
+      quotationDetails =
+        quotationState.subRequests[subRequestId].quotationDetails[foundIdx] ||
+        item;
+    }
+    // No validation for now
+    const productErrors = {};
+    return (
+      <Card
+        key={requestItemId}
+        className={`transition-all hover:shadow-md ${
+          isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
+        }`}
+        onClick={() => onProductClick(item.id)}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <span
+                className={`text-xs px-2 py-1 rounded shrink-0 ${
+                  subRequestId
+                    ? "bg-orange-100 text-orange-600"
+                    : "bg-gray-100 text-orange-600"
+                }`}
+              >
+                #{orderNumber}
+              </span>
+              <span className="font-semibold text-base truncate">
+                {item.productName}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span
+                className={`font-bold text-lg ${
+                  subRequestId ? "text-orange-600" : "text-blue-600"
+                }`}
+              >
+                ×{item.quantity}
+              </span>
+            </div>
+          </div>
+          <div className="flex justify-start mt-3">
+            <a
+              href={item.productURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-start gap-1 text-blue-600 hover:underline text-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Xem sản phẩm
+            </a>
+          </div>
+          {/* Quote button and inline form */}
+          {status === "CHECKING" && (
+            <>
+              <div className="flex justify-end mt-3">
+                <Button
+                  variant={isProductFormOpen ? "secondary" : "outline"}
+                  size="sm"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    dispatch(
+                      toggleExpandProductQuotation({
+                        subRequestId,
+                        requestItemId,
+                      })
+                    );
+                  }}
+                >
+                  {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
+                </Button>
+              </div>
+              {isProductFormOpen && (
+                <div className="mt-3">
+                  {console.log(itemIndexNumber)}
+                  <QuotationForm
+                    product={quotationDetails}
+                    errors={productErrors}
+                    onChange={(field, value) => {
+                      dispatch(
+                        setItemDetail({
+                          subRequestId,
+                          itemIndex: itemIndexNumber,
+                          field,
+                          value,
+                        })
+                      );
+                    }}
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
           Danh sách sản phẩm
-          {isSelectionMode && (
+          {isGroupingMode && (
             <span className="text-sm font-normal text-blue-600 bg-blue-100 px-2 py-1 rounded">
               Chế độ chọn nhóm
             </span>
           )}
         </CardTitle>
         <CardDescription>
-          {isSelectionMode
+          {isGroupingMode
             ? "Chọn các sản phẩm bằng checkbox để tạo nhóm"
             : status === "SENT"
             ? "Xem thông tin sản phẩm trong yêu cầu mua hàng"
             : "Chọn sản phẩm để xem chi tiết và nhập giá báo giá"}
         </CardDescription>
-        {isSelectionMode && (
+        {isGroupingMode && (
           <div className="flex justify-end">
             <Button
               variant="outline"
               size="sm"
-              onClick={onExitSelectionMode}
+              onClick={onExitGroupingMode}
               className="text-gray-600"
             >
               <X className="h-4 w-4 mr-1" />
@@ -314,18 +446,19 @@ export function ProductList({
             </h3>
 
             {/* Group creation controls (only in selection mode) */}
-            {isSelectionMode && selectedItems.length > 0 && (
+            {isGroupingMode && selectedItems.length > 0 && (
               <GroupCreationControls
-                selectedCount={selectedItems.length}
+                selectedItems={selectedItems}
                 onOpenDialog={handleOpenDialog}
                 onClearSelection={handleClearSelection}
+                onExitGroupingMode={onExitGroupingMode}
               />
             )}
 
             {/* Product items */}
             <div className="space-y-2 mb-4">
               {requestItems.map((item) => (
-                <SelectableProductCard
+                <UnGroupItem
                   key={item.id}
                   item={item}
                   subRequestId={null}
@@ -334,7 +467,7 @@ export function ProductList({
                   onProductClick={onProductClick}
                   dispatch={dispatch}
                   quotationState={quotationState}
-                  isSelectionMode={isSelectionMode}
+                  isGroupingMode={isGroupingMode}
                   isSelected={selectedItems.includes(item.id)}
                   onSelectionChange={handleSelectionChange}
                 />
@@ -362,15 +495,17 @@ export function ProductList({
           ))}
       </CardContent>
 
+      {/* Group Creation Dialog (reusable component) */}
       <GroupCreationDialog
+        handleClearSelection={handleClearSelection}
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         selectedItems={selectedItems}
         requestItems={requestItems}
-        onCreateGroup={(createdItems) => {
+        onCreateGroup={(selectedItemsArray) => {
+          if (onCreateGroup) onCreateGroup(selectedItemsArray);
           setSelectedItems([]);
           setIsDialogOpen(false);
-          if (onCreateGroup) onCreateGroup(createdItems);
         }}
       />
     </Card>
