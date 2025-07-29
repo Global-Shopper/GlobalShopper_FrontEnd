@@ -2,18 +2,20 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export function QuotationForm({
-  product,
-  errors = {},
-  onChange
-}) {
+export function QuotationForm({ product, errors = {}, onChange }) {
   return (
     <div className="p-4 rounded space-y-2">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
-          <Label>{product?.productName || 'Sản phẩm'}</Label>
+          <Label>{product?.productName || "Sản phẩm"}</Label>
         </div>
 
         <div>
@@ -22,8 +24,8 @@ export function QuotationForm({
             name="basePrice"
             placeholder="Giá gốc"
             type="number"
-            value={product?.basePrice || ''}
-            onChange={e => onChange('basePrice', e.target.value)}
+            value={product?.basePrice || ""}
+            onChange={(e) => onChange("basePrice", e.target.value)}
           />
           {errors?.basePrice && (
             <div className="text-red-500 text-xs">{errors.basePrice}</div>
@@ -34,8 +36,8 @@ export function QuotationForm({
           <Input
             name="hsCodeId"
             placeholder="HS Code"
-            value={product?.hsCodeId || ''}
-            onChange={e => onChange('hsCodeId', e.target.value)}
+            value={product?.hsCodeId || ""}
+            onChange={(e) => onChange("hsCodeId", e.target.value)}
           />
           {errors?.hsCodeId && (
             <div className="text-red-500 text-xs">{errors.hsCodeId}</div>
@@ -46,8 +48,8 @@ export function QuotationForm({
           <Input
             name="region"
             placeholder="VD: UK"
-            value={product?.region || ''}
-            onChange={e => onChange('region', e.target.value)}
+            value={product?.region || ""}
+            onChange={(e) => onChange("region", e.target.value)}
           />
           {errors?.region && (
             <div className="text-red-500 text-xs">{errors.region}</div>
@@ -59,8 +61,8 @@ export function QuotationForm({
             name="serviceFee"
             placeholder="Phí dịch vụ"
             type="number"
-            value={product?.serviceFee || ''}
-            onChange={e => onChange('serviceFee', e.target.value)}
+            value={product?.serviceFee || ""}
+            onChange={(e) => onChange("serviceFee", e.target.value)}
           />
           {errors?.serviceFee && (
             <div className="text-red-500 text-xs">{errors.serviceFee}</div>
@@ -70,14 +72,17 @@ export function QuotationForm({
           <Label>Tiền tệ</Label>
           <select
             name="currency"
-            value={product?.currency || ''}
-            onChange={e => onChange('currency', e.target.value)}
+            value={product?.currency || ""}
+            onChange={(e) => onChange("currency", e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded"
           >
             <option value="">Chọn tiền tệ</option>
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
-            <option value="VND">VND</option>
+            <option value="CNY">CNY</option>
+            <option value="JPY">JPY</option>
+            <option value="KRW">KRW</option>
+            <option value="GBP">GBP</option>
           </select>
           {errors?.currency && (
             <div className="text-red-500 text-xs">{errors.currency}</div>
@@ -89,8 +94,8 @@ export function QuotationForm({
         <Textarea
           name="note"
           placeholder="Ghi chú cho sản phẩm này..."
-          value={product?.note || ''}
-          onChange={e => onChange('note', e.target.value)}
+          value={product?.note || ""}
+          onChange={(e) => onChange("note", e.target.value)}
         />
         {errors?.note && (
           <div className="text-red-500 text-xs">{errors.note}</div>
