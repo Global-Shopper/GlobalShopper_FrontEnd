@@ -10,10 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  useCheckingPurchaseRequestMutation,
-  useGetPurchaseRequestQuery,
-} from "@/services/gshopApi";
+import { useGetPurchaseRequestQuery } from "@/services/gshopApi";
 import { PaginationBar } from "@/utils/Pagination";
 import {
   Select,
@@ -24,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import PageLoading from "@/components/PageLoading";
-import { toast } from "sonner";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 
 const TABS = [
@@ -34,13 +30,42 @@ const TABS = [
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
+import { useLocation } from "react-router-dom";
+
 const AdPurchaseReqList = () => {
-  const [tab, setTab] = useState("assigned");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState(
+    new URLSearchParams(location.search).get("type") || "assigned"
+  );
+  const [currentPage, setCurrentPage] = useState(
+    Number(new URLSearchParams(location.search).get("page")) || 0
+  );
+  const [pageSize, setPageSize] = useState(
+    Number(new URLSearchParams(location.search).get("size")) || 10
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
-  const navigate = useNavigate();
+
+  // Helper to update URL params
+  const updateUrlParams = (params) => {
+    const searchParams = new URLSearchParams(location.search);
+    Object.entries(params).forEach(([key, value]) => {
+      searchParams.set(key, value);
+    });
+    navigate(`?${searchParams.toString()}`, { replace: true });
+  };
+
+  // Sync state from URL params when location.search changes
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const type = searchParams.get("type") || "assigned";
+    const page = Number(searchParams.get("page")) || 0;
+    const size = Number(searchParams.get("size")) || 10;
+    setTab(type);
+    setCurrentPage(page);
+    setPageSize(size);
+  }, [location.search]);
 
   const {
     data: requestsData,
@@ -51,23 +76,6 @@ const AdPurchaseReqList = () => {
     size: pageSize,
     type: tab,
   });
-  const [checking, { isLoading: isCheckLoading }] =
-    useCheckingPurchaseRequestMutation();
-
-  const handleChecking = async (requestId) => {
-    try {
-      await checking(requestId)
-        .unwrap()
-        .then(() => {
-          toast.success("Yêu cầu đã được kiểm tra thành công.");
-        });
-    } catch (error) {
-      toast.error(
-        "Lỗi khi kiểm tra yêu cầu: " +
-          (error?.data?.message || "Vui lòng thử lại.")
-      );
-    }
-  };
 
   // Table rendering function
   const renderTable = (requests) => (
@@ -162,11 +170,18 @@ const AdPurchaseReqList = () => {
   const handleTabChange = (value) => {
     setTab(value);
     setCurrentPage(0);
+    updateUrlParams({ type: value, page: 0, size: pageSize });
   };
 
   const handlePageSizeChange = (value) => {
     setPageSize(Number(value));
     setCurrentPage(0);
+    updateUrlParams({ type: tab, page: 0, size: value });
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    updateUrlParams({ type: tab, page, size: pageSize });
   };
 
   // Handle search input change
@@ -276,7 +291,7 @@ const AdPurchaseReqList = () => {
         <PaginationBar
           totalPages={totalPages}
           currentPage={currentPage}
-          handlePageChange={setCurrentPage}
+          handlePageChange={handlePageChange}
         />
       </Tabs>
     </div>
