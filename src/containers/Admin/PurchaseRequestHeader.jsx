@@ -14,7 +14,7 @@ export function PurchaseRequestHeader({
   onRequestUpdate,
   onCreateGroup,
   onSendQuote,
-  isSelectionMode,
+  isGroupingMode,
   isCreateGroupDisabled,
   isRequestUpdateDisabled,
   isSendQuoteDisabled,
@@ -103,15 +103,15 @@ export function PurchaseRequestHeader({
 
           {/* Toggle Tạo Nhóm button */}
           <Button
-            variant={isSelectionMode ? "default" : "outline"}
+            variant={isGroupingMode ? "default" : "outline"}
             size="sm"
             disabled={isCreateGroupDisabled}
             onClick={onCreateGroup}
-            className={isSelectionMode ? "bg-blue-600 hover:bg-blue-700" : ""}
+            className={isGroupingMode ? "bg-blue-600 hover:bg-blue-700" : ""}
           >
             <Users className="h-4 w-4 mr-2" />
-            {console.log(isSelectionMode)}
-            <div>{isSelectionMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
+            {console.log(isGroupingMode)}
+            <div>{isGroupingMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
           </Button>
 
           <Button
