@@ -1,50 +1,45 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './baseRequest';
-import endpoints from '../const/endpoints';
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { axiosBaseQuery } from "./baseRequest";
+import endpoints from "../const/endpoints";
 
 const gshopApi = createApi({
-  reducerPath: 'gshopApi',
-  tagTypes: [
-    'CustomerProfile',
-    'ShippingAddress',
-    'PurchaseRequest',
-    'Wallet',
-  ],
+  reducerPath: "gshopApi",
+  tagTypes: ["CustomerProfile", "ShippingAddress", "PurchaseRequest", "Wallet"],
   baseQuery: axiosBaseQuery(),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.LOGIN,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     register: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.REGISTER,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     changeEmail: builder.mutation({
       query: (newEmail) => ({
         params: newEmail,
         url: endpoints.CHANGE_EMAIL,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     verifyChangeEmail: builder.mutation({
       query: (data) => ({
         params: data,
         url: endpoints.VERIFY_CHANGE_EMAIL,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     verifyOTP: builder.mutation({
       query: (data) => ({
         params: data,
         url: endpoints.VERIFY_OTP,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     resendOTP: builder.query({
@@ -57,7 +52,7 @@ const gshopApi = createApi({
       query: (data) => ({
         params: data,
         url: endpoints.VERIFY_OTP_FORGOT_PASSWORD,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     forgotPassword: builder.query({
@@ -69,148 +64,158 @@ const gshopApi = createApi({
     getCustomerInfo: builder.query({
       query: () => ({
         url: `${endpoints.CUSTOMER_PROFILE}/current-information`,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: ['CustomerProfile'],
+      providesTags: ["CustomerProfile"],
     }),
     updateCustomerProfile: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.CUSTOMER_PROFILE,
-        method: 'PUT',
+        method: "PUT",
       }),
-      invalidatesTags: ['CustomerProfile'],
+      invalidatesTags: ["CustomerProfile"],
     }),
     uploadAvatar: builder.mutation({
       query: (formData) => ({
         data: formData,
         url: endpoints.UPLOAD_AVATAR,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: ['CustomerProfile'],
+      invalidatesTags: ["CustomerProfile"],
     }),
     resetPassword: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.RESET_PASSWORD,
-        method: 'PUT',
+        method: "PUT",
       }),
     }),
     getShippingAddress: builder.query({
       query: () => ({
         url: endpoints.SHIPPING_ADDRESS,
-        method: 'GET',
+        method: "GET",
       }),
       transformResponse: (response) => {
         if (Array.isArray(response)) {
-          response = [...response].sort((a, b) => (b.default === true) - (a.default === true));
+          response = [...response].sort(
+            (a, b) => (b.default === true) - (a.default === true)
+          );
         }
         return response;
       },
-      providesTags: ['ShippingAddress'],
+      providesTags: ["ShippingAddress"],
     }),
     createShippingAddress: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.SHIPPING_ADDRESS,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: ['ShippingAddress'],
+      invalidatesTags: ["ShippingAddress"],
     }),
     updateShippingAddress: builder.mutation({
       query: ({ id, ...data }) => ({
         data: data,
         url: `${endpoints.SHIPPING_ADDRESS}/${id}`,
-        method: 'PUT',
+        method: "PUT",
       }),
-      invalidatesTags: ['ShippingAddress'],
+      invalidatesTags: ["ShippingAddress"],
     }),
     deleteShippingAddress: builder.mutation({
       query: (id) => ({
         url: `${endpoints.SHIPPING_ADDRESS}/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['ShippingAddress'],
+      invalidatesTags: ["ShippingAddress"],
     }),
     defaultShippingAddress: builder.mutation({
       query: (id) => ({
         url: `${endpoints.DEFAULT_SHIPPING_ADDRESS}/${id}`,
-        method: 'PUT',
+        method: "PUT",
       }),
-      invalidatesTags: ['ShippingAddress'],
+      invalidatesTags: ["ShippingAddress"],
     }),
     changePassword: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.CHANGE_PASSWORD,
-        method: 'PUT',
+        method: "PUT",
       }),
     }),
     getPurchaseRequest: builder.query({
       query: (data) => ({
         params: data,
         url: endpoints.PURCHASE_REQUEST,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: ['PurchaseRequest'],
+      providesTags: ["PurchaseRequest"],
     }),
     checkingPurchaseRequest: builder.mutation({
       query: (id) => ({
         url: `${endpoints.CHECKING_PURCHASE_REQUEST}/${id}`,
-        method: 'PATCH',
+        method: "PATCH",
       }),
-      invalidatesTags: ['PurchaseRequest'],
+      invalidatesTags: ["PurchaseRequest"],
     }),
     createWithLinkPurchaseRequest: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.WITH_LINK_PURCHASE_REQUEST,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: ['PurchaseRequest'],
+      invalidatesTags: ["PurchaseRequest"],
     }),
     createWithoutLinkPurchaseRequest: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.WITHOUT_LINK_PURCHASE_REQUEST,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: ['PurchaseRequest'],
+      invalidatesTags: ["PurchaseRequest"],
     }),
     getPurchaseRequestDetail: builder.query({
       query: (id) => ({
         url: `${endpoints.PURCHASE_REQUEST}/${id}`,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: ['PurchaseRequest', 'PurchaseRequestDetail']
+      providesTags: ["PurchaseRequest", "PurchaseRequestDetail"],
     }),
     createQuotation: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.QUOTATION,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: ['PurchaseRequestDetail'],
+      invalidatesTags: ["PurchaseRequestDetail"],
+    }),
+    createGroup: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.SUB_REQUEST,
+        method: "POST",
+      }),
+      invalidatesTags: ["PurchaseRequestDetail"],
     }),
     getWallet: builder.query({
       query: () => ({
         url: endpoints.WALLET,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: ['Wallet'],
+      providesTags: ["Wallet"],
     }),
     depositWallet: builder.mutation({
       query: (data) => ({
         data: data,
         url: endpoints.WALLET,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     transactionHistory: builder.query({
       query: (data) => ({
         params: data,
         url: endpoints.TRANSACTION_HISTORY,
-        method: 'GET',
+        method: "GET",
       }),
     }),
     // checkPayment: builder.query({
@@ -252,6 +257,7 @@ export const {
   useCheckingPurchaseRequestMutation,
   useGetPurchaseRequestDetailQuery,
   useTransactionHistoryQuery,
+  useCreateGroupMutation,
 } = gshopApi;
 
 export default gshopApi;

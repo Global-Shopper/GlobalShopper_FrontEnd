@@ -11,18 +11,19 @@ export function PurchaseRequestHeader({
   adminName,
   createdAt,
   expiredAt,
-  requestType,
-  isRequestingUpdate,
-  updateRequested,
-  onRequestCustomerUpdate,
+  onRequestUpdate,
   onCreateGroup,
+  onSendQuote,
+  isSelectionMode,
+  isCreateGroupDisabled,
+  isRequestUpdateDisabled,
+  isSendQuoteDisabled,
   getStatusColor,
   getStatusText,
   formatDate,
 }) {
   const [checking, { isLoading: isCheckLoading }] =
     useCheckingPurchaseRequestMutation();
-  const isCreateGroupDisabled = status === "SENT" || requestType === "OFFLINE";
   const handleCheckingRequest = async () => {
     try {
       await checking(requestId)
@@ -92,27 +93,32 @@ export function PurchaseRequestHeader({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onRequestCustomerUpdate}
-                disabled={isRequestingUpdate || updateRequested}
+                onClick={onRequestUpdate}
+                disabled={isRequestUpdateDisabled}
               >
-                {isRequestingUpdate
-                  ? "Requesting..."
-                  : updateRequested
-                  ? "Update Requested"
-                  : "Yêu cầu khách cập nhật thông tin"}
+                Yêu cầu khách cập nhật thông tin
               </Button>
             </>
           )}
+
+          {/* Toggle Tạo Nhóm button */}
           <Button
-            variant="outline"
+            variant={isSelectionMode ? "default" : "outline"}
             size="sm"
             disabled={isCreateGroupDisabled}
             onClick={onCreateGroup}
+            className={isSelectionMode ? "bg-blue-600 hover:bg-blue-700" : ""}
           >
             <Users className="h-4 w-4 mr-2" />
-            Tạo Nhóm
+            {console.log(isSelectionMode)}
+            <div>{isSelectionMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
           </Button>
-          <Button size="sm" disabled={status === "SENT"}>
+
+          <Button
+            size="sm"
+            disabled={isSendQuoteDisabled}
+            onClick={onSendQuote}
+          >
             Gửi Báo Giá
           </Button>
         </div>
