@@ -16,8 +16,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 
 export default function ItemForm({ initialItem, index, onChange }) {
-  const [addFieldValue, setAddFieldValue] = useState("");
-
   // Use local state for variantRows (not inside item)
   const [item, setItem] = useState({
     name: "",
@@ -26,14 +24,12 @@ export default function ItemForm({ initialItem, index, onChange }) {
     quantity: 1,
   });
   const [variantRows, setVariantRows] = useState([]);
+  const [addFieldValue, setAddFieldValue] = useState("");
+
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrls, setPreviewUrls] = useState([]); // local preview only
   const fileInputRef = useRef();
 
-  const handleAddVariantRow = (value) => {
-    addVariantRow(value);
-    setAddFieldValue(""); // Reset to show placeholder again
-  };
   // Sync initialItem to state
   useEffect(() => {
     setItem({
@@ -46,20 +42,11 @@ export default function ItemForm({ initialItem, index, onChange }) {
     if (Array.isArray(initialItem?.variants)) {
       setVariantRows(
         initialItem.variants.map((v) => {
-          // Parse "Color: Red" to {fieldType, customFieldName, fieldValue}
+          // Parse "Color: Red" to { attributeName, fieldValue }
           const match = v.match(/^([^:]+):\s*(.+)$/);
-          if (!match)
-            return { fieldType: "Khác", customFieldName: v, fieldValue: "" };
+          if (!match) return { attributeName: v, fieldValue: "" };
           const [_, left, right] = match;
-          // If left is in PREDEFINED_VARIANT_FIELDS, use as fieldType
-          if (PREDEFINED_VARIANT_FIELDS.includes(left)) {
-            return { fieldType: left, customFieldName: "", fieldValue: right };
-          }
-          return {
-            fieldType: "Khác",
-            customFieldName: left,
-            fieldValue: right,
-          };
+          return { attributeName: left, fieldValue: right };
         })
       );
     } else {
@@ -71,16 +58,8 @@ export default function ItemForm({ initialItem, index, onChange }) {
   function getFormattedVariants(rows) {
     if (!rows) return [];
     return rows
-      .filter(
-        (row) =>
-          (row.fieldType !== "Khác" ? row.fieldType : row.customFieldName) &&
-          row.fieldValue
-      )
-      .map((row) =>
-        row.fieldType === "Khác"
-          ? `${row.customFieldName}: ${row.fieldValue}`
-          : `${row.fieldType}: ${row.fieldValue}`
-      );
+      .filter((row) => row.attributeName && row.fieldValue)
+      .map((row) => `${row.attributeName}: ${row.fieldValue}`);
   }
 
   // Notify parent if needed
@@ -104,10 +83,19 @@ export default function ItemForm({ initialItem, index, onChange }) {
   };
 
   const addVariantRow = (fieldType) => {
-    setVariantRows((rows) => [
-      ...rows,
-      { fieldType, customFieldName: "", fieldValue: "" },
-    ]);
+    if (fieldType === "Khác") {
+      setVariantRows((rows) => [
+        ...rows,
+        { attributeName: "", fieldValue: "" },
+      ]);
+      setAddFieldValue("");
+    } else if (fieldType) {
+      setVariantRows((rows) => [
+        ...rows,
+        { attributeName: fieldType, fieldValue: "" },
+      ]);
+      setAddFieldValue("");
+    }
   };
 
   const removeVariantRow = (idx) => {
@@ -307,71 +295,79 @@ export default function ItemForm({ initialItem, index, onChange }) {
             Thuộc tính sản phẩm
           </Label>
           {console.log(variantRows)}
-          {variantRows.map((row, variantIdx) => (
-            <div key={variantIdx} className="flex gap-2 mb-2 items-center">
-              <Select
-                value={row.fieldType || row.customFieldName || "Khác"}
-                onValueChange={(value) => {
-                  console.log(value);
-                  updateVariantRow(variantIdx, {
-                    fieldType: value,
-                    customFieldName:
-                      value === "Khác" ? "" : row.customFieldName,
-                  });
-                }}
-              >
-                <SelectTrigger className="h-10 min-w-[120px]">
-                  <SelectValue placeholder="Chọn thuộc tính" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PREDEFINED_VARIANT_FIELDS.filter(
-                    (field) =>
-                      field === "Khác" ||
-                      !variantRows.map((r) => r.fieldType).includes(field) ||
-                      field === row.fieldType
-                  ).map((opt) => (
-                    <SelectItem key={opt} value={opt}>
-                      {opt}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {row.fieldType === "Khác" && (
+          {variantRows.map((row, variantIdx) => {
+            const isPredefined = PREDEFINED_VARIANT_FIELDS.includes(
+              row.attributeName
+            );
+            return (
+              <div key={variantIdx} className="flex gap-2 mb-2 items-center">
+                <Select
+                  value={isPredefined ? row.attributeName : "Khác"}
+                  onValueChange={(value) => {
+                    if (value === "Khác") {
+                      updateVariantRow(variantIdx, { attributeName: "" });
+                    } else {
+                      updateVariantRow(variantIdx, { attributeName: value });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-10 min-w-[120px]">
+                    <SelectValue placeholder="Chọn thuộc tính" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PREDEFINED_VARIANT_FIELDS.filter(
+                      (field) =>
+                        field === "Khác" ||
+                        !variantRows
+                          .map((r, i) =>
+                            i !== variantIdx ? r.attributeName : null
+                          )
+                          .includes(field)
+                    ).map((opt) => (
+                      <SelectItem key={opt} value={opt}>
+                        {opt}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Inline custom attribute name input for custom fields */}
+                {!isPredefined && (
+                  <Input
+                    value={row.attributeName}
+                    onChange={(e) =>
+                      updateVariantRow(variantIdx, {
+                        attributeName: e.target.value,
+                      })
+                    }
+                    placeholder="Tên thuộc tính"
+                    className="h-10 flex-1"
+                  />
+                )}
                 <Input
-                  value={row.customFieldName}
+                  value={row.fieldValue}
                   onChange={(e) =>
                     updateVariantRow(variantIdx, {
-                      customFieldName: e.target.value,
+                      fieldValue: e.target.value,
                     })
                   }
-                  placeholder="Tên thuộc tính"
+                  placeholder="Giá trị thuộc tính"
                   className="h-10 flex-1"
                 />
-              )}
-              <Input
-                value={row.fieldValue}
-                onChange={(e) =>
-                  updateVariantRow(variantIdx, {
-                    fieldValue: e.target.value,
-                  })
-                }
-                placeholder="Giá trị thuộc tính"
-                className="h-10 flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => removeVariantRow(variantIdx)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeVariantRow(variantIdx)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            );
+          })}
           {/* Add Variant Button */}
           <div className="mt-2">
-            <Select value={addFieldValue} onValueChange={handleAddVariantRow}>
+            <Select value={addFieldValue} onValueChange={addVariantRow}>
               <SelectTrigger className="h-10 w-48">
                 <SelectValue placeholder="+ Thêm thuộc tính" />
               </SelectTrigger>
@@ -379,7 +375,7 @@ export default function ItemForm({ initialItem, index, onChange }) {
                 {PREDEFINED_VARIANT_FIELDS.filter(
                   (field) =>
                     field === "Khác" ||
-                    !variantRows.map((r) => r.fieldType).includes(field)
+                    !variantRows.map((r) => r.attributeName).includes(field)
                 ).map((opt) => (
                   <SelectItem key={opt} value={opt}>
                     {opt}
