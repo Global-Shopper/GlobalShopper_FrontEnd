@@ -21,6 +21,8 @@ const endpoints = {
   TRANSACTION_HISTORY: "/transactions/current-user",
   QUOTATION: "/quotation",
   SUB_REQUEST: "/purchase-request/create-sub-request",
+  RAW_DATA: "/ai/get-raw-data",
+  QUOTATION_CALCULATE: "/quotation/calculate",
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
 };
 export default endpoints;

@@ -27,7 +27,7 @@ export const getStatusText = (status) => {
     case "CANCELLED":
       return "Đã hủy";
     case "INSUFFICIENT":
-      return "Không đủ";
+      return "Chờ cập nhật lại";
     default:
       return status;
   }

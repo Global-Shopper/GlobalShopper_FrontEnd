@@ -31,40 +31,25 @@ const TABS = [
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 import { useLocation } from "react-router-dom";
+import { useUrlPagination } from "@/hooks/useUrlPagination";
+import PageError from "@/components/PageError";
 
 const AdPurchaseReqList = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [tab, setTab] = useState(
-    new URLSearchParams(location.search).get("type") || "assigned"
-  );
-  const [currentPage, setCurrentPage] = useState(
-    Number(new URLSearchParams(location.search).get("page")) || 0
-  );
-  const [pageSize, setPageSize] = useState(
-    Number(new URLSearchParams(location.search).get("size")) || 10
-  );
+  const [page, setPage, size, setSize, type, setType] = useUrlPagination();
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
-
-  // Helper to update URL params
-  const updateUrlParams = (params) => {
-    const searchParams = new URLSearchParams(location.search);
-    Object.entries(params).forEach(([key, value]) => {
-      searchParams.set(key, value);
-    });
-    navigate(`?${searchParams.toString()}`, { replace: true });
-  };
 
   // Sync state from URL params when location.search changes
   React.useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const type = searchParams.get("type") || "assigned";
-    const page = Number(searchParams.get("page")) || 0;
+    const page = Number(searchParams.get("page")) || 1;
     const size = Number(searchParams.get("size")) || 10;
-    setTab(type);
-    setCurrentPage(page);
-    setPageSize(size);
+    setType(type);
+    setPage(page);
+    setSize(size);
   }, [location.search]);
 
   const {
@@ -72,9 +57,9 @@ const AdPurchaseReqList = () => {
     isFetching: isRequestLoading,
     isError: isRequestError,
   } = useGetPurchaseRequestQuery({
-    page: currentPage,
-    size: pageSize,
-    type: tab,
+    page: page - 1,
+    size: size,
+    type: type,
   });
 
   // Table rendering function
@@ -168,20 +153,14 @@ const AdPurchaseReqList = () => {
   const totalPages = requestsData?.totalPages || 1;
 
   const handleTabChange = (value) => {
-    setTab(value);
-    setCurrentPage(0);
-    updateUrlParams({ type: value, page: 0, size: pageSize });
+    setType(value);
+    setPage(1);
+    setSize(10);
   };
 
   const handlePageSizeChange = (value) => {
-    setPageSize(Number(value));
-    setCurrentPage(0);
-    updateUrlParams({ type: tab, page: 0, size: value });
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    updateUrlParams({ type: tab, page, size: pageSize });
+    setSize(Number(value));
+    setPage(1);
   };
 
   // Handle search input change
@@ -199,7 +178,7 @@ const AdPurchaseReqList = () => {
   return (
     <div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
       <Tabs
-        value={tab}
+        value={type}
         onValueChange={handleTabChange}
         className="flex-1 flex flex-col"
       >
@@ -223,10 +202,7 @@ const AdPurchaseReqList = () => {
               >
                 Số dòng/trang:
               </label>
-              <Select
-                value={String(pageSize)}
-                onValueChange={handlePageSizeChange}
-              >
+              <Select value={String(size)} onValueChange={handlePageSizeChange}>
                 <SelectTrigger
                   id="pageSize"
                   className="w-24 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500"
@@ -272,7 +248,7 @@ const AdPurchaseReqList = () => {
             {isRequestLoading ? (
               <PageLoading />
             ) : isRequestError ? (
-              <div>Lỗi khi tải dữ liệu.</div>
+              <PageError />
             ) : (
               renderTable(requestsData?.content || [], true)
             )}
@@ -281,18 +257,14 @@ const AdPurchaseReqList = () => {
             {isRequestLoading ? (
               <PageLoading disEnableFullScreen />
             ) : isRequestError ? (
-              <div>Lỗi khi tải dữ liệu.</div>
+              <PageError />
             ) : (
               renderTable(requestsData?.content || [])
             )}
           </TabsContent>
         </div>
-        {console.log(currentPage, pageSize, totalPages)}
-        <PaginationBar
-          totalPages={totalPages}
-          currentPage={currentPage}
-          handlePageChange={handlePageChange}
-        />
+        {console.log(page, size, totalPages)}
+        <PaginationBar totalPages={totalPages} page={page} setPage={setPage} />
       </Tabs>
     </div>
   );

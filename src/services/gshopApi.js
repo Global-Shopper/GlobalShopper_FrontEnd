@@ -174,12 +174,26 @@ const gshopApi = createApi({
       }),
       invalidatesTags: ["PurchaseRequest"],
     }),
+    getRawData: builder.query({
+      query: (link) => ({
+        params: link,
+        url: endpoints.RAW_DATA,
+        method: "GET",
+      }),
+    }),
     getPurchaseRequestDetail: builder.query({
       query: (id) => ({
         url: `${endpoints.PURCHASE_REQUEST}/${id}`,
         method: "GET",
       }),
       providesTags: ["PurchaseRequest", "PurchaseRequestDetail"],
+    }),
+    calculateQuotation: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.QUOTATION_CALCULATE,
+        method: "POST",
+      }),
     }),
     createQuotation: builder.mutation({
       query: (data) => ({
@@ -258,6 +272,8 @@ export const {
   useGetPurchaseRequestDetailQuery,
   useTransactionHistoryQuery,
   useCreateGroupMutation,
+  useCalculateQuotationMutation,
+  useLazyGetRawDataQuery,
 } = gshopApi;
 
 export default gshopApi;
