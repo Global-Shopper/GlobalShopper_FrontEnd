@@ -5,8 +5,8 @@ import {
   Pagination,
   PaginationContent,
   PaginationPrevious,
-  PaginationNext
-} from "@/components/ui/pagination"
+  PaginationNext,
+} from "@/components/ui/pagination";
 
 /**
  * Generate pagination items for a given page range
@@ -16,8 +16,13 @@ import {
  * @param {number} maxVisiblePages - Maximum number of visible page buttons
  * @returns {Array} Array of pagination item components
  */
-export const generatePaginationItems = (totalPages, currentPage, handlePageChange, maxVisiblePages = 5) => {
-  const items = []
+export const generatePaginationItems = (
+  totalPages,
+  currentPage,
+  handlePageChange,
+  maxVisiblePages = 5
+) => {
+  const items = [];
 
   if (totalPages <= maxVisiblePages) {
     // Show all pages if total is small
@@ -31,7 +36,7 @@ export const generatePaginationItems = (totalPages, currentPage, handlePageChang
             {i + 1}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
   } else {
     // Show first page
@@ -44,7 +49,7 @@ export const generatePaginationItems = (totalPages, currentPage, handlePageChang
           1
         </PaginationLink>
       </PaginationItem>
-    )
+    );
 
     // Show ellipsis if needed
     if (currentPage > 2) {
@@ -52,12 +57,12 @@ export const generatePaginationItems = (totalPages, currentPage, handlePageChang
         <PaginationItem key="ellipsis1">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
 
     // Show current page and neighbors
-    const start = Math.max(1, currentPage - 1)
-    const end = Math.min(totalPages - 2, currentPage + 1)
+    const start = Math.max(1, currentPage - 1);
+    const end = Math.min(totalPages - 2, currentPage + 1);
 
     for (let i = start; i <= end; i++) {
       items.push(
@@ -69,7 +74,7 @@ export const generatePaginationItems = (totalPages, currentPage, handlePageChang
             {i + 1}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
 
     // Show ellipsis if needed
@@ -78,7 +83,7 @@ export const generatePaginationItems = (totalPages, currentPage, handlePageChang
         <PaginationItem key="ellipsis2">
           <PaginationEllipsis />
         </PaginationItem>
-      )
+      );
     }
 
     // Show last page
@@ -92,12 +97,12 @@ export const generatePaginationItems = (totalPages, currentPage, handlePageChang
             {totalPages}
           </PaginationLink>
         </PaginationItem>
-      )
+      );
     }
   }
 
-  return items
-}
+  return items;
+};
 
 /**
  * Calculate pagination info
@@ -113,11 +118,11 @@ export const getPaginationInfo = (pageable, totalPages, totalElements) => {
     totalPages: totalPages || 0,
     totalElements: totalElements || 0,
     hasNext: !pageable?.last,
-    hasPrevious: !pageable?.first
-  }
-}
+    hasPrevious: !pageable?.first,
+  };
+};
 
-export const PaginationBar = ({ totalPages, currentPage, handlePageChange }) => {
+export const PaginationBar = ({ totalPages, page, setPage }) => {
   return (
     <>
       {totalPages > 1 && (
@@ -126,17 +131,29 @@ export const PaginationBar = ({ totalPages, currentPage, handlePageChange }) => 
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
-                  className={currentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  className={
+                    page === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
 
-              {generatePaginationItems(totalPages, currentPage, handlePageChange)}
+              {generatePaginationItems(
+                totalPages,
+                page - 1, // 0-based for UI components
+                (page) => setPage(page + 1)
+              )}
 
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
-                  className={currentPage === totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onClick={() => setPage(Math.min(totalPages, page + 1))}
+                  className={
+                    page === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
             </PaginationContent>
@@ -144,6 +161,5 @@ export const PaginationBar = ({ totalPages, currentPage, handlePageChange }) => 
         </div>
       )}
     </>
-
-  )
-}
+  );
+};
