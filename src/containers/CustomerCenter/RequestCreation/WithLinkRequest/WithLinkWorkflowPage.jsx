@@ -450,7 +450,7 @@ export default function WithLinkWorkflowPage() {
               item.status === "manual" ||
               item.product) && (
               <ItemForm
-                initialProduct={item.product}
+                initialItem={item.product}
                 index={index}
                 onChange={(updatedProduct) => {
                   const newLinks = [...productLinks];

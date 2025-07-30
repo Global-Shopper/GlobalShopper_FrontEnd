@@ -13,26 +13,105 @@ import { Loader2, Upload, X, Trash2 } from "lucide-react";
 import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant";
 
 import React, { useEffect, useRef, useState } from "react";
+import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 
-export default function ItemForm({ initialProduct, index, onChange }) {
-  const [product, setProduct] = useState({});
-  useEffect(() => {
-    setProduct(initialProduct);
-  }, [initialProduct]);
-  console.log(product);
+export default function ItemForm({ initialItem, index, onChange }) {
+  const [addFieldValue, setAddFieldValue] = useState("");
+
+  // Use local state for variantRows (not inside item)
+  const [item, setItem] = useState({
+    name: "",
+    description: "",
+    images: [],
+    quantity: 1,
+  });
+  const [variantRows, setVariantRows] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState([]); // local preview only
   const fileInputRef = useRef();
 
+  const handleAddVariantRow = (value) => {
+    addVariantRow(value);
+    setAddFieldValue(""); // Reset to show placeholder again
+  };
+  // Sync initialItem to state
+  useEffect(() => {
+    setItem({
+      name: initialItem?.name || "",
+      description: initialItem?.description || "",
+      images: initialItem?.images || [],
+      quantity: initialItem?.quantity || 1,
+    });
+    // Convert variants (array of string) to variantRows if needed
+    if (Array.isArray(initialItem?.variants)) {
+      setVariantRows(
+        initialItem.variants.map((v) => {
+          // Parse "Color: Red" to {fieldType, customFieldName, fieldValue}
+          const match = v.match(/^([^:]+):\s*(.+)$/);
+          if (!match)
+            return { fieldType: "Khác", customFieldName: v, fieldValue: "" };
+          const [_, left, right] = match;
+          // If left is in PREDEFINED_VARIANT_FIELDS, use as fieldType
+          if (PREDEFINED_VARIANT_FIELDS.includes(left)) {
+            return { fieldType: left, customFieldName: "", fieldValue: right };
+          }
+          return {
+            fieldType: "Khác",
+            customFieldName: left,
+            fieldValue: right,
+          };
+        })
+      );
+    } else {
+      setVariantRows([]);
+    }
+  }, [initialItem]);
+
+  // Helper to format variants automatically
+  function getFormattedVariants(rows) {
+    if (!rows) return [];
+    return rows
+      .filter(
+        (row) =>
+          (row.fieldType !== "Khác" ? row.fieldType : row.customFieldName) &&
+          row.fieldValue
+      )
+      .map((row) =>
+        row.fieldType === "Khác"
+          ? `${row.customFieldName}: ${row.fieldValue}`
+          : `${row.fieldType}: ${row.fieldValue}`
+      );
+  }
+
   // Notify parent if needed
-  const notifyChange = (updatedProduct) => {
-    setProduct(updatedProduct);
-    if (onChange) onChange(updatedProduct);
+  const notifyChange = (updated) => {
+    const formattedVariants = getFormattedVariants(variantRows);
+    const itemWithVariants = { ...updated, variants: formattedVariants };
+    setItem(itemWithVariants);
+    if (onChange) onChange(itemWithVariants);
   };
 
   // Handlers
   const handleFieldChange = (field, value) => {
-    const updatedProduct = { ...product, [field]: value };
-    notifyChange(updatedProduct);
+    const updatedItem = { ...item, [field]: value };
+    notifyChange(updatedItem);
+  };
+
+  const updateVariantRow = (idx, changes) => {
+    setVariantRows((rows) =>
+      rows.map((row, i) => (i === idx ? { ...row, ...changes } : row))
+    );
+  };
+
+  const addVariantRow = (fieldType) => {
+    setVariantRows((rows) => [
+      ...rows,
+      { fieldType, customFieldName: "", fieldValue: "" },
+    ]);
+  };
+
+  const removeVariantRow = (idx) => {
+    setVariantRows((rows) => rows.filter((_, i) => i !== idx));
   };
 
   const handleImageUpload = async (event) => {
@@ -50,56 +129,47 @@ export default function ItemForm({ initialProduct, index, onChange }) {
     }
     setIsUploading(true);
     try {
-      // TODO: Replace with your upload logic
-      const urls = files.map(() => ""); // placeholder
-      const updatedProduct = {
-        ...product,
-        images: [...(product.images || []), ...urls.filter(Boolean)],
-      };
-      notifyChange(updatedProduct);
+      // Step 1: Add local previews immediately
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      setPreviewUrls((prev) => [...prev, ...newPreviews]);
+
+      // Step 2: Upload in background
+      for (const file of files) {
+        const url = await uploadToCloudinary(file);
+        if (url) {
+          // Remove the first preview (FIFO)
+          setPreviewUrls((prev) => {
+            if (prev.length > 0) {
+              URL.revokeObjectURL(prev[0]);
+              return prev.slice(1);
+            }
+            return prev;
+          });
+          const updatedItem = {
+            ...item,
+            images: [...(item.images || []), url],
+          };
+          notifyChange(updatedItem);
+        }
+      }
     } catch {
       alert("Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.");
     } finally {
       setIsUploading(false);
     }
   };
-
   const removeImage = (imgIdx) => {
-    const updatedProduct = {
-      ...product,
-      images: product.images.filter((_, i) => i !== imgIdx),
+    // Remove preview and revoke object URL
+    setPreviewUrls((prev) => {
+      if (prev[imgIdx]) URL.revokeObjectURL(prev[imgIdx]);
+      return prev.filter((_, i) => i !== imgIdx);
+    });
+    // Remove from product state (cloud URLs)
+    const updatedItem = {
+      ...item,
+      images: item.images.filter((_, i) => i !== imgIdx),
     };
-    notifyChange(updatedProduct);
-  };
-
-  const addVariantRow = (fieldType) => {
-    const updatedProduct = {
-      ...product,
-      variantRows: [
-        ...(product.variantRows || []),
-        { fieldType, customFieldName: "", fieldValue: "" },
-      ],
-    };
-    notifyChange(updatedProduct);
-  };
-
-  const updateVariantRow = (variantIdx, changes) => {
-    const updatedVariantRows = product.variantRows.map((row, i) =>
-      i === variantIdx ? { ...row, ...changes } : row
-    );
-    const updatedProduct = {
-      ...product,
-      variantRows: updatedVariantRows,
-    };
-    notifyChange(updatedProduct);
-  };
-
-  const removeVariantRow = (variantIdx) => {
-    const updatedProduct = {
-      ...product,
-      variantRows: product.variantRows.filter((_, i) => i !== variantIdx),
-    };
-    notifyChange(updatedProduct);
+    notifyChange(updatedItem);
   };
 
   // (Render logic will use local product state and handlers)
@@ -115,19 +185,19 @@ export default function ItemForm({ initialProduct, index, onChange }) {
             Tên sản phẩm <span className="text-red-500">*</span>
           </Label>
           <Input
-            value={product.name || ""}
+            value={item.name || ""}
             onChange={(e) => handleFieldChange("name", e.target.value)}
             placeholder="Nhập tên sản phẩm"
             className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
         </div>
-        {console.log(product.description)}
+        {console.log(item.description)}
         <div>
           <Label className="text-sm font-medium text-gray-700">
             Mô tả sản phẩm
           </Label>
           <Textarea
-            value={product.description || ""}
+            value={item.description || ""}
             onChange={(e) => handleFieldChange("description", e.target.value)}
             placeholder="Nhập mô tả chi tiết sản phẩm"
             rows={3}
@@ -141,8 +211,33 @@ export default function ItemForm({ initialProduct, index, onChange }) {
             Hình ảnh sản phẩm
           </Label>
           <div className="flex flex-wrap gap-3">
-            {product.images?.map((img, imgIdx) => (
-              <div key={`${img}-${imgIdx}`} className="relative">
+            {/* Show previews for images not yet uploaded (local only) */}
+            {previewUrls.map((url, idx) => (
+              <div key={url} className="relative">
+                <img
+                  src={url}
+                  alt={`Product preview ${idx + 1}`}
+                  className="w-20 h-20 object-cover rounded-lg border"
+                />
+                {isUploading && (
+                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white/60 rounded-lg">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                  </div>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeImage(idx)}
+                  className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+            {/* Show uploaded images (cloud URLs) */}
+            {item.images?.map((img, imgIdx) => (
+              <div key={img} className="relative">
                 <img
                   src={img}
                   alt={`Product preview ${imgIdx + 1}`}
@@ -152,7 +247,7 @@ export default function ItemForm({ initialProduct, index, onChange }) {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeImage(index, imgIdx)}
+                  onClick={() => removeImage(imgIdx)}
                   className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
                 >
                   <X className="h-3 w-3" />
@@ -195,7 +290,7 @@ export default function ItemForm({ initialProduct, index, onChange }) {
             type="number"
             min="1"
             max="10"
-            value={product.quantity || 1}
+            value={item.quantity || 1}
             onChange={(e) => {
               let value = parseInt(e.target.value) || 1;
               if (value > 10) value = 10;
@@ -211,75 +306,72 @@ export default function ItemForm({ initialProduct, index, onChange }) {
           <Label className="text-sm font-medium text-gray-700 mb-2 block">
             Thuộc tính sản phẩm
           </Label>
-          {product.variantRows?.map((row, variantIdx) => {
-            return (
-              <div key={variantIdx} className="flex gap-2 mb-2 items-center">
-                <Select
-                  value={row.fieldType}
-                  onValueChange={(value) =>
-                    updateVariantRow(variantIdx, {
-                      fieldType: value,
-                      customFieldName:
-                        value === "Khác" ? "" : row.customFieldName,
-                    })
-                  }
-                >
-                  <SelectTrigger className="h-10 min-w-[120px]">
-                    <SelectValue placeholder="Chọn thuộc tính" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PREDEFINED_VARIANT_FIELDS.filter(
-                      (field) =>
-                        field === "Khác" ||
-                        !product.variantRows
-                          .map((r) => r.fieldType)
-                          .includes(field) ||
-                        field === row.fieldType
-                    ).map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {row.fieldType === "Khác" && (
-                  <Input
-                    value={row.customFieldName}
-                    onChange={(e) =>
-                      updateVariantRow(variantIdx, {
-                        customFieldName: e.target.value,
-                      })
-                    }
-                    placeholder="Tên thuộc tính"
-                    className="h-10 flex-1"
-                  />
-                )}
+          {console.log(variantRows)}
+          {variantRows.map((row, variantIdx) => (
+            <div key={variantIdx} className="flex gap-2 mb-2 items-center">
+              <Select
+                value={row.fieldType || row.customFieldName || "Khác"}
+                onValueChange={(value) => {
+                  console.log(value);
+                  updateVariantRow(variantIdx, {
+                    fieldType: value,
+                    customFieldName:
+                      value === "Khác" ? "" : row.customFieldName,
+                  });
+                }}
+              >
+                <SelectTrigger className="h-10 min-w-[120px]">
+                  <SelectValue placeholder="Chọn thuộc tính" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PREDEFINED_VARIANT_FIELDS.filter(
+                    (field) =>
+                      field === "Khác" ||
+                      !variantRows.map((r) => r.fieldType).includes(field) ||
+                      field === row.fieldType
+                  ).map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {row.fieldType === "Khác" && (
                 <Input
-                  value={row.fieldValue}
+                  value={row.customFieldName}
                   onChange={(e) =>
                     updateVariantRow(variantIdx, {
-                      fieldValue: e.target.value,
+                      customFieldName: e.target.value,
                     })
                   }
-                  placeholder="Giá trị thuộc tính"
+                  placeholder="Tên thuộc tính"
                   className="h-10 flex-1"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeVariantRow(variantIdx)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            );
-          })}
-
+              )}
+              <Input
+                value={row.fieldValue}
+                onChange={(e) =>
+                  updateVariantRow(variantIdx, {
+                    fieldValue: e.target.value,
+                  })
+                }
+                placeholder="Giá trị thuộc tính"
+                className="h-10 flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => removeVariantRow(variantIdx)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
           {/* Add Variant Button */}
           <div className="mt-2">
-            <Select onValueChange={addVariantRow}>
+            <Select value={addFieldValue} onValueChange={handleAddVariantRow}>
               <SelectTrigger className="h-10 w-48">
                 <SelectValue placeholder="+ Thêm thuộc tính" />
               </SelectTrigger>
@@ -287,9 +379,7 @@ export default function ItemForm({ initialProduct, index, onChange }) {
                 {PREDEFINED_VARIANT_FIELDS.filter(
                   (field) =>
                     field === "Khác" ||
-                    !(
-                      product.variantRows?.map((r) => r.fieldType) || []
-                    ).includes(field)
+                    !variantRows.map((r) => r.fieldType).includes(field)
                 ).map((opt) => (
                   <SelectItem key={opt} value={opt}>
                     {opt}
