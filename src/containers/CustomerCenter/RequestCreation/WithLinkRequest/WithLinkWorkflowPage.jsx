@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,10 +30,8 @@ import {
   useLazyGetRawDataQuery,
   useCreateWithLinkPurchaseRequestMutation,
 } from "@/services/gshopApi";
-
-import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { toast } from "sonner";
-import ItemForm from "./ItemForm";
+import ItemForm from "./ItemExtractForm";
 
 const createEmptyProduct = () => ({
   name: "",
@@ -127,7 +125,7 @@ export default function WithLinkWorkflowPage() {
         newLinks[index].status = "success";
         toast.success("Trích xuất thông tin sản phẩm thành công!");
       }
-    } catch (error) {
+    } catch {
       newLinks[index].status = "failed";
       newLinks[index].product = {
         ...createEmptyProduct(),
@@ -151,109 +149,6 @@ export default function WithLinkWorkflowPage() {
     setProductLinks(newLinks);
     toast.info("Chế độ nhập thủ công đã được kích hoạt.");
   };
-
-  // When product info is edited
-  const handleProductChange = (index, product) => {
-    const newLinks = [...productLinks];
-    newLinks[index].product = product;
-    setProductLinks(newLinks);
-  };
-
-  // Handle image upload for a specific product
-  const handleImageUpload = async (index, event) => {
-    const files = Array.from(event.target.files);
-    if (!files.length) return;
-
-    // Validate all files
-    for (const file of files) {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Vui lòng chọn file hình ảnh");
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("Kích thước file không được vượt quá 10MB");
-        return;
-      }
-    }
-
-    const newLinks = [...productLinks];
-    newLinks[index].isUploading = true;
-    setProductLinks(newLinks);
-
-    try {
-      const uploadPromises = files.map((file) => uploadToCloudinary(file));
-      const urls = await Promise.all(uploadPromises);
-      const updatedProduct = {
-        ...newLinks[index].product,
-        images: [
-          ...(newLinks[index].product?.images || []),
-          ...urls.filter(Boolean),
-        ],
-      };
-      handleProductChange(index, updatedProduct);
-    } catch {
-      toast.error("Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.");
-    } finally {
-      newLinks[index].isUploading = false;
-      setProductLinks(newLinks);
-    }
-  };
-
-  // Remove image from a specific product
-  const removeImage = (productIndex, imageIndex) => {
-    const newLinks = [...productLinks];
-    const updatedProduct = {
-      ...newLinks[productIndex].product,
-      images: newLinks[productIndex].product.images.filter(
-        (_, i) => i !== imageIndex
-      ),
-    };
-    handleProductChange(productIndex, updatedProduct);
-  };
-
-  // Add variant row for a specific product
-  const addVariantRow = (productIndex, fieldType) => {
-    const newLinks = [...productLinks];
-    const currentVariantRows =
-      newLinks[productIndex].product?.variantRows || [];
-    const updatedProduct = {
-      ...newLinks[productIndex].product,
-      variantRows: [
-        ...currentVariantRows,
-        { fieldType, customFieldName: "", fieldValue: "" },
-      ],
-    };
-    handleProductChange(productIndex, updatedProduct);
-  };
-
-  // Update variant row for a specific product
-  const updateVariantRow = (productIndex, variantIndex, changes) => {
-    const newLinks = [...productLinks];
-    const currentVariantRows =
-      newLinks[productIndex].product?.variantRows || [];
-    const updatedVariantRows = currentVariantRows.map((row, i) =>
-      i === variantIndex ? { ...row, ...changes } : row
-    );
-    const updatedProduct = {
-      ...newLinks[productIndex].product,
-      variantRows: updatedVariantRows,
-    };
-    handleProductChange(productIndex, updatedProduct);
-  };
-
-  // Remove variant row for a specific product
-  const removeVariantRow = (productIndex, variantIndex) => {
-    const newLinks = [...productLinks];
-    const currentVariantRows =
-      newLinks[productIndex].product?.variantRows || [];
-    const updatedProduct = {
-      ...newLinks[productIndex].product,
-      variantRows: currentVariantRows.filter((_, i) => i !== variantIndex),
-    };
-    handleProductChange(productIndex, updatedProduct);
-  };
-
-  // Can continue if all products have a name
   const canContinue =
     productLinks.length > 0 &&
     productLinks.every((p) => p.product && p.product.name?.trim());
@@ -444,7 +339,6 @@ export default function WithLinkWorkflowPage() {
                 </span>
               )}
             </div>
-            {console.log(item)}
             {(item.status === "success" ||
               item.status === "failed" ||
               item.status === "manual" ||
