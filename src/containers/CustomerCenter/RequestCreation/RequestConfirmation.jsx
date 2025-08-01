@@ -8,18 +8,22 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import CreateAddressForm from "../CustomerProfile/CreateAddressForm"
+import { selectShippingAddressId, setShippingAddressId } from "@/features/onlineReq"
+import { useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 
-export default function RequestConfirmation({ type, items, contactInfo, onNext, onBack, setShippingAddressId, shippingAddressId }) {
+export default function RequestConfirmation({ linkItem, contactInfo, onNext, onBack }) {
+  const dispatch = useDispatch()
   const { data: isLoadingCreate } = useCreateWithoutLinkPurchaseRequestMutation()
   const {
 		data: addresses,
 		isLoading: isAddressLoading,
 		isError: isAddressError,
 	} = useGetShippingAddressQuery();
-
 	const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const selectedAddress = addresses?.find(addr => addr.id === shippingAddressId)
+  const shippingAddressId = useSelector(selectShippingAddressId);
+  const selectedAddress = addresses?.find(addr => addr.id == shippingAddressId);
 
   const handleAddAddress = () => {
 		setIsPopoverOpen(true);
@@ -31,14 +35,14 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
 
   const handleSubmit = async () => {
     if (!shippingAddressId) {
-      toast.error("Vui lòng chọn địa chỉ giao hàng trước khi gửi yêu cầu.")
-      return
+      toast.error("Vui lòng chọn địa chỉ giao hàng trước khi gửi yêu cầu.");
+      return;
     }
     onNext({
       shippingAddressId,
       contactInfo: contactInfo,
-      items,
-    })
+      linkItem,
+    });
   }
 
   return (
@@ -58,14 +62,14 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
               {addresses?.map((address) => (
                 <div
                   key={address.id}
-                  className={`cursor-pointer border rounded-2xl p-4 transition-all ${address.id === shippingAddressId
+                  className={`cursor-pointer border rounded-2xl p-4 transition-all ${address.id == shippingAddressId
                       ? "ring-2 ring-primary/80 bg-primary/5 border-primary"
                       : "hover:ring-2 hover:ring-primary/30"
                     }`}
-                  onClick={() => setShippingAddressId(address.id)}
+                  onClick={() => dispatch(setShippingAddressId(address.id))}
                   tabIndex={0}
                   role="button"
-                  aria-pressed={address.id === shippingAddressId}
+                  aria-pressed={address.id == shippingAddressId}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-semibold">{address.name}</span>
@@ -108,7 +112,7 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
           <div className="space-y-6">
             <h4 className="font-bold text-lg text-gray-900">Sản phẩm yêu cầu</h4>
 
-            {type === "without-link" && selectedAddress && (
+            {selectedAddress && (
               <div className="bg-orange-50 p-6 rounded-lg border border-orange-200">
                 <h5 className="font-semibold mb-3 text-orange-800">Thông tin nhận hàng</h5>
                 <div className="space-y-2 text-sm">
@@ -129,61 +133,67 @@ export default function RequestConfirmation({ type, items, contactInfo, onNext, 
             )}
 
             <div className="bg-gray-50 p-6 rounded-2xl border">
-              <h5 className="font-semibold mb-4 text-gray-800">Danh sách sản phẩm ({items.length})</h5>
+              <h5 className="font-semibold mb-4 text-gray-800">Danh sách sản phẩm ({linkItem?.length})</h5>
               <div className="space-y-4">
-                {items.map((product, index) => (
-                  <div key={product.id || index} className="bg-white p-4 rounded-2xl border">
-                    <div className="flex items-start gap-4">
-                      {/* Image preview section */}
-                      {product.images && product.images.length > 0 && (
-                        <div className="flex-shrink-0 flex flex-wrap gap-2">
-                          {product.images.map((img, idx) => (
-                            <img
-                              key={img}
-                              src={img}
-                              alt={`Product preview ${idx + 1}`}
-                              className="w-16 h-16 object-cover rounded-lg border"
-                            />
-                          ))}
-                        </div>
-                      )}
-                      <div className="flex-1 flex flex-col gap-2">
-                        <div>
-                          <span className="font-medium text-gray-900">{index + 1}. {product.productName}</span>
-                          {product.link && (
-                            <span className="ml-2 text-blue-600 text-sm">
-                              <a
-                                href={product.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:underline"
-                              >
-                                Xem sản phẩm
-                              </a>
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          <strong>Số lượng:</strong> {product.quantity}
-                        </div>
-                        {product.variants && product.variants.length > 0 && (
-                          <ul className="mt-1 space-y-1">
-                            {product.variants.map((variant, vIdx) => (
-                              <li key={vIdx} className="text-sm text-gray-700 pl-2 border-l-2 border-orange-300">
-                                {variant}
-                              </li>
+                {/* Future: branch by type for offline/online */}
+                {linkItem?.map((item, index) => {
+                  // For online requests, item.product is always present
+                  // For offline, adapt as needed in the future
+                  const product = item.product || {};
+                  return (
+                    <div key={item.id || index} className="bg-white p-4 rounded-2xl border">
+                      <div className="flex items-start gap-4">
+                        {/* Image preview section */}
+                        {product.images && product.images.length > 0 && (
+                          <div className="flex-shrink-0 flex flex-wrap gap-2">
+                            {product.images.map((img, idx) => (
+                              <img
+                                key={img}
+                                src={img}
+                                alt={`Product preview ${idx + 1}`}
+                                className="w-16 h-16 object-cover rounded-lg border"
+                              />
                             ))}
-                          </ul>
-                        )}
-                        {product.description && (
-                          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                            <strong>Ghi chú:</strong> {product.description}
                           </div>
                         )}
+                        <div className="flex-1 flex flex-col gap-2">
+                          <div>
+                            <span className="font-medium text-gray-900">{index + 1}. {product.name || "(Chưa có tên)"}</span>
+                            {product.link && (
+                              <span className="ml-2 text-blue-600 text-sm">
+                                <a
+                                  href={product.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:underline"
+                                >
+                                  Xem sản phẩm
+                                </a>
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <strong>Số lượng:</strong> {product.quantity || 1}
+                          </div>
+                          {product.variantRows && product.variantRows.length > 0 && (
+                            <ul className="mt-1 space-y-1">
+                              {product.variantRows.map((variant, vIdx) => (
+                                <li key={vIdx} className="text-sm text-gray-700 pl-2 border-l-2 border-orange-300">
+                                  {variant?.attributeName}: {variant?.fieldValue}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {product.description && (
+                            <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                              <strong>Ghi chú:</strong> {product.description}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

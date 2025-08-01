@@ -1,10 +1,21 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addItemLink,
+  removeItemLink,
+  updateItemLink,
+  updateProductField,
+  updateProductFields,
+  setCurrentStep,
+  selectAllItems,
+  selectCurrentStep,
+  selectShippingAddressId,
+  resetRequest,
+} from "@/features/onlineReq";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectTrigger,
@@ -21,8 +32,6 @@ import {
   ArrowLeft,
   Home,
   ExternalLink,
-  Upload,
-  Trash2,
 } from "lucide-react";
 import RequestConfirmation from "../RequestConfirmation";
 import RequestSuccess from "../RequestSuccess";
@@ -31,134 +40,134 @@ import {
   useCreateWithLinkPurchaseRequestMutation,
 } from "@/services/gshopApi";
 import { toast } from "sonner";
-import ItemForm from "./ItemExtractForm";
+import ItemExtractForm from "./ItemExtractForm";
+import { useEffect } from "react";
 
-const createEmptyProduct = () => ({
-  name: "",
-  description: "",
-  quantity: 1,
-  variants: [],
-  link: "",
-  images: [],
-  variantRows: [],
-});
 
 export default function WithLinkWorkflowPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [getRawData] = useLazyGetRawDataQuery();
-  const [createPurchaseRequest, { data: purchaseData }] =
-    useCreateWithLinkPurchaseRequestMutation();
-  const [currentStep, setCurrentStep] = useState("linkInput");
-  const [productLinks, setProductLinks] = useState([
-    { link: "", product: null, status: "idle", isUploading: false },
-  ]);
-  const [shippingAddressId, setShippingAddressId] = useState(null);
+  const [createPurchaseRequest, { data: purchaseData }] = useCreateWithLinkPurchaseRequestMutation();
 
-  // Add new product link
-  const addProductLink = () => {
-    setProductLinks([
-      ...productLinks,
-      { link: "", product: null, status: "idle" },
-    ]);
-  };
+  const itemLinks = useSelector(selectAllItems);
+  const currentStep = useSelector(selectCurrentStep);
+  const shippingAddressId = useSelector(selectShippingAddressId);
 
   // Remove a product link
-  const removeProductLink = (index) => {
-    setProductLinks(productLinks.filter((_, i) => i !== index));
+  const handleRemoveItemLink = (index) => {
+    dispatch(removeItemLink(index));
   };
 
   // Update the value of a product link
-  const updateProductLink = (index, value) => {
-    const newLinks = [...productLinks];
-    newLinks[index].link = value;
-    setProductLinks(newLinks);
+  const handleUpdateItemLink = (index, value) => {
+    dispatch(updateItemLink({ index, link: value }));
   };
 
   // Extract product data from API
   const handleExtract = async (index) => {
-    const newLinks = [...productLinks];
-    newLinks[index].status = "extracting";
-    setProductLinks(newLinks);
+    dispatch(updateItemLink({ index, link: itemLinks[index].link }));
+    dispatch(updateProductField({ index, field: "status", value: "extracting" }));
     try {
-      console.log(newLinks[index].link);
-      const rawData = await getRawData({
-        link: newLinks[index].link,
-      }).unwrap();
-
-      // Check if rawData is empty or has no meaningful content
+      const rawData = await getRawData({ link: itemLinks[index].link }).unwrap();
       const isEmptyData =
         !rawData ||
         Object.keys(rawData).length === 0 ||
-        (!rawData.name &&
-          !rawData.description &&
-          (!rawData.variants || rawData.variants.length === 0));
-
+        (!rawData.name && !rawData.description && (!rawData.variants || rawData.variants.length === 0));
       if (isEmptyData) {
-        // Treat empty response as failed extraction
-        newLinks[index].status = "failed";
-        newLinks[index].product = {
-          ...createEmptyProduct(),
-          link: newLinks[index].link,
-          id: `product_${Date.now()}_${index}`,
-        };
-        toast.error(
-          "Không thể trích xuất thông tin từ link này. Vui lòng nhập thông tin thủ công."
-        );
+        dispatch(updateProductField({
+          index,
+          field: "product",
+          value: {
+            name: "",
+            description: "",
+            quantity: 1,
+            variants: [],
+            variantRows: [],
+            images: [],
+            link: itemLinks[index].link,
+            id: `product_${Date.now()}_${index}`,
+          },
+        }));
+        dispatch(updateProductField({ index, field: "status", value: "failed" }));
+        toast.error("Không thể trích xuất thông tin từ link này. Vui lòng nhập thông tin thủ công.");
       } else {
-        // Successful extraction with meaningful data
-        // Create variant rows from extracted variants
         const variantRows = (rawData?.variants || []).map((variant) => ({
-          fieldType: variant,
-          customFieldName: "",
+          attributeName: variant,
           fieldValue: "",
         }));
-
-        newLinks[index].product = {
-          ...createEmptyProduct(),
-          name: rawData?.name || "",
-          description: rawData?.description || "",
-          variants: rawData?.variants || [],
-          variantRows,
-          link: newLinks[index].link,
-          id: `product_${Date.now()}_${index}`,
-        };
-        newLinks[index].status = "success";
+        dispatch(updateProductFields({
+          index,
+          fields: {
+            name: rawData?.name || "",
+            description: rawData?.description || "",
+            variants: rawData?.variants || [],
+            variantRows,
+            images: rawData?.images || [],
+            link: itemLinks[index].link,
+            id: `product_${Date.now()}_${index}`,
+          },
+        }));
+        dispatch(updateProductField({ index, field: "status", value: "success" }));
         toast.success("Trích xuất thông tin sản phẩm thành công!");
       }
     } catch {
-      newLinks[index].status = "failed";
-      newLinks[index].product = {
-        ...createEmptyProduct(),
-        link: newLinks[index].link,
-        id: `product_${Date.now()}_${index}`,
-      };
+      dispatch(updateProductFields({
+        index,
+        fields: {
+          name: "",
+          description: "",
+          quantity: 1,
+          variants: [],
+          variantRows: [],
+          images: [],
+          link: itemLinks[index].link,
+          id: `product_${Date.now()}_${index}`,
+        },
+      }));
+      dispatch(updateProductField({ index, field: "status", value: "failed" }));
       toast.error("Trích xuất thất bại. Vui lòng nhập thông tin thủ công.");
     }
-    setProductLinks([...newLinks]);
   };
 
   // Allow manual entry
   const handleManualEntry = (index) => {
-    const newLinks = [...productLinks];
-    newLinks[index].status = "manual";
-    newLinks[index].product = {
-      ...createEmptyProduct(),
-      link: newLinks[index].link,
-      id: `manual_${Date.now()}_${index}`,
-    };
-    setProductLinks(newLinks);
+    dispatch(updateProductField({
+      index,
+      field: "product",
+      value: {
+        name: "",
+        description: "",
+        quantity: 1,
+        variants: [],
+        variantRows: [],
+        images: [],
+        link: itemLinks[index].link,
+        id: `manual_${Date.now()}_${index}`,
+      },
+    }));
+    dispatch(updateProductField({ index, field: "status", value: "manual" }));
     toast.info("Chế độ nhập thủ công đã được kích hoạt.");
   };
+
   const canContinue =
-    productLinks.length > 0 &&
-    productLinks.every((p) => p.product && p.product.name?.trim());
+    itemLinks?.length > 0 &&
+    itemLinks.every((p) => p.product && p.product.name?.trim());
 
   // Handle success
   const handleSuccess = () => {
-    const requestItems = productLinks.map((p) => p.product).filter(Boolean);
+    const requestItems = itemLinks.map((p) => p.product).filter(Boolean);
+    console.log(requestItems)
     createPurchaseRequest({
       shippingAddressId,
-      requestItems,
+      requestItems: requestItems.map((item) => ({
+        productName: item?.name,
+        productURL: item?.link,
+        variants: item?.variantRows?.map((variant) => `${variant?.attributeName}: ${variant?.fieldValue}`),
+        images: item?.images,
+        quantity: item?.quantity,
+        description: item?.description,
+      })),
     })
       .unwrap()
       .then(() => {
@@ -169,9 +178,15 @@ export default function WithLinkWorkflowPage() {
           error?.data?.message ||
             "Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau."
         );
+      })
+      .finally(() => {
+        dispatch(setCurrentStep("success"));
       });
-    setCurrentStep("success");
   };
+
+  useEffect(() => {
+      dispatch(resetRequest());
+  }, [dispatch]);
 
   // Step navigation
   const handleBackToSelection = () => navigate(-1);
@@ -260,7 +275,7 @@ export default function WithLinkWorkflowPage() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
-        {productLinks.map((item, index) => (
+        {itemLinks.map((item, index) => (
           <div
             key={index}
             className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-4"
@@ -273,17 +288,17 @@ export default function WithLinkWorkflowPage() {
                 </Label>
                 <Input
                   value={item.link}
-                  onChange={(e) => updateProductLink(index, e.target.value)}
+                  onChange={(e) => handleUpdateItemLink(index, e.target.value)}
                   placeholder="https://amazon.com/product/... hoặc https://shopee.com/..."
                   className="h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
-              {productLinks.length > 1 && (
+              {itemLinks.length > 1 && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeProductLink(index)}
+                  onClick={() => handleRemoveItemLink(index)}
                   className="mt-6 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
                 >
                   <X className="h-4 w-4" />
@@ -343,15 +358,7 @@ export default function WithLinkWorkflowPage() {
               item.status === "failed" ||
               item.status === "manual" ||
               item.product) && (
-              <ItemForm
-                initialItem={item.product}
-                index={index}
-                onChange={(updatedProduct) => {
-                  const newLinks = [...productLinks];
-                  newLinks[index].product = updatedProduct;
-                  setProductLinks(newLinks);
-                }}
-              />
+              <ItemExtractForm index={index} />
             )}
           </div>
         ))}
@@ -359,7 +366,7 @@ export default function WithLinkWorkflowPage() {
         <Button
           type="button"
           variant="outline"
-          onClick={addProductLink}
+          onClick={() => dispatch(addItemLink())}
           className="w-full h-12 border-dashed border-2 border-blue-300 text-blue-600 hover:bg-blue-50"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -376,7 +383,7 @@ export default function WithLinkWorkflowPage() {
             Quay lại
           </Button>
           <Button
-            onClick={() => setCurrentStep("confirmation")}
+            onClick={() => dispatch(setCurrentStep("confirmation"))}
             className="flex-1 h-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
             disabled={!canContinue}
           >
@@ -402,18 +409,15 @@ export default function WithLinkWorkflowPage() {
             tin thủ công
           </p>
         </div>
-
         {renderStepIndicator()}
-
+        {console.log(currentStep)}
         {currentStep === "linkInput" && renderLinkInput()}
         {currentStep === "confirmation" && (
           <RequestConfirmation
-            items={productLinks.map((p) => p.product).filter(Boolean)}
+            linkItem={itemLinks}
             type="with-link"
             onNext={handleSuccess}
-            onBack={() => setCurrentStep("linkInput")}
-            setShippingAddressId={setShippingAddressId}
-            shippingAddressId={shippingAddressId}
+            onBack={() => dispatch(setCurrentStep("linkInput"))}
           />
         )}
         {currentStep === "success" && (

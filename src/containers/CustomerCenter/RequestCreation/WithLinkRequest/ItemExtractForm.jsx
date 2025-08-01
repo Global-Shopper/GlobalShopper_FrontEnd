@@ -12,95 +12,33 @@ import {
 import { Loader2, Upload, X, Trash2 } from "lucide-react";
 import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
+import {
+  updateProductField,
+  updateVariantRow,
+  addVariantRow,
+  removeVariantRow,
+  addImageUrl,
+  removeImageUrl,
+  selectAllItems,
+} from "@/features/onlineReq";
 
-export default function ItemForm({ initialItem, index, onChange }) {
-  // Use local state for variantRows (not inside item)
-  const [item, setItem] = useState({
-    name: "",
-    description: "",
-    images: [],
-    quantity: 1,
-  });
-  const [variantRows, setVariantRows] = useState([]);
-  const [addFieldValue, setAddFieldValue] = useState("");
-
-  const [isUploading, setIsUploading] = useState(false);
-  const [previewUrls, setPreviewUrls] = useState([]); // local preview only
+export default function ItemExtractForm({ index }) {
+  const dispatch = useDispatch();
+  const items = useSelector(selectAllItems);
+  const item = items[index]?.product || {};
+  const variantRows = item.variantRows || [];
   const fileInputRef = useRef();
-
-  // Sync initialItem to state
-  useEffect(() => {
-    setItem({
-      name: initialItem?.name || "",
-      description: initialItem?.description || "",
-      images: initialItem?.images || [],
-      quantity: initialItem?.quantity || 1,
-    });
-    // Convert variants (array of string) to variantRows if needed
-    if (Array.isArray(initialItem?.variants)) {
-      setVariantRows(
-        initialItem.variants.map((v) => {
-          // Parse "Color: Red" to { attributeName, fieldValue }
-          const match = v.match(/^([^:]+):\s*(.+)$/);
-          if (!match) return { attributeName: v, fieldValue: "" };
-          const [_, left, right] = match;
-          return { attributeName: left, fieldValue: right };
-        })
-      );
-    } else {
-      setVariantRows([]);
-    }
-  }, [initialItem]);
-
-  // Helper to format variants automatically
-  function getFormattedVariants(rows) {
-    if (!rows) return [];
-    return rows
-      .filter((row) => row.attributeName && row.fieldValue)
-      .map((row) => `${row.attributeName}: ${row.fieldValue}`);
-  }
-
-  // Notify parent if needed
-  const notifyChange = (updated) => {
-    const formattedVariants = getFormattedVariants(variantRows);
-    const itemWithVariants = { ...updated, variants: formattedVariants };
-    setItem(itemWithVariants);
-    if (onChange) onChange(itemWithVariants);
-  };
-
+  const isUploading = useRef(false);
+  const previewUrls = useRef([]);
+  console.log(item)
   // Handlers
   const handleFieldChange = (field, value) => {
-    const updatedItem = { ...item, [field]: value };
-    notifyChange(updatedItem);
+    dispatch(updateProductField({ index, field, value }));
   };
 
-  const updateVariantRow = (idx, changes) => {
-    setVariantRows((rows) =>
-      rows.map((row, i) => (i === idx ? { ...row, ...changes } : row))
-    );
-  };
-
-  const addVariantRow = (fieldType) => {
-    if (fieldType === "Khác") {
-      setVariantRows((rows) => [
-        ...rows,
-        { attributeName: "", fieldValue: "" },
-      ]);
-      setAddFieldValue("");
-    } else if (fieldType) {
-      setVariantRows((rows) => [
-        ...rows,
-        { attributeName: fieldType, fieldValue: "" },
-      ]);
-      setAddFieldValue("");
-    }
-  };
-
-  const removeVariantRow = (idx) => {
-    setVariantRows((rows) => rows.filter((_, i) => i !== idx));
-  };
 
   const handleImageUpload = async (event) => {
     const files = Array.from(event.target.files);
@@ -115,52 +53,40 @@ export default function ItemForm({ initialItem, index, onChange }) {
         return;
       }
     }
-    setIsUploading(true);
+    isUploading.current = true;
     try {
       // Step 1: Add local previews immediately
       const newPreviews = files.map((file) => URL.createObjectURL(file));
-      setPreviewUrls((prev) => [...prev, ...newPreviews]);
-
+      previewUrls.current = [...previewUrls.current, ...newPreviews];
       // Step 2: Upload in background
       for (const file of files) {
         const url = await uploadToCloudinary(file);
         if (url) {
-          // Remove the first preview (FIFO)
-          setPreviewUrls((prev) => {
-            if (prev.length > 0) {
-              URL.revokeObjectURL(prev[0]);
-              return prev.slice(1);
-            }
-            return prev;
-          });
-          const updatedItem = {
-            ...item,
-            images: [...(item.images || []), url],
-          };
-          notifyChange(updatedItem);
+          dispatch(addImageUrl({ itemIndex: index, url }));
         }
       }
     } catch {
       alert("Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.");
     } finally {
-      setIsUploading(false);
+      isUploading.current = false;
     }
   };
-  const removeImage = (imgIdx) => {
-    // Remove preview and revoke object URL
-    setPreviewUrls((prev) => {
-      if (prev[imgIdx]) URL.revokeObjectURL(prev[imgIdx]);
-      return prev.filter((_, i) => i !== imgIdx);
-    });
-    // Remove from product state (cloud URLs)
-    const updatedItem = {
-      ...item,
-      images: item.images.filter((_, i) => i !== imgIdx),
-    };
-    notifyChange(updatedItem);
+
+  const handleRemoveImage = (imgIdx) => {
+    dispatch(removeImageUrl({ itemIndex: index, imageIndex: imgIdx }));
+  }
+  // Handlers for variant rows
+  const handleAddVariantRow = (fieldType) => {
+    dispatch(addVariantRow({ itemIndex: index, fieldType }));
   };
 
-  // (Render logic will use local product state and handlers)
+  const handleUpdateVariantRow = (variantIdx, changes) => {
+    dispatch(updateVariantRow({ itemIndex: index, variantIndex: variantIdx, changes }));
+  };
+
+  const handleRemoveVariantRow = (variantIdx) => {
+    dispatch(removeVariantRow({ itemIndex: index, variantIndex: variantIdx }));
+  };
 
   return (
     <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
@@ -179,7 +105,6 @@ export default function ItemForm({ initialItem, index, onChange }) {
             className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
         </div>
-        {console.log(item.description)}
         <div>
           <Label className="text-sm font-medium text-gray-700">
             Mô tả sản phẩm
@@ -200,14 +125,14 @@ export default function ItemForm({ initialItem, index, onChange }) {
           </Label>
           <div className="flex flex-wrap gap-3">
             {/* Show previews for images not yet uploaded (local only) */}
-            {previewUrls.map((url, idx) => (
+            {previewUrls ? previewUrls.current.map((url, idx) => (
               <div key={url} className="relative">
                 <img
                   src={url}
-                  alt={`Product preview ${idx + 1}`}
+                  alt={`Item preview ${idx + 1}`}
                   className="w-20 h-20 object-cover rounded-lg border"
                 />
-                {isUploading && (
+                {isUploading.current && (
                   <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white/60 rounded-lg">
                     <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
                   </div>
@@ -216,26 +141,24 @@ export default function ItemForm({ initialItem, index, onChange }) {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeImage(idx)}
+                  onClick={() => handleRemoveImage(idx)}
                   className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </div>
-            ))}
-            {/* Show uploaded images (cloud URLs) */}
-            {item.images?.map((img, imgIdx) => (
-              <div key={img} className="relative">
+            )) : item.images.map((url, idx) => (
+              <div key={url} className="relative">
                 <img
-                  src={img}
-                  alt={`Product preview ${imgIdx + 1}`}
+                  src={url}
+                  alt={`Item preview ${idx + 1}`}
                   className="w-20 h-20 object-cover rounded-lg border"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeImage(imgIdx)}
+                  onClick={() => handleRemoveImage(idx)}
                   className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
                 >
                   <X className="h-3 w-3" />
@@ -250,16 +173,16 @@ export default function ItemForm({ initialItem, index, onChange }) {
                 multiple
                 onChange={handleImageUpload}
                 className="hidden"
-                disabled={isUploading}
+                disabled={isUploading.current}
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
+                disabled={isUploading.current}
                 className="w-20 h-20 border-dashed border-2 border-gray-300 hover:border-blue-400"
               >
-                {isUploading ? (
+                {isUploading.current ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4" />
@@ -294,7 +217,6 @@ export default function ItemForm({ initialItem, index, onChange }) {
           <Label className="text-sm font-medium text-gray-700 mb-2 block">
             Thuộc tính sản phẩm
           </Label>
-          {console.log(variantRows)}
           {variantRows.map((row, variantIdx) => {
             const isPredefined = PREDEFINED_VARIANT_FIELDS.includes(
               row.attributeName
@@ -305,9 +227,9 @@ export default function ItemForm({ initialItem, index, onChange }) {
                   value={isPredefined ? row.attributeName : "Khác"}
                   onValueChange={(value) => {
                     if (value === "Khác") {
-                      updateVariantRow(variantIdx, { attributeName: "" });
+                      handleUpdateVariantRow(variantIdx, { attributeName: "" });
                     } else {
-                      updateVariantRow(variantIdx, { attributeName: value });
+                      handleUpdateVariantRow(variantIdx, { attributeName: value });
                     }
                   }}
                 >
@@ -335,7 +257,7 @@ export default function ItemForm({ initialItem, index, onChange }) {
                   <Input
                     value={row.attributeName}
                     onChange={(e) =>
-                      updateVariantRow(variantIdx, {
+                      handleUpdateVariantRow(variantIdx, {
                         attributeName: e.target.value,
                       })
                     }
@@ -346,7 +268,7 @@ export default function ItemForm({ initialItem, index, onChange }) {
                 <Input
                   value={row.fieldValue}
                   onChange={(e) =>
-                    updateVariantRow(variantIdx, {
+                    handleUpdateVariantRow(variantIdx, {
                       fieldValue: e.target.value,
                     })
                   }
@@ -357,7 +279,7 @@ export default function ItemForm({ initialItem, index, onChange }) {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeVariantRow(variantIdx)}
+                  onClick={() => handleRemoveVariantRow(variantIdx)}
                   className="text-red-600 hover:text-red-700"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -367,7 +289,7 @@ export default function ItemForm({ initialItem, index, onChange }) {
           })}
           {/* Add Variant Button */}
           <div className="mt-2">
-            <Select value={addFieldValue} onValueChange={addVariantRow}>
+            <Select value={""} onValueChange={handleAddVariantRow}>
               <SelectTrigger className="h-10 w-48">
                 <SelectValue placeholder="+ Thêm thuộc tính" />
               </SelectTrigger>
