@@ -13,6 +13,7 @@ import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
 import { selectAllItems as selectOnlineItems } from "@/features/onlineReq"
 import { selectAllItems as selectOfflineItems } from "@/features/offlineReq"
+import ShippingInfoCard from "@/components/ShippingInfoCard"
 
 export default function RequestConfirmation({ type, onNext, onBack }) {
   const isOnline = type === "online";
@@ -113,23 +114,7 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
             <h4 className="font-bold text-lg text-gray-900">Sản phẩm yêu cầu</h4>
 
             {selectedAddress && (
-              <div className="bg-orange-50 p-6 rounded-lg border border-orange-200">
-                <h5 className="font-semibold mb-3 text-orange-800">Thông tin nhận hàng</h5>
-                <div className="space-y-2 text-sm">
-                  <p>
-                    <strong>Người nhận:</strong> {selectedAddress.name}
-                  </p>
-                  <p>
-                    <strong>Loại địa chỉ:</strong> {selectedAddress.tag}
-                  </p>
-                  <p>
-                    <strong>Địa chỉ:</strong> {selectedAddress.location}
-                  </p>
-                  <p>
-                    <strong>Số điện thoại:</strong> {selectedAddress.phoneNumber}
-                  </p>
-                </div>
-              </div>
+              <ShippingInfoCard address={selectedAddress} />
             )}
 
             <div className="bg-gray-50 p-6 rounded-2xl border">

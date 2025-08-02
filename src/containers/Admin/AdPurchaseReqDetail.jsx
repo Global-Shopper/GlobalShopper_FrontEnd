@@ -72,21 +72,10 @@ function AdPurchaseReqDetail() {
   const [quotePrices, setQuotePrices] = useState({});
   const [notes, setNotes] = useState("");
   const [expandedSubRequest, setExpandedSubRequest] = useState(null);
-  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
-
-  // Enhanced form state
-  const [formData, setFormData] = useState({
-    seller: "",
-    ecommercePlatform: "",
-    contactInfo: [],
-    customSeller: "",
-    customPlatform: "",
-  });
 
   const [isRequestingUpdate, setIsRequestingUpdate] = useState(false);
   const [updateRequested, setUpdateRequested] = useState(false);
   const [isGroupingMode, setIsGroupingMode] = useState(false);
-  const [selectedItemsForGroup, setSelectedItemsForGroup] = useState([]);
 
   const selectedProduct = React.useMemo(() => {
     if (req?.requestItems?.length > 0) {
@@ -132,8 +121,6 @@ function AdPurchaseReqDetail() {
 
   const handleCreateGroup = (items = []) => {
     if (items.length > 0) {
-      setSelectedItemsForGroup(items);
-      setShowCreateGroupModal(true);
       setIsGroupingMode(false); // Exit selection mode after creating group
     } else {
       // Toggle selection mode
@@ -152,14 +139,6 @@ function AdPurchaseReqDetail() {
       setIsRequestingUpdate(false);
     }
   };
-
-  // Form validation
-
-  // Reset form
-
-  // Handle form field changes
-
-  // Handle contact info
 
   const handleExitGroupingMode = () => {
     setIsGroupingMode(false);
