@@ -12,6 +12,7 @@ const initialState = {
     quantity: 1,
     productURL: "",
     description: "",
+    localImages: [],
     images: [],
     variantRows: [], // [{fieldType, customFieldName, fieldValue}]
   },
@@ -65,9 +66,22 @@ const offlineReqSlice = createSlice({
         quantity: 1,
         productURL: "",
         description: "",
+        localImages: [],
         images: [],
         variantRows: [],
       };
+    },
+    addDraftLocalImage(state, action) {
+      state.currentItemDraft.localImages.push(action.payload);
+    },
+    removeDraftLocalImage(state, action) {
+      state.currentItemDraft.localImages.splice(action.payload, 1);
+    },
+    resetDraftLocalImages(state) {
+      state.currentItemDraft.localImages = [];
+    },
+    setDraftLocalImages(state, action) {
+      state.currentItemDraft.localImages = action.payload;
     },
     addItem(state) {
       const item = {
@@ -110,6 +124,10 @@ export const {
   updateDraftVariantRow,
   removeDraftVariantRow,
   resetCurrentItemDraft,
+  addDraftLocalImage,
+  removeDraftLocalImage,
+  resetDraftLocalImages,
+  setDraftLocalImages,
   addItem,
   removeItem,
   updateItem,

@@ -40,7 +40,14 @@ console.log("shippingAddressId", shippingAddressId);
     createPurchaseRequest({
       shippingAddressId,
       contactInfo,
-      requestItems: items,
+      requestItems: items.map((item) => ({
+        productName: item?.name,
+        productURL: item?.link,
+        variants: item?.variantRows?.map((variant) => `${variant?.attributeName}: ${variant?.fieldValue}`),
+        images: item?.images,
+        quantity: item?.quantity,
+        description: item?.description,
+      })),
     })
       .unwrap()
       .then(() => {

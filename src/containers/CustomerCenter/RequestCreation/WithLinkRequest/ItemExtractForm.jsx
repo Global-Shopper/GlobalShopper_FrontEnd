@@ -29,10 +29,10 @@ export default function ItemExtractForm({ index }) {
   const dispatch = useDispatch();
   const items = useSelector(selectAllItems);
   const item = items[index]?.product || {};
+  console.log(item,index)
   const variantRows = item.variantRows || [];
   const fileInputRef = useRef();
   const [isUploading, setIsUploading] = useState(false);
-  const previewUrls = useRef([]);
   console.log(item)
   // Handlers
   const handleFieldChange = (field, value) => {
@@ -57,7 +57,7 @@ export default function ItemExtractForm({ index }) {
     try {
       // Step 1: Add local previews immediately
       const newPreviews = files.map((file) => URL.createObjectURL(file));
-      previewUrls.current = [...previewUrls.current, ...newPreviews];
+      dispatch(updateProductField({ index, field: "localImages", value: [...item.localImages, ...newPreviews] }));
       // Step 2: Upload in background
       for (const file of files) {
         const url = await uploadToCloudinary(file);
@@ -73,6 +73,7 @@ export default function ItemExtractForm({ index }) {
   };
 
   const handleRemoveImage = (imgIdx) => {
+    dispatch(updateProductField({ index, field: "localImages", value: item.localImages.filter((_, idx) => idx !== imgIdx) }));
     dispatch(removeImageUrl({ itemIndex: index, imageIndex: imgIdx }));
   }
   // Handlers for variant rows
@@ -125,7 +126,7 @@ export default function ItemExtractForm({ index }) {
           </Label>
           <div className="flex flex-wrap gap-3">
             {/* Show previews for images not yet uploaded (local only) */}
-            {previewUrls ? previewUrls.current.map((url, idx) => (
+            {item.localImages.map((url, idx) => (
               <div key={url} className="relative">
                 <img
                   src={url}
@@ -137,23 +138,6 @@ export default function ItemExtractForm({ index }) {
                     <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
                   </div>
                 )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleRemoveImage(idx)}
-                  className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            )) : item.images.map((url, idx) => (
-              <div key={url} className="relative">
-                <img
-                  src={url}
-                  alt={`Item preview ${idx + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg border"
-                />
                 <Button
                   type="button"
                   variant="outline"

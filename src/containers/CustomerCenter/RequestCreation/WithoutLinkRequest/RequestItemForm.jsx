@@ -36,6 +36,10 @@ import {
   removeDraftVariantRow,
   resetCurrentItemDraft,
   addItem,
+  addDraftLocalImage,
+  removeDraftLocalImage,
+  resetDraftLocalImages,
+  removeItem,
 } from "@/features/offlineReq";
 
 export default function RequestItemForm({
@@ -48,8 +52,10 @@ export default function RequestItemForm({
   const variantRows = currentItemDraft.variantRows || [];
   const [showFieldDropdown, setShowFieldDropdown] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrls, setPreviewUrls] = useState([]); // local previews
   const fileInputRef = useRef(null);
+
+  // Redux preview images
+  const localImages = currentItemDraft.localImages || [];
 
   // Compute available fields for adding new variant
   const usedFieldTypes = variantRows.map((row) => row.fieldType);
@@ -85,22 +91,17 @@ export default function RequestItemForm({
         return;
       }
     }
-    // Step 1: Add local previews immediately
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls((prev) => [...prev, ...newPreviews]);
+    // Step 1: Add local previews immediately to Redux
+    for (const file of files) {
+      const previewUrl = URL.createObjectURL(file);
+      dispatch(addDraftLocalImage(previewUrl));
+      console.log(previewUrl);
+    }
     setIsUploading(true);
     try {
       for (const file of files) {
         const url = await uploadToCloudinary(file);
         if (url) {
-          // Remove the first preview (FIFO)
-          setPreviewUrls((prev) => {
-            if (prev.length > 0) {
-              URL.revokeObjectURL(prev[0]);
-              return prev.slice(1);
-            }
-            return prev;
-          });
           dispatch(addDraftImage(url));
         }
       }
@@ -109,15 +110,17 @@ export default function RequestItemForm({
     } finally {
       setIsUploading(false);
     }
-  };
-  const removeImage = (idx) => {
-    // Remove from preview if present
-    setPreviewUrls((prev) => {
-      if (prev[idx]) URL.revokeObjectURL(prev[idx]);
-      return prev.filter((_, i) => i !== idx);
-    });
-    // Remove from uploaded images in Redux
-    dispatch(removeDraftImage(idx));
+  }; 
+  const removeImage = (idx, isPreview = false) => {
+    if (isPreview) {
+      // Remove preview image from Redux and revoke object URL
+      const url = localImages[idx];
+      if (url && url.startsWith("blob:")) URL.revokeObjectURL(url);
+      dispatch(removeDraftLocalImage(idx));
+    } else {
+      // Remove from uploaded images in Redux
+      dispatch(removeDraftImage(idx));
+    }
   };
   const addRequestItem = () => {
     if (!currentItemDraft.productName.trim()) {
@@ -128,11 +131,10 @@ export default function RequestItemForm({
     dispatch(resetCurrentItemDraft());
     setShowFieldDropdown(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    setPreviewUrls([]);
   };
 
   const removeRequestItem = (requestItemId) => {
-    dispatch({ type: "offlineReq/removeItem", payload: requestItemId });
+    dispatch(removeItem(requestItemId));
   };
 
   // Render
@@ -157,9 +159,9 @@ export default function RequestItemForm({
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-start gap-4">
-                        {requestItem.images.length > 0 && (
+                        {requestItem.localImages.length > 0 && (
                           <div className="flex-shrink-0 flex flex-wrap gap-2">
-                            {requestItem.images.map((img, idx) => (
+                            {requestItem.localImages.map((img, idx) => (
                               <img
                                 key={img}
                                 src={img}
@@ -259,8 +261,9 @@ export default function RequestItemForm({
               Hình ảnh sản phẩm (có thể chọn nhiều)
             </Label>
             <div className="flex flex-wrap gap-4">
-              {/* Show previews for images not yet uploaded (local only) */}
-              {previewUrls.map((url, idx) => (
+              {console.log(localImages)}
+              {/* Show previews for images not yet uploaded (local only, from Redux) */}
+              {localImages.map((url, idx) => (
                 <div key={url} className="relative">
                   <img
                     src={url}
@@ -276,26 +279,7 @@ export default function RequestItemForm({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => removeImage(idx)}
-                    className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-              {/* Show uploaded images (cloud URLs) */}
-              {currentItemDraft.images && currentItemDraft.images.map((img, imgIdx) => (
-                <div key={img} className="relative">
-                  <img
-                    src={img}
-                    alt={`Product preview ${imgIdx + 1}`}
-                    className="w-24 h-24 object-cover rounded-lg border"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeImage(imgIdx)}
+                    onClick={() => removeImage(idx, true)}
                     className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
                   >
                     <Trash2 className="h-3 w-3" />

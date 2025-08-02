@@ -27,7 +27,7 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
     : setShippingAddressIdOffline;
 
   const items = useSelector(isOnline ? selectOnlineItems : selectOfflineItems);
-
+  console.log("items", items);
   const { data: isLoadingCreate } = useCreateWithoutLinkPurchaseRequestMutation();
   const {
 		data: addresses,
@@ -144,9 +144,9 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                     <div key={item.id || index} className="bg-white p-4 rounded-2xl border">
                       <div className="flex items-start gap-4">
                         {/* Image preview section */}
-                        {product.images && product.images.length > 0 && (
+                        {product.localImages && product.localImages.length > 0 && (
                           <div className="flex-shrink-0 flex-col flex-wrap space-y-2">
-                            {product.images.map((img, idx) => (
+                            {product.localImages.map((img, idx) => (
                               <img
                                 key={img}
                                 src={img}
@@ -200,9 +200,9 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                     <div key={item.id || index} className="bg-white p-4 rounded-2xl border">
                       <div className="flex items-start gap-4">
                         {/* Image preview section */}
-                        {item.images && item.images.length > 0 && (
+                        {item.localImages && item.localImages.length > 0 && (
                           <div className="flex-shrink-0 flex-col flex-wrap space-y-2">
-                            {item.images.map((img, idx) => (
+                            {item.localImages.map((img, idx) => (
                               <img
                                 key={img}
                                 src={img}

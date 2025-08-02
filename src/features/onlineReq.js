@@ -9,6 +9,7 @@ const initialState = {
       link: '',
       status: 'idle',
       product: {
+        localImages: [],
         name: '',
         description: '',
         quantity: 1,
@@ -41,6 +42,7 @@ const onlineReqSlice = createSlice({
         link: '',
         status: 'idle', // 'idle' | 'extracting' | 'success' | 'failed' | 'manual'
         product: {
+          localImages: [],
           name: '',
           description: '',
           quantity: 1,
