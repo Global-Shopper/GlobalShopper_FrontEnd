@@ -17,6 +17,7 @@ function StatusBadge({ status }) {
 }
 
 function RequestItemCard({ item }) {
+  console.log(item);
   const q = item.quotationDetail;
   return (
     <div className="flex gap-4 mb-4 p-3 bg-white rounded border border-gray-100 shadow-sm">
@@ -59,10 +60,17 @@ function RequestItemCard({ item }) {
                       {formatCurrency(q.totalPriceBeforeExchange, q.currency, getLocaleCurrencyFormat(q.currency))}
                     </TableCell>
                   </TableRow>
-                  {q.taxRates?.map((rate, idx) => (
+                  {q.taxRates?.map((tax, idx) => (
                     <TableRow key={idx} className="border-b">
-                      <TableCell className="text-gray-600">Thuế ({rate}%)</TableCell>
-                      <TableCell>{q.taxAmounts?.[rate] ? q.taxAmounts[rate].toLocaleString() + ' VND' : '-'}</TableCell>
+                      <TableCell className="text-gray-600">
+                        {tax.taxType} ({tax.rate}%)
+                        {tax.region ? ` - ${tax.region}` : ''}
+                      </TableCell>
+                      <TableCell>
+                        {q.taxAmounts?.[tax.taxType] ? 
+                          formatCurrency(q.taxAmounts[tax.taxType], 'VND', getLocaleCurrencyFormat('VND')) : 
+                          '-'}
+                      </TableCell>
                     </TableRow>
                   ))}
                   {q.totalTaxAmount > 0 && (
