@@ -154,7 +154,7 @@ export function GroupCreationDialog({
             {/* Platform Field */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Platform <span className="text-red-500">*</span>
+                Nền tảng E-commerce <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={formik.values.ecommercePlatform}
@@ -214,10 +214,10 @@ export function GroupCreationDialog({
             {/* Seller Field */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Seller <span className="text-red-500">*</span>
+                Người bán <span className="text-red-500">*</span>
               </Label>
               <Input
-                placeholder="Nhập tên seller"
+                placeholder="Nhập tên người bán"
                 name="seller"
                 value={formik.values.seller}
                 onChange={formik.handleChange}

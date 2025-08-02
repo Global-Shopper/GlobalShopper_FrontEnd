@@ -188,8 +188,7 @@ export default function ItemExtractForm({ index }) {
             value={item.quantity || 1}
             onChange={(e) => {
               let value = parseInt(e.target.value) || 1;
-              if (value > 10) value = 10;
-              if (value < 1) value = 1;
+              if (value > 10) value = Number.parseInt(e.nativeEvent.data);
               handleFieldChange("quantity", value);
             }}
             className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-32"

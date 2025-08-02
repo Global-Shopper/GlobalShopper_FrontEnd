@@ -242,7 +242,7 @@ export default function RequestItemForm({
                 htmlFor="requestItemNote"
                 className="text-base font-medium"
               >
-                Mô tả, ghi chú thêm về sản phẩm
+                Mô tả về sản phẩm
               </Label>
               <Textarea
                 id="requestItemNote"
@@ -339,8 +339,7 @@ export default function RequestItemForm({
                 value={currentItemDraft.quantity}
                 onChange={e => {
                   let value = Number.parseInt(e.target.value) || 1;
-                  if (value > 10) value = 10;
-                  if (value < 1) value = 1;
+                  if (value > 10) value = Number.parseInt(e.nativeEvent.data);
                   dispatch(setCurrentItemDraftField({ field: "quantity", value }));
                 }}
                 className="h-12"
