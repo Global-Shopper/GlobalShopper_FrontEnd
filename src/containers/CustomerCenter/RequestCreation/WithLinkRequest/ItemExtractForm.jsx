@@ -12,7 +12,7 @@ import {
 import { Loader2, Upload, X, Trash2 } from "lucide-react";
 import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import {
@@ -31,7 +31,7 @@ export default function ItemExtractForm({ index }) {
   const item = items[index]?.product || {};
   const variantRows = item.variantRows || [];
   const fileInputRef = useRef();
-  const isUploading = useRef(false);
+  const [isUploading, setIsUploading] = useState(false);
   const previewUrls = useRef([]);
   console.log(item)
   // Handlers
@@ -53,7 +53,7 @@ export default function ItemExtractForm({ index }) {
         return;
       }
     }
-    isUploading.current = true;
+    setIsUploading(true);
     try {
       // Step 1: Add local previews immediately
       const newPreviews = files.map((file) => URL.createObjectURL(file));
@@ -68,7 +68,7 @@ export default function ItemExtractForm({ index }) {
     } catch {
       alert("Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.");
     } finally {
-      isUploading.current = false;
+      setIsUploading(false);
     }
   };
 
@@ -132,7 +132,7 @@ export default function ItemExtractForm({ index }) {
                   alt={`Item preview ${idx + 1}`}
                   className="w-20 h-20 object-cover rounded-lg border"
                 />
-                {isUploading.current && (
+                {isUploading && (
                   <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white/60 rounded-lg">
                     <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
                   </div>
@@ -173,16 +173,16 @@ export default function ItemExtractForm({ index }) {
                 multiple
                 onChange={handleImageUpload}
                 className="hidden"
-                disabled={isUploading.current}
+                disabled={isUploading}
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading.current}
+                disabled={isUploading}
                 className="w-20 h-20 border-dashed border-2 border-gray-300 hover:border-blue-400"
               >
-                {isUploading.current ? (
+                {isUploading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4" />

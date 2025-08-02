@@ -4,27 +4,39 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ArrowRight, ArrowLeft, Loader2, PackageCheck, Plus } from "lucide-react"
 import { useCreateWithoutLinkPurchaseRequestMutation, useGetShippingAddressQuery } from "@/services/gshopApi"
-import { toast } from "sonner"
 import { useState } from "react"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import CreateAddressForm from "../CustomerProfile/CreateAddressForm"
-import { selectShippingAddressId, setShippingAddressId } from "@/features/onlineReq"
+import { selectShippingAddressId as selectShippingAddressIdOnline, setShippingAddressId as setShippingAddressIdOnline } from "@/features/onlineReq"
+import { selectShippingAddressId as selectShippingAddressIdOffline, setShippingAddressId as setShippingAddressIdOffline } from "@/features/offlineReq"
 import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
+import { selectAllItems as selectOnlineItems } from "@/features/onlineReq"
+import { selectAllItems as selectOfflineItems } from "@/features/offlineReq"
 
-export default function RequestConfirmation({ linkItem, contactInfo, onNext, onBack }) {
-  const dispatch = useDispatch()
-  const { data: isLoadingCreate } = useCreateWithoutLinkPurchaseRequestMutation()
+export default function RequestConfirmation({ type, onNext, onBack }) {
+  const isOnline = type === "online";
+  const dispatch = useDispatch();
+
+  // Branch selectors/actions by mode
+  const shippingAddressId = useSelector(
+    isOnline ? selectShippingAddressIdOnline : selectShippingAddressIdOffline
+  );
+  const setShippingAddressId = isOnline
+    ? setShippingAddressIdOnline
+    : setShippingAddressIdOffline;
+
+  const items = useSelector(isOnline ? selectOnlineItems : selectOfflineItems);
+
+  const { data: isLoadingCreate } = useCreateWithoutLinkPurchaseRequestMutation();
   const {
 		data: addresses,
 		isLoading: isAddressLoading,
-		isError: isAddressError,
 	} = useGetShippingAddressQuery();
 	const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const shippingAddressId = useSelector(selectShippingAddressId);
   const selectedAddress = addresses?.find(addr => addr.id == shippingAddressId);
-
+  console.log("selectedAddress", selectedAddress);
   const handleAddAddress = () => {
 		setIsPopoverOpen(true);
 	};
@@ -32,18 +44,6 @@ export default function RequestConfirmation({ linkItem, contactInfo, onNext, onB
   const handleClosePopover = () => {
 		setIsPopoverOpen(false);
 	};
-
-  const handleSubmit = async () => {
-    if (!shippingAddressId) {
-      toast.error("Vui lòng chọn địa chỉ giao hàng trước khi gửi yêu cầu.");
-      return;
-    }
-    onNext({
-      shippingAddressId,
-      contactInfo: contactInfo,
-      linkItem,
-    });
-  }
 
   return (
     <div className="space-y-6">
@@ -133,10 +133,10 @@ export default function RequestConfirmation({ linkItem, contactInfo, onNext, onB
             )}
 
             <div className="bg-gray-50 p-6 rounded-2xl border">
-              <h5 className="font-semibold mb-4 text-gray-800">Danh sách sản phẩm ({linkItem?.length})</h5>
+              <h5 className="font-semibold mb-4 text-gray-800">Danh sách sản phẩm ({items?.length})</h5>
               <div className="space-y-4">
-                {/* Future: branch by type for offline/online */}
-                {linkItem?.map((item, index) => {
+                {/* Branch by online/offline mode for item rendering */}
+                {isOnline ? items?.map((item, index) => {
                   // For online requests, item.product is always present
                   // For offline, adapt as needed in the future
                   const product = item.product || {};
@@ -145,7 +145,7 @@ export default function RequestConfirmation({ linkItem, contactInfo, onNext, onB
                       <div className="flex items-start gap-4">
                         {/* Image preview section */}
                         {product.images && product.images.length > 0 && (
-                          <div className="flex-shrink-0 flex flex-wrap gap-2">
+                          <div className="flex-shrink-0 flex-col flex-wrap space-y-2">
                             {product.images.map((img, idx) => (
                               <img
                                 key={img}
@@ -193,6 +193,50 @@ export default function RequestConfirmation({ linkItem, contactInfo, onNext, onB
                       </div>
                     </div>
                   );
+                }) : items?.map((item, index) => {
+                  // For offline requests, item.product is always present
+                  // For online, adapt as needed in the future
+                  return (
+                    <div key={item.id || index} className="bg-white p-4 rounded-2xl border">
+                      <div className="flex items-start gap-4">
+                        {/* Image preview section */}
+                        {item.images && item.images.length > 0 && (
+                          <div className="flex-shrink-0 flex-col flex-wrap space-y-2">
+                            {item.images.map((img, idx) => (
+                              <img
+                                key={img}
+                                src={img}
+                                alt={`Product preview ${idx + 1}`}
+                                className="w-16 h-16 object-cover rounded-lg border"
+                              />
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex-1 flex flex-col gap-2">
+                          <div>
+                            <span className="font-medium text-gray-900">{index + 1}. {item.productName || "(Chưa có tên)"}</span>
+                            {item.productURL && (
+                              <span className="ml-2 text-blue-600 text-sm">
+                                <a
+                                  href={item.productURL}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:underline"
+                                >
+                                  {item.productURL}
+                                </a>
+                              </span>
+                            )}
+                          </div>
+                          {item.description && (
+                            <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                              <strong>Ghi chú:</strong> {item.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
                 })}
               </div>
             </div>
@@ -204,7 +248,7 @@ export default function RequestConfirmation({ linkItem, contactInfo, onNext, onB
               Quay lại
             </Button>
             <Button
-              onClick={handleSubmit}
+              onClick={onNext}
               className="flex-1 h-12 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
             >
               {isLoadingCreate ? (

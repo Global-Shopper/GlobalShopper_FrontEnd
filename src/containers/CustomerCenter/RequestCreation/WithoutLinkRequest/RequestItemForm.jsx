@@ -26,21 +26,26 @@ import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { toast } from "sonner";
 
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setCurrentItemDraftField,
+  addDraftImage,
+  removeDraftImage,
+  addDraftVariantRow,
+  updateDraftVariantRow,
+  removeDraftVariantRow,
+  resetCurrentItemDraft,
+  addItem,
+} from "@/features/offlineReq";
+
 export default function RequestItemForm({
-  items,
-  onItemsChange,
   onNext,
   onBack,
 }) {
-  const [currentRequestItem, setCurrentRequestItem] = useState({
-    productName: "",
-    quantity: 1,
-    productURL: "",
-    description: "",
-    images: [],
-    variants: [],
-  });
-  const [variantRows, setVariantRows] = useState([]);
+  const dispatch = useDispatch();
+  const currentItemDraft = useSelector((state) => state.rootReducer.offlineReq.currentItemDraft);
+  const items = useSelector((state) => state.rootReducer.offlineReq.items);
+  const variantRows = currentItemDraft.variantRows || [];
   const [showFieldDropdown, setShowFieldDropdown] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrls, setPreviewUrls] = useState([]); // local previews
@@ -54,21 +59,16 @@ export default function RequestItemForm({
 
   // Handlers
   const updateVariantRow = (idx, changes) => {
-    setVariantRows((rows) =>
-      rows.map((row, i) => (i === idx ? { ...row, ...changes } : row))
-    );
+    dispatch(updateDraftVariantRow({ index: idx, changes }));
   };
 
   const addVariantRow = (fieldType) => {
-    setVariantRows((rows) => [
-      ...rows,
-      { fieldType, customFieldName: "", fieldValue: "" },
-    ]);
+    dispatch(addDraftVariantRow({ fieldType, customFieldName: "", fieldValue: "" }));
     setShowFieldDropdown(false);
   };
 
   const removeVariantRow = (idx) => {
-    setVariantRows((rows) => rows.filter((_, i) => i !== idx));
+    dispatch(removeDraftVariantRow(idx));
   };
 
   const handleImageUpload = async (event) => {
@@ -90,7 +90,7 @@ export default function RequestItemForm({
     setPreviewUrls((prev) => [...prev, ...newPreviews]);
     setIsUploading(true);
     try {
-      for (const [_, file] of files.entries()) {
+      for (const file of files) {
         const url = await uploadToCloudinary(file);
         if (url) {
           // Remove the first preview (FIFO)
@@ -101,15 +101,7 @@ export default function RequestItemForm({
             }
             return prev;
           });
-          setCurrentRequestItem((prev) => {
-            const updated = {
-              ...prev,
-              images: [...(prev.images || []), url],
-            };
-            // Always notify parent
-            onItemsChange([...items.slice(0, -1), updated]);
-            return updated;
-          });
+          dispatch(addDraftImage(url));
         }
       }
     } catch {
@@ -124,53 +116,23 @@ export default function RequestItemForm({
       if (prev[idx]) URL.revokeObjectURL(prev[idx]);
       return prev.filter((_, i) => i !== idx);
     });
-    // Remove from uploaded images
-    setCurrentRequestItem((prev) => {
-      const updated = {
-        ...prev,
-        images: prev.images.filter((_, i) => i !== idx),
-      };
-      onItemsChange([...items.slice(0, -1), updated]);
-      return updated;
-    });
+    // Remove from uploaded images in Redux
+    dispatch(removeDraftImage(idx));
   };
   const addRequestItem = () => {
-    if (!currentRequestItem.productName.trim()) {
+    if (!currentItemDraft.productName.trim()) {
       alert("Vui lòng nhập tên sản phẩm");
       return;
     }
-    const variants = variantRows
-      .filter(
-        (row) =>
-          (row.fieldType === "Khác" ? row.customFieldName.trim() : true) &&
-          row.fieldValue.trim()
-      )
-      .map(
-        (row) =>
-          `${row.fieldType === "Khác" ? row.customFieldName : row.fieldType}: ${
-            row.fieldValue
-          }`
-      );
-    const requestItem = {
-      ...currentRequestItem,
-      variants,
-    };
-    onItemsChange([...items, requestItem]);
-    setCurrentRequestItem({
-      productName: "",
-      quantity: 1,
-      productURL: "",
-      description: "",
-      images: [],
-      variants: [],
-    });
-    setVariantRows([]);
+    dispatch(addItem());
+    dispatch(resetCurrentItemDraft());
     setShowFieldDropdown(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    setPreviewUrls([]);
   };
 
   const removeRequestItem = (requestItemId) => {
-    onItemsChange(items.filter((item) => item.id !== requestItemId));
+    dispatch({ type: "offlineReq/removeItem", payload: requestItemId });
   };
 
   // Render
@@ -216,9 +178,10 @@ export default function RequestItemForm({
                               Số lượng: {requestItem.quantity}
                             </Badge>
                           </div>
-                          {requestItem.variants.map((variant, vIdx) => (
+                          {/* Display variants if present */}
+                          {requestItem.variantRows && requestItem.variantRows.length > 0 && requestItem.variantRows.map((row, vIdx) => (
                             <p key={vIdx} className="text-sm text-gray-600">
-                              {variant}
+                              {row.fieldType === "Khác" ? row.customFieldName : row.fieldType}: {row.fieldValue}
                             </p>
                           ))}
                           {requestItem.description && (
@@ -266,13 +229,8 @@ export default function RequestItemForm({
               </Label>
               <Input
                 id="requestItemName"
-                value={currentRequestItem?.productName}
-                onChange={(e) =>
-                  setCurrentRequestItem((prev) => ({
-                    ...prev,
-                    productName: e.target.value,
-                  }))
-                }
+                value={currentItemDraft.productName}
+                onChange={e => dispatch(setCurrentItemDraftField({ field: "productName", value: e.target.value }))}
                 placeholder="Ví dụ: Áo thun nam Nike, Giày sneaker Adidas..."
                 className="h-12"
               />
@@ -286,13 +244,8 @@ export default function RequestItemForm({
               </Label>
               <Textarea
                 id="requestItemNote"
-                value={currentRequestItem?.description}
-                onChange={(e) =>
-                  setCurrentRequestItem((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
+                value={currentItemDraft.description}
+                onChange={e => dispatch(setCurrentItemDraftField({ field: "description", value: e.target.value }))}
                 placeholder="Ghi chú thêm về sản phẩm nếu có..."
                 rows={4}
                 className="resize-none"
@@ -331,7 +284,7 @@ export default function RequestItemForm({
                 </div>
               ))}
               {/* Show uploaded images (cloud URLs) */}
-              {currentRequestItem?.images.map((img, imgIdx) => (
+              {currentItemDraft.images && currentItemDraft.images.map((img, imgIdx) => (
                 <div key={img} className="relative">
                   <img
                     src={img}
@@ -399,14 +352,12 @@ export default function RequestItemForm({
                 type="number"
                 min="1"
                 max="10"
-                value={currentRequestItem?.quantity}
-                onChange={(e) => {
+                value={currentItemDraft.quantity}
+                onChange={e => {
                   let value = Number.parseInt(e.target.value) || 1;
-                  if (value > 10) value = Number.parseInt(e.nativeEvent.data);
-                  setCurrentRequestItem((prev) => ({
-                    ...prev,
-                    quantity: value,
-                  }));
+                  if (value > 10) value = 10;
+                  if (value < 1) value = 1;
+                  dispatch(setCurrentItemDraftField({ field: "quantity", value }));
                 }}
                 className="h-12"
               />
@@ -420,13 +371,8 @@ export default function RequestItemForm({
               </Label>
               <Input
                 id="requestItemLink"
-                value={currentRequestItem?.productURL}
-                onChange={(e) =>
-                  setCurrentRequestItem((prev) => ({
-                    ...prev,
-                    productURL: e.target.value,
-                  }))
-                }
+                value={currentItemDraft.productURL}
+                onChange={e => dispatch(setCurrentItemDraftField({ field: "productURL", value: e.target.value }))}
                 placeholder="https://example.com/product"
                 className="h-12"
               />
@@ -547,7 +493,7 @@ export default function RequestItemForm({
           Quay lại
         </Button>
         <Button
-          onClick={onNext}
+          onClick={() => onNext()}
           className="flex-1 h-12"
           disabled={items.length === 0}
         >

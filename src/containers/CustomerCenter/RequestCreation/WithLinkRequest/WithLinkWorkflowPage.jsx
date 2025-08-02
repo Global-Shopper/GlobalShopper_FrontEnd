@@ -47,8 +47,8 @@ import { useEffect } from "react";
 export default function WithLinkWorkflowPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [getRawData] = useLazyGetRawDataQuery();
-  const [createPurchaseRequest, { data: purchaseData }] = useCreateWithLinkPurchaseRequestMutation();
+  const [getRawData, { isFetching: isFetchingGetRawData }] = useLazyGetRawDataQuery();
+  const [createPurchaseRequest, { data: purchaseData, isLoading: isLoadingCreatePurchaseRequest }] = useCreateWithLinkPurchaseRequestMutation();
 
   const itemLinks = useSelector(selectAllItems);
   const currentStep = useSelector(selectCurrentStep);
@@ -156,6 +156,10 @@ export default function WithLinkWorkflowPage() {
 
   // Handle success
   const handleSuccess = () => {
+    if (!shippingAddressId) {
+      toast.error("Vui lòng chọn địa chỉ giao hàng trước khi gửi yêu cầu.");
+      return;
+    }
     const requestItems = itemLinks.map((p) => p.product).filter(Boolean);
     console.log(requestItems)
     createPurchaseRequest({
@@ -189,7 +193,7 @@ export default function WithLinkWorkflowPage() {
   }, [dispatch]);
 
   // Step navigation
-  const handleBackToSelection = () => navigate(-1);
+  const handleBackToSelection = () => navigate("/create-request");
   const handleBackToHome = () => navigate("/");
 
   // Render breadcrumb
@@ -311,11 +315,11 @@ export default function WithLinkWorkflowPage() {
                 type="button"
                 size="sm"
                 variant="default"
-                disabled={!item.link.trim() || item.status === "extracting"}
+                disabled={!item.link.trim() || isFetchingGetRawData}
                 onClick={() => handleExtract(index)}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {item.status === "extracting" ? (
+                {isFetchingGetRawData ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Đang trích xuất...
@@ -331,7 +335,7 @@ export default function WithLinkWorkflowPage() {
                 type="button"
                 size="sm"
                 variant="outline"
-                disabled={item.status === "extracting"}
+                disabled={isFetchingGetRawData}
                 onClick={() => handleManualEntry(index)}
                 className="border-blue-300 text-blue-600 hover:bg-blue-50"
               >
@@ -414,8 +418,7 @@ export default function WithLinkWorkflowPage() {
         {currentStep === "linkInput" && renderLinkInput()}
         {currentStep === "confirmation" && (
           <RequestConfirmation
-            linkItem={itemLinks}
-            type="with-link"
+            type="online"
             onNext={handleSuccess}
             onBack={() => dispatch(setCurrentStep("linkInput"))}
           />
