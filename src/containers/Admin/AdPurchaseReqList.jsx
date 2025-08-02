@@ -133,7 +133,6 @@ const AdPurchaseReqList = () => {
               </span>
             </TableCell>
             <TableCell className="text-center py-3">
-              {console.log(request.createdAt)}
               {request.createdAt
                 ? new Date(request.createdAt).toLocaleDateString("vi-VN")
                 : "-"}

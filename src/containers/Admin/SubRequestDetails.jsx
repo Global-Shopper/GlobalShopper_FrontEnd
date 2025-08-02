@@ -29,7 +29,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
   const dispatch = useDispatch();
   const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
   // API mutation (must be above early return)
-  const [createQuotation, { isLoading: isQuotationLoading }] = useCreateQuotationMutation();
+  const [createQuotation] = useCreateQuotationMutation();
 
   useEffect(() => {
     if (!quotationState) {
@@ -41,7 +41,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
           hsCodeId: "",
           region: "",
           basePrice: 0,
-          serviceFee: 100000,
+          serviceFee: 1,
           note: "",
           currency: "VND"
         }))

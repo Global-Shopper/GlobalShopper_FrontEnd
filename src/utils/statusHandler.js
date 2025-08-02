@@ -29,6 +29,6 @@ export const getStatusText = (status) => {
     case "INSUFFICIENT":
       return "Chờ cập nhật lại";
     default:
-      return status;
+      return "Đang xử lý";
   }
 };

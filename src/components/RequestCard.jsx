@@ -201,7 +201,7 @@ const RequestCard = ({ request, listView = false }) => {
 									<div className="flex items-center gap-1 bg-orange-50 px-2 py-2 rounded">
 										<Package className="h-4 w-4 text-orange-700" />
 										<span className="text-xs font-semibold text-orange-800">
-											{request.requestItems.length}
+											{request?.requestItems?.concat(request?.subRequests)?.length}
 										</span>
 									</div>
 								</div>
