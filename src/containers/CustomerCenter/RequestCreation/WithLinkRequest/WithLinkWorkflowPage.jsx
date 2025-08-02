@@ -108,6 +108,7 @@ export default function WithLinkWorkflowPage() {
             id: `product_${Date.now()}_${index}`,
           },
         }));
+        console.log(itemLinks[index]?.product?.variantRows);
         dispatch(updateProductField({ index, field: "status", value: "success" }));
         toast.success("Trích xuất thông tin sản phẩm thành công!");
       }

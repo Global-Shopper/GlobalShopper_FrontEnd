@@ -77,9 +77,11 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
                 {subRequest.ecommercePlatform}
               </Badge>
             )}
-            <Badge variant="outline" className="text-xs">
-              {subRequest.requestItems.length} sản phẩm
-            </Badge>
+            {subRequest.status === "QUOTED" && (
+              <Badge variant="default" className="text-xs">
+                Đã báo giá
+              </Badge>
+            )}
           </div>
           <Button variant="ghost" size="sm">
             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

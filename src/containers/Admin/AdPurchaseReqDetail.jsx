@@ -82,8 +82,6 @@ function AdPurchaseReqDetail() {
     customSeller: "",
     customPlatform: "",
   });
-  const [formErrors, setFormErrors] = useState({});
-  const [newContactInfo, setNewContactInfo] = useState("");
 
   const [isRequestingUpdate, setIsRequestingUpdate] = useState(false);
   const [updateRequested, setUpdateRequested] = useState(false);
@@ -156,46 +154,8 @@ function AdPurchaseReqDetail() {
   };
 
   // Form validation
-  const validateForm = () => {
-    const errors = {};
-
-    // Validate seller
-    const finalSeller =
-      formData.seller === "Other" ? formData.customSeller : formData.seller;
-    if (!finalSeller?.trim()) {
-      errors.seller = "Seller is required";
-    }
-
-    // Validate platform
-    const finalPlatform =
-      formData.ecommercePlatform === "Other"
-        ? formData.customPlatform
-        : formData.ecommercePlatform;
-    if (!finalPlatform?.trim()) {
-      errors.ecommercePlatform = "Platform is required";
-    }
-
-    // Validate contact info
-    if (formData.contactInfo.length === 0) {
-      errors.contactInfo = "At least one contact info is required";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
 
   // Reset form
-  const resetForm = () => {
-    setFormData({
-      seller: "",
-      ecommercePlatform: "",
-      contactInfo: [],
-      customSeller: "",
-      customPlatform: "",
-    });
-    setFormErrors({});
-    setNewContactInfo("");
-  };
 
   // Handle form field changes
 

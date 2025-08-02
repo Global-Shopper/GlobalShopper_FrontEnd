@@ -15,7 +15,6 @@ import { Switch } from "@/components/ui/switch";
 export default function RequestDashboard() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("row");
-  console.log(viewMode === "column" ? 3 : 10);
   const [page, setPage, size, setSize] = useUrlPagination(
     1,
     viewMode === "column" ? 3 : 10
