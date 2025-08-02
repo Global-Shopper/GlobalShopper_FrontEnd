@@ -240,13 +240,13 @@ export default function RequestItemForm({
                 htmlFor="requestItemNote"
                 className="text-base font-medium"
               >
-                Ghi chú (tuỳ chọn)
+                Mô tả, ghi chú thêm về sản phẩm
               </Label>
               <Textarea
                 id="requestItemNote"
                 value={currentItemDraft.description}
                 onChange={e => dispatch(setCurrentItemDraftField({ field: "description", value: e.target.value }))}
-                placeholder="Ghi chú thêm về sản phẩm nếu có..."
+                placeholder="Mô tả, ghi chú thêm về sản phẩm nếu có..."
                 rows={4}
                 className="resize-none"
               />
