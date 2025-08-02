@@ -111,7 +111,7 @@ const AdPurchaseReqList = () => {
             </TableCell>
             <TableCell className="py-3">
               {request.subRequests?.map(
-                (sub) => sub.contactInfo[0]?.split(":")[1]
+                (sub) => sub?.contactInfo?.[0]?.split(":")[1]
               ) || "-"}
             </TableCell>
             <TableCell className="py-3">{request.customer?.phone}</TableCell>
