@@ -17,7 +17,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd ~/GlobalShopperFE || git clone https://github.com/Global-Shopper/GlobalShopperFE.git && cd GlobalShopperFE
+            cd ~/GlobalShopper_FrontEnd || git clone https://github.com/Global_Shopper/GlobalShopper_FrontEnd.git && cd GlobalShopper_FrontEnd  
             git checkout main
             git pull origin main
 
