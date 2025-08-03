@@ -340,7 +340,7 @@ const Header = () => {
                   <div className="py-2">
                     {[
                       {
-                        to: "/account-center/purchase-request-list",
+                        to: "/account-center/purchase-request-list?page=1&size=10",
                         text: "Yêu cầu mua hàng",
                         icon: CalendarArrowUp,
                       },

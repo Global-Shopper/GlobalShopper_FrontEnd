@@ -88,6 +88,10 @@ const getRequestTypeText = (type) => {
 
 const RequestCard = ({ request, listView = false }) => {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const allItems = [
+		...(request?.requestItems || []),
+		...((request?.subRequests || []).flatMap((sub) => sub.requestItems || []))
+	];
 
 	const handleCancelRequest = () => {
 		// TODO: Implement cancel request functionality
@@ -313,10 +317,11 @@ const RequestCard = ({ request, listView = false }) => {
 					<div className="flex items-center gap-2">
 						<Package className="h-4 w-4 text-gray-400" />
 						<span className="text-sm font-medium">
-							Sản phẩm ({request.requestItems.length})
+							Sản phẩm ({allItems.length})
 						</span>
 					</div>
-					{request.requestItems.map((item) => (
+					{console.log(allItems)}
+					{allItems.map((item) => (
 						<div key={item.id} className="pl-6 space-y-1">
 							<div className="flex items-center justify-between">
 								<p className="text-sm font-medium">

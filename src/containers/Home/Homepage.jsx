@@ -54,7 +54,7 @@ export default function Homepage() {
 										className="h-14 px-8 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
 										asChild
 									>
-										<Link to="/app">
+										<Link to="/create-request">
 											Gửi yêu cầu
 											<ArrowRight className="ml-2 h-6 w-6" />
 										</Link>
@@ -149,7 +149,7 @@ export default function Homepage() {
 													className="border-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 font-semibold px-6 py-3 rounded-xl transition-all duration-300"
 													asChild
 												>
-													<Link to="/app">
+													<Link to="/create-request">
 														Gửi ngay →
 													</Link>
 												</Button>
@@ -192,7 +192,7 @@ export default function Homepage() {
 													className="border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 font-semibold px-6 py-3 rounded-xl transition-all duration-300"
 													asChild
 												>
-													<Link to="/app?tab=requests">
+													<Link to="/account-center/purchase-request-list?page=1&size=10">
 														Xem báo giá →
 													</Link>
 												</Button>
@@ -234,7 +234,7 @@ export default function Homepage() {
 													className="border-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 font-semibold px-6 py-3 rounded-xl transition-all duration-300"
 													asChild
 												>
-													<Link to="/app?tab=orders">
+													<Link to="/account-center/purchase-request-list?page=1&size=10">
 														Theo dõi →
 													</Link>
 												</Button>

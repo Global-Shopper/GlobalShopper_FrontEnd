@@ -4,7 +4,7 @@ import endpoints from "../const/endpoints";
 
 const gshopApi = createApi({
   reducerPath: "gshopApi",
-  tagTypes: ["CustomerProfile", "ShippingAddress", "PurchaseRequest", "Wallet"],
+  tagTypes: ["CustomerProfile", "ShippingAddress", "PurchaseRequest", "Wallet", "PurchaseRequestDetail"],
   baseQuery: axiosBaseQuery(),
   endpoints: (builder) => ({
     login: builder.mutation({

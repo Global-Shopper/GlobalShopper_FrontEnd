@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency, getLocaleCurrencyFormat } from "@/utils/formatCurrency";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
+import productDefaultImage from "@/assets/productDefault.png";
 
 function StatusBadge({ status }) {
   const color = getStatusColor(status);
@@ -17,11 +18,14 @@ function StatusBadge({ status }) {
 }
 
 function RequestItemCard({ item }) {
-  console.log(item);
   const q = item.quotationDetail;
   return (
     <div className="flex gap-4 mb-4 p-3 bg-white rounded border border-gray-100 shadow-sm">
-      <img src={item.images?.[0]} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+      {item.images?.length > 0 ? item.images?.map((image) => (
+        <img src={image} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+      )) : (
+        <img src={productDefaultImage} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+      )}
       <div className="flex-1">
         <div className="font-semibold text-gray-900">{item.productName}</div>
         <div className="text-xs text-gray-500 mb-1">{item.variants?.join(", ")}</div>
@@ -67,8 +71,8 @@ function RequestItemCard({ item }) {
                         {tax.region ? ` - ${tax.region}` : ''}
                       </TableCell>
                       <TableCell>
-                        {q.taxAmounts?.[tax.taxType] ? 
-                          formatCurrency(q.taxAmounts[tax.taxType], 'VND', getLocaleCurrencyFormat('VND')) : 
+                        {q.taxAmounts?.[tax.taxType] ?
+                          formatCurrency(q.taxAmounts[tax.taxType], 'VND', getLocaleCurrencyFormat('VND')) :
                           '-'}
                       </TableCell>
                     </TableRow>
@@ -100,9 +104,15 @@ function SubRequestCard({ subRequest, expired, onPay }) {
     <div className="mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
       <div className="flex items-center gap-4 mb-2">
         <div className="font-semibold text-gray-800">
-          {subRequest.seller} ({subRequest.ecommercePlatform})
+          {
+            subRequest?.ecommercePlatform ? (
+              <span>{subRequest?.seller} ({subRequest?.ecommercePlatform})</span>
+            ) : (
+              <span>{subRequest?.contactInfo[0]}</span>
+            )
+          }
         </div>
-        <StatusBadge status={subRequest.status} />
+        <StatusBadge status={subRequest?.status} />
       </div>
       <div className="mb-2">
         {subRequest.requestItems?.map((item) => (
@@ -134,8 +144,8 @@ function SubRequestCard({ subRequest, expired, onPay }) {
       {subRequest.status === "QUOTED" && (
         <button
           className={`mt-2 px-4 py-2 rounded shadow ${expired
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
             }`}
           onClick={() => onPay(subRequest)}
           disabled={expired}

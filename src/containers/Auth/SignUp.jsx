@@ -79,9 +79,9 @@ export default function Signup() {
 				email: values.email,
 				password: values.password,
 				gender: values.gender,
-				phone: values.phone ? values.phone : "0912345678",
-				address: values.address ? values.address : "0",
-				avatar: values.avatar ? values.avatar : "0",
+				phone: values.phone ? values.phone : null,
+				address: values.address ? values.address : null,
+				avatar: values.avatar ? values.avatar : null,
 				dateOfBirth: 0,
 			};
 			await register(payload)

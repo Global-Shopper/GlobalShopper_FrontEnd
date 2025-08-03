@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { signout } from "@/features/user";
 import { useDispatch, useSelector } from "react-redux";
 import logo from "@/assets/LOGO_Gshop.png";
+import defaultAvt from "@/assets/defaultAvt.jpg";
 
 // Menu items.
 const items = [
@@ -50,6 +51,7 @@ export function AdminSidebar() {
   const { avatar, name, email } = useSelector(
     (state) => state.rootReducer.user
   );
+  console.log(avatar);
   return (
     <Sidebar>
       <SidebarContent>
@@ -83,8 +85,7 @@ export function AdminSidebar() {
         <img
           src={
             avatar ||
-            "https://ui-avatars.com/api/?name=" +
-              encodeURIComponent(name || "Admin")
+            defaultAvt
           }
           alt="Avatar"
           className="w-14 h-14 rounded-full border border-gray-300 object-cover shadow mb-1"
