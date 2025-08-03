@@ -10,7 +10,7 @@ const items = [
 	},
 	{
 		title: "Yêu cầu mua hàng",
-		url: "/account-center/purchase-request-list",
+		url: "/account-center/purchase-request-list?page=1&size=10",
 		icon: Home,
 	},
 	{

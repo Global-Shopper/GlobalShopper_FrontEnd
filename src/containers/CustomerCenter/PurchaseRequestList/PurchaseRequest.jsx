@@ -1,30 +1,45 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Plus, ShoppingCart } from "lucide-react";
 import RequestCard from "@/components/RequestCard";
 import RequestFilters from "./RequestFilters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGetPurchaseRequestQuery } from "@/services/gshopApi";
-import { useUrlPagination } from "@/hooks/useUrlPagination";
+import { useURLSync } from "@/hooks/useURLSync";
 import { PaginationBar } from "@/utils/Pagination";
 import PageError from "@/components/PageError";
 import PageLoading from "@/components/PageLoading";
 import { Switch } from "@/components/ui/switch";
+import { useNavigate } from "react-router-dom";
 
-export default function RequestDashboard() {
+export default function PurchaseRequest() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("row");
-  const [page, setPage, size, setSize] = useUrlPagination(
-    1,
-    viewMode === "column" ? 3 : 10
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [page, setPage] = useURLSync(
+    searchParams,
+    setSearchParams,
+    "page",
+    "number",
+    1
   );
 
-  // When viewMode changes, reset page to 1
+  const [size, setSize] = useURLSync(
+    searchParams,
+    setSearchParams,
+    "size",
+    "number",
+    10
+  );
+
+  // Update size when viewMode changes
   useEffect(() => {
-    setPage(1);
-    setSize(viewMode === "column" ? 3 : 10);
-  }, [viewMode, setPage, setSize]);
+    const newSize = viewMode === "column" ? 3 : 10;
+    if (size !== newSize) {
+      setSize(newSize);
+    }
+  }, [viewMode, setSize, size]);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -47,7 +62,7 @@ export default function RequestDashboard() {
   } = useGetPurchaseRequestQuery({
     page: page - 1,
     size: size,
-    type: "assigned",
+    type: filters.type === "all" ? "" : filters.type,
   });
 
   const allRequests = purchaseRequestsData?.content || [];
@@ -131,13 +146,6 @@ export default function RequestDashboard() {
     navigate("/create-request");
   };
 
-  //   useEffect(() => {
-  //     if (filters.search || filters.status || filters.type || filters.dateRange) {
-  //       console.log("filters changed", filters);
-  //       setPage(1);
-  //     }
-  //   }, [filters, setPage, sort]);
-
   if (isRequestLoading) {
     return <PageLoading />;
   }
@@ -188,7 +196,7 @@ export default function RequestDashboard() {
               id="view-mode-switch"
             />
             <span className="text-sm font-medium text-gray-700">
-              Chế độ lưới
+              Chế độ cột
             </span>
           </div>
           {requests.length === 0 ? (

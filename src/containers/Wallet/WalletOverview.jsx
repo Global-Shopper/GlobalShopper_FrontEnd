@@ -211,7 +211,7 @@ const getCreditUpdateText = (type, amount, status) => {
                   </Link>
                 </Button>
                 <Button asChild className="w-full justify-start" variant="outline">
-                  <Link to="/account-center/purchase-request-list">
+                  <Link to="/account-center/purchase-request-list?page=1&size=10">
                     <ArrowUpRight className="mr-2 h-4 w-4" />
                     Tạo yêu cầu mua hàng
                   </Link>

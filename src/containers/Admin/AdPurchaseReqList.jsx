@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -31,14 +31,36 @@ const TABS = [
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 import { useLocation } from "react-router-dom";
-import { useUrlPagination } from "@/hooks/useUrlPagination";
+import { useURLSync } from "@/hooks/useURLSync";
 import PageError from "@/components/PageError";
 
 const AdPurchaseReqList = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [page, setPage, size, setSize, type, setType] = useUrlPagination();
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [page, setPage] = useURLSync(
+    searchParams,
+    setSearchParams,
+    "page",
+    "number",
+    1
+  );
+
+  const [size, setSize] = useURLSync(
+    searchParams,
+    setSearchParams,
+    "size",
+    "number",
+    10
+  );
+  const [type, setType] = useURLSync(
+    searchParams,
+    setSearchParams,
+    "type",
+    "string",
+    "assigned"
+  );
   const searchInputRef = useRef(null);
 
   // Sync state from URL params when location.search changes

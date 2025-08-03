@@ -27,12 +27,12 @@ import {
   Link as LinkIcon,
   Plus,
   X,
-  Loader2,
   ArrowRight,
   ArrowLeft,
   Home,
   ExternalLink,
 } from "lucide-react";
+import AIBotLoader from "@/components/ui/AIBotLoader";
 import RequestConfirmation from "../RequestConfirmation";
 import RequestSuccess from "../RequestSuccess";
 import {
@@ -41,18 +41,24 @@ import {
 } from "@/services/gshopApi";
 import { toast } from "sonner";
 import ItemExtractForm from "./ItemExtractForm";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import ExtractPreviewModal from "@/components/ExtractPreviewModal";
 
 
 export default function WithLinkWorkflowPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [getRawData, { isFetching: isFetchingGetRawData }] = useLazyGetRawDataQuery();
-  const [createPurchaseRequest, { data: purchaseData, isLoading: isLoadingCreatePurchaseRequest }] = useCreateWithLinkPurchaseRequestMutation();
+  const [createPurchaseRequest, { data: purchaseData }] = useCreateWithLinkPurchaseRequestMutation();
 
   const itemLinks = useSelector(selectAllItems);
   const currentStep = useSelector(selectCurrentStep);
   const shippingAddressId = useSelector(selectShippingAddressId);
+
+  // --- New preview state for extraction ---
+  const [previewIndex, setPreviewIndex] = useState(null);
+  const [previewProduct, setPreviewProduct] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Remove a product link
   const handleRemoveItemLink = (index) => {
@@ -64,7 +70,7 @@ export default function WithLinkWorkflowPage() {
     dispatch(updateItemLink({ index, link: value }));
   };
 
-  // Extract product data from API
+  // Extract product data from API (now previews before applying)
   const handleExtract = async (index) => {
     dispatch(updateItemLink({ index, link: itemLinks[index].link }));
     dispatch(updateProductField({ index, field: "status", value: "extracting" }));
@@ -96,21 +102,20 @@ export default function WithLinkWorkflowPage() {
           attributeName: variant,
           fieldValue: "",
         }));
-        dispatch(updateProductFields({
-          index,
-          fields: {
-            name: rawData?.name || "",
-            description: rawData?.description || "",
-            variants: rawData?.variants || [],
-            variantRows,
-            images: rawData?.images || [],
-            link: itemLinks[index].link,
-            id: `product_${Date.now()}_${index}`,
-          },
-        }));
-        console.log(itemLinks[index]?.product?.variantRows);
+        // Instead of dispatching, show preview modal
+        setPreviewProduct({
+          name: rawData?.name || "",
+          description: rawData?.description || "",
+          quantity: 1,
+          variants: rawData?.variants || [],
+          variantRows,
+          images: rawData?.images || [],
+          link: itemLinks[index].link,
+          id: `product_${Date.now()}_${index}`,
+        });
+        setPreviewIndex(index);
+        setPreviewOpen(true);
         dispatch(updateProductField({ index, field: "status", value: "success" }));
-        toast.success("Trích xuất thông tin sản phẩm thành công!");
       }
     } catch {
       dispatch(updateProductFields({
@@ -131,24 +136,22 @@ export default function WithLinkWorkflowPage() {
     }
   };
 
-  // Allow manual entry
-  const handleManualEntry = (index) => {
-    dispatch(updateProductField({
-      index,
-      field: "product",
-      value: {
-        name: "",
-        description: "",
-        quantity: 1,
-        variants: [],
-        variantRows: [],
-        images: [],
-        link: itemLinks[index].link,
-        id: `manual_${Date.now()}_${index}`,
-      },
-    }));
-    dispatch(updateProductField({ index, field: "status", value: "manual" }));
-    toast.info("Chế độ nhập thủ công đã được kích hoạt.");
+  // Handler for applying previewed product to form
+  const handleApplyExtracted = () => {
+    if (previewIndex !== null && previewProduct) {
+      dispatch(updateProductFields({ index: previewIndex, fields: previewProduct }));
+      toast.success("Đã áp dụng thông tin sản phẩm vào form!");
+    }
+    setPreviewOpen(false);
+    setPreviewIndex(null);
+    setPreviewProduct(null);
+  };
+
+  // Handler for discarding preview
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    setPreviewIndex(null);
+    setPreviewProduct(null);
   };
 
   const canContinue =
@@ -181,7 +184,7 @@ export default function WithLinkWorkflowPage() {
       .catch((error) => {
         toast.error(
           error?.data?.message ||
-            "Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau."
+          "Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau."
         );
       })
       .finally(() => {
@@ -190,7 +193,7 @@ export default function WithLinkWorkflowPage() {
   };
 
   useEffect(() => {
-      dispatch(resetRequest());
+    dispatch(resetRequest());
   }, [dispatch]);
 
   // Step navigation
@@ -240,27 +243,24 @@ export default function WithLinkWorkflowPage() {
             <div key={step} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
-                    index <= currentIndex
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${index <= currentIndex
                       ? "bg-blue-600 text-white shadow-md"
                       : "bg-white text-gray-400 border-2 border-gray-200"
-                  }`}
+                    }`}
                 >
                   {index + 1}
                 </div>
                 <span
-                  className={`text-xs mt-2 font-medium transition-colors ${
-                    index <= currentIndex ? "text-blue-600" : "text-gray-400"
-                  }`}
+                  className={`text-xs mt-2 font-medium transition-colors ${index <= currentIndex ? "text-blue-600" : "text-gray-400"
+                    }`}
                 >
                   {stepLabels[index]}
                 </span>
               </div>
               {index < steps.length - 1 && (
                 <div
-                  className={`w-16 h-0.5 mx-4 transition-colors ${
-                    index < currentIndex ? "bg-blue-600" : "bg-gray-200"
-                  }`}
+                  className={`w-16 h-0.5 mx-4 transition-colors ${index < currentIndex ? "bg-blue-600" : "bg-gray-200"
+                    }`}
                 />
               )}
             </div>
@@ -322,7 +322,7 @@ export default function WithLinkWorkflowPage() {
               >
                 {isFetchingGetRawData ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <AIBotLoader />
                     Đang trích xuất...
                   </>
                 ) : (
@@ -332,16 +332,6 @@ export default function WithLinkWorkflowPage() {
                   </>
                 )}
               </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={isFetchingGetRawData}
-                onClick={() => handleManualEntry(index)}
-                className="border-blue-300 text-blue-600 hover:bg-blue-50"
-              >
-                Nhập thủ công
-              </Button>
 
               {item.status === "failed" && (
                 <span className="text-xs text-red-600 font-medium">
@@ -350,23 +340,26 @@ export default function WithLinkWorkflowPage() {
               )}
               {item.status === "success" && (
                 <span className="text-xs text-green-600 font-medium">
-                  ✅ Trích xuất thành công
-                </span>
-              )}
-              {item.status === "manual" && (
-                <span className="text-xs text-blue-600 font-medium">
-                  ✏️ Nhập thủ công
+                  ✅ Điền tự động bởi AI
                 </span>
               )}
             </div>
             {(item.status === "success" ||
               item.status === "failed" ||
-              item.status === "manual" ||
               item.product) && (
-              <ItemExtractForm index={index} />
-            )}
+                <ItemExtractForm index={index} />
+              )}
           </div>
         ))}
+        {/* Extraction Preview Modal */}
+        <div className="space-0">
+          <ExtractPreviewModal
+            open={previewOpen}
+            onClose={handleClosePreview}
+            onApply={handleApplyExtracted}
+            product={previewProduct}
+          />
+        </div>
 
         <Button
           type="button"
@@ -415,7 +408,6 @@ export default function WithLinkWorkflowPage() {
           </p>
         </div>
         {renderStepIndicator()}
-        {console.log(currentStep)}
         {currentStep === "linkInput" && renderLinkInput()}
         {currentStep === "confirmation" && (
           <RequestConfirmation

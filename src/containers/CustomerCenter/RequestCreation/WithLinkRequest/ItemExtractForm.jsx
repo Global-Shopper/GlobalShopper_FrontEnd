@@ -29,11 +29,9 @@ export default function ItemExtractForm({ index }) {
   const dispatch = useDispatch();
   const items = useSelector(selectAllItems);
   const item = items[index]?.product || {};
-  console.log(item,index)
   const variantRows = item.variantRows || [];
   const fileInputRef = useRef();
   const [isUploading, setIsUploading] = useState(false);
-  console.log(item)
   // Handlers
   const handleFieldChange = (field, value) => {
     dispatch(updateProductField({ index, field, value }));
