@@ -31,4 +31,21 @@ export const getStatusText = (status) => {
     default:
       return "Đang xử lý";
   }
+};// Helper function to get status badge variant
+export const getStatusBadgeVariant = (status) => {
+	switch (status) {
+		case "SENT":
+			return "default";
+		case "CHECKING":
+			return "secondary";
+		case "QUOTED":
+			return "outline";
+		case "CANCELLED":
+			return "destructive";
+    case "INSUFFICIENT":
+      return "outline";
+		default:
+			return "outline";
+	}
 };
+

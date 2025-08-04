@@ -42,7 +42,7 @@ import { toast } from "sonner";
 import ItemExtractForm from "./ItemExtractForm";
 import { useEffect, useState } from "react";
 import ExtractPreviewModal from "@/components/ExtractPreviewModal";
-import { resetAllPurchaseReq } from "@/features/purchaseReq.reducer";
+import { resetAllPurchaseReq } from "@/features/purchaseReq.action";
 
 
 export default function WithLinkWorkflowPage() {

@@ -17,6 +17,20 @@ export default function PurchaseRequest() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("row");
   const [searchParams, setSearchParams] = useSearchParams();
+  const [status, setStatus] = useURLSync(
+    searchParams,
+    setSearchParams,
+    "status",
+    "string",
+    ""
+  );
+  const [sort, setSort] = useURLSync(
+    searchParams,
+    setSearchParams,
+    "sort",
+    "array",
+    ["createdAt,desc", "expiredAt,desc"]
+  );
   const [page, setPage] = useURLSync(
     searchParams,
     setSearchParams,
@@ -32,6 +46,7 @@ export default function PurchaseRequest() {
     "number",
     10
   );
+  console.log(sort);
 
   // Update size when viewMode changes
   useEffect(() => {
@@ -40,21 +55,6 @@ export default function PurchaseRequest() {
       setSize(newSize);
     }
   }, [viewMode, setSize, size]);
-
-  // Filter states
-  const [filters, setFilters] = useState({
-    search: "",
-    status: "all",
-    type: "all",
-    dateRange: "all",
-  });
-
-  // Sort states
-  const [sort, setSort] = useState({
-    field: "createdAt",
-    direction: "desc",
-  });
-
   const {
     data: purchaseRequestsData,
     isLoading: isRequestLoading,
@@ -62,85 +62,10 @@ export default function PurchaseRequest() {
   } = useGetPurchaseRequestQuery({
     page: page - 1,
     size: size,
-    type: filters.type === "all" ? "" : filters.type,
+    sort: sort,
   });
 
   const allRequests = purchaseRequestsData?.content || [];
-
-  const filteredRequests = allRequests.filter((request) => {
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      const matchesSearch =
-        request.id?.toString().includes(searchLower) ||
-        request.requestItems?.some((item) =>
-          item.productName?.toLowerCase().includes(searchLower)
-        ) ||
-        request.shippingAddress?.name?.toLowerCase().includes(searchLower);
-      if (!matchesSearch) return false;
-    }
-
-    if (filters.status !== "all" && request.status !== filters.status) {
-      return false;
-    }
-    if (filters.type !== "all" && request.requestType !== filters.type) {
-      return false;
-    }
-    if (filters.dateRange !== "all") {
-      const requestDate = new Date(parseInt(request.createdAt));
-      const now = new Date();
-
-      switch (filters.dateRange) {
-        case "today": {
-          if (requestDate.toDateString() !== now.toDateString()) return false;
-          break;
-        }
-        case "week": {
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          if (requestDate < weekAgo) return false;
-          break;
-        }
-        case "month": {
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          if (requestDate < monthAgo) return false;
-          break;
-        }
-      }
-    }
-
-    return true;
-  });
-
-  // Client-side sorting
-  const sortedRequests = [...filteredRequests].sort((a, b) => {
-    let aValue, bValue;
-
-    switch (sort.field) {
-      case "createdAt":
-      case "updatedAt":
-        aValue = new Date(parseInt(a[sort.field]));
-        bValue = new Date(parseInt(b[sort.field]));
-        break;
-      case "totalProducts":
-        aValue = a.requestItems?.length || 0;
-        bValue = b.requestItems?.length || 0;
-        break;
-      case "status":
-        aValue = a.status || "";
-        bValue = b.status || "";
-        break;
-      default:
-        aValue = a[sort.field] || "";
-        bValue = b[sort.field] || "";
-    }
-
-    if (sort.direction === "asc") {
-      return aValue > bValue ? 1 : -1;
-    } else {
-      return aValue < bValue ? 1 : -1;
-    }
-  });
-
-  const requests = sortedRequests;
 
   const handleCreateRequest = () => {
     navigate("/create-request");
@@ -174,12 +99,11 @@ export default function PurchaseRequest() {
             Tạo yêu cầu mới
           </Button>
         </div>
-
         <RequestFilters
-          filters={filters}
-          onFiltersChange={setFilters}
+          status={status}
+          setStatus={setStatus}
           sort={sort}
-          onSortChange={setSort}
+          setSort={setSort}
         />
 
         <div className="space-y-4">
@@ -199,7 +123,7 @@ export default function PurchaseRequest() {
               Chế độ cột
             </span>
           </div>
-          {requests.length === 0 ? (
+          {allRequests.length === 0 ? (
             <>
               <Card className="shadow-sm">
                 <CardContent className="p-12 text-center">
@@ -225,7 +149,7 @@ export default function PurchaseRequest() {
             <>
               {viewMode === "row" ? (
                 <div className="flex flex-col gap-4">
-                  {requests.map((request) => (
+                  {allRequests.map((request) => (
                     <Link
                       to={`/account-center/purchase-request/${request.id}`}
                       key={request.id}
@@ -236,7 +160,7 @@ export default function PurchaseRequest() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {requests.map((request) => (
+                  {allRequests.map((request) => (
                     <Link
                       to={`/account-center/purchase-request/${request.id}`}
                       key={request.id}
