@@ -63,6 +63,7 @@ export default function PurchaseRequest() {
     page: page - 1,
     size: size,
     sort: sort,
+    ...(status !== "" && status !== "all" ? { status } : {}),
   });
 
   const allRequests = purchaseRequestsData?.content || [];
