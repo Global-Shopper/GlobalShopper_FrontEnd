@@ -19,9 +19,9 @@ export const getStatusColor = (status) => {
 export const getStatusText = (status) => {
   switch (status) {
     case "SENT":
-      return "Đang xử lý";
+      return "Đã gửi";
     case "CHECKING":
-      return "Đã xác nhận";
+      return "Đang xử lý";
     case "QUOTED":
       return "Đã báo giá";
     case "CANCELLED":
@@ -29,7 +29,7 @@ export const getStatusText = (status) => {
     case "INSUFFICIENT":
       return "Chờ cập nhật lại";
     default:
-      return "Đang xử lý";
+      return "Đã gửi";
   }
 };// Helper function to get status badge variant
 export const getStatusBadgeVariant = (status) => {
