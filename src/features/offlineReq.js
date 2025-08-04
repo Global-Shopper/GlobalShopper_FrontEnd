@@ -100,8 +100,8 @@ const offlineReqSlice = createSlice({
         Object.assign(state.items[idx], changes);
       }
     },
-    resetAll(state) {
-      Object.assign(state, initialState);
+    resetOfflineRequest() {
+      return initialState;
     },
     setStatus(state, action) {
       state.status = action.payload;
@@ -131,7 +131,7 @@ export const {
   addItem,
   removeItem,
   updateItem,
-  resetAll,
+  resetOfflineRequest,
   setStatus,
   setError,
 } = offlineReqSlice.actions;

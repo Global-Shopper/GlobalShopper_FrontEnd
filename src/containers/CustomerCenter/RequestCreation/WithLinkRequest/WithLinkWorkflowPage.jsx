@@ -10,7 +10,6 @@ import {
   selectAllItems,
   selectCurrentStep,
   selectShippingAddressId,
-  resetRequest,
 } from "@/features/onlineReq";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +42,7 @@ import { toast } from "sonner";
 import ItemExtractForm from "./ItemExtractForm";
 import { useEffect, useState } from "react";
 import ExtractPreviewModal from "@/components/ExtractPreviewModal";
+import { resetAllPurchaseReq } from "@/features/purchaseReq.reducer";
 
 
 export default function WithLinkWorkflowPage() {
@@ -193,7 +193,7 @@ export default function WithLinkWorkflowPage() {
   };
 
   useEffect(() => {
-    dispatch(resetRequest());
+    dispatch(resetAllPurchaseReq());
   }, [dispatch]);
 
   // Step navigation
