@@ -37,7 +37,7 @@ export function useURLSync(
         searchParams.set(paramName, newParamValue);
         return searchParams;
       },
-      { replace: true }
+      { replace: false }
     );
   }, []);
 

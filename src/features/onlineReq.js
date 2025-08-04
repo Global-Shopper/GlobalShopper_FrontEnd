@@ -159,7 +159,7 @@ const onlineReqSlice = createSlice({
     },
     
     // Reset the state
-    resetRequest: () => initialState,
+    resetOnlRequest: () => initialState,
   },
 
 });
@@ -178,7 +178,7 @@ export const {
   removeImageUrl,
   setShippingAddressId,
   setCurrentStep,
-  resetRequest,
+  resetOnlRequest,
 } = onlineReqSlice.actions;
 
 // Selectors
