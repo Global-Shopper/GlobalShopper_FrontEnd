@@ -18,6 +18,11 @@ export function useURLSync(
       `useURLSync: initialValue must be a string when type is "string"`
     );
   }
+  if (type === "number" && typeof initialValue !== "number") {
+    throw new Error(
+      `useURLSync: initialValue must be a number when type is "number"`
+    );
+  }
 
   // Read current search parameter value(s)
   const param = type === "array" ? searchParams.getAll(paramName) : searchParams.get(paramName);

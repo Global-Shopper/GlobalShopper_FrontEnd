@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import PageLoading from "@/components/PageLoading";
+import PageError from "@/components/PageError";
+import { useURLSync } from "@/hooks/useURLSync";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 
 const TABS = [
@@ -30,49 +32,15 @@ const TABS = [
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
-import { useLocation } from "react-router-dom";
-import { useURLSync } from "@/hooks/useURLSync";
-import PageError from "@/components/PageError";
-
 const AdPurchaseReqList = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const [page, setPage] = useURLSync(
-    searchParams,
-    setSearchParams,
-    "page",
-    "number",
-    1
-  );
-
-  const [size, setSize] = useURLSync(
-    searchParams,
-    setSearchParams,
-    "size",
-    "number",
-    10
-  );
-  const [type, setType] = useURLSync(
-    searchParams,
-    setSearchParams,
-    "type",
-    "string",
-    "assigned"
-  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
+  const [size, setSize] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
+  const [type, setType] = useURLSync(searchParams, setSearchParams, "type", "string", "assigned");
+  const [sort] = useURLSync(searchParams, setSearchParams, "sort", "array", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
-
-  // Sync state from URL params when location.search changes
-  React.useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const type = searchParams.get("type") || "assigned";
-    const page = Number(searchParams.get("page")) || 1;
-    const size = Number(searchParams.get("size")) || 10;
-    setType(type);
-    setPage(page);
-    setSize(size);
-  }, [location.search]);
 
   const {
     data: requestsData,
@@ -80,8 +48,9 @@ const AdPurchaseReqList = () => {
     isError: isRequestError,
   } = useGetPurchaseRequestQuery({
     page: page - 1,
-    size: size,
-    type: type,
+    size,
+    type,
+    sort,
   });
 
   // Table rendering function
@@ -108,9 +77,6 @@ const AdPurchaseReqList = () => {
             Trạng thái
           </TableHead>
           <TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
-            Số loại sản phẩm
-          </TableHead>
-          <TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
             Ngày tạo
           </TableHead>
           <TableHead className="text-center text-gray-700 font-semibold text-sm rounded-tr-2xl bg-blue-100">
@@ -129,29 +95,20 @@ const AdPurchaseReqList = () => {
               <p>{request.id}</p>
             </TableCell>
             <TableCell className="font-medium py-3">
-              {request.customer?.name}
+              {request.customer?.name || "-"}
             </TableCell>
             <TableCell className="py-3">
-              {request.subRequests?.map(
-                (sub) => sub?.contactInfo?.[0]?.split(":")[1]
-              ) || "-"}
+              {request.subRequests?.map((sub) => sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
             </TableCell>
-            <TableCell className="py-3">{request.customer?.phone}</TableCell>
-            <TableCell className="py-3">{request.customer?.email}</TableCell>
+            <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
+            <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>
             <TableCell className="py-3">
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                   request.status
                 )} group-hover:shadow`}
               >
-                {getStatusText(request.status)}
-              </span>
-            </TableCell>
-            <TableCell className="text-center py-3">
-              <span className="text-sm font-medium">
-                {request.requestItems?.length ||
-                  request.subRequests?.length ||
-                  0}
+                {getStatusText(request.status)}{" "}{(request?.status === "QUOTED") ? `(${request?.itemsHasQuotation}/${request?.totalItems})` : ""}
               </span>
             </TableCell>
             <TableCell className="text-center py-3">
@@ -174,20 +131,20 @@ const AdPurchaseReqList = () => {
   const totalPages = requestsData?.totalPages || 1;
 
   const handleTabChange = (value) => {
+    console.log("handleTabChange: Setting type to", value);
     setType(value);
-    setPage(1);
-    setSize(10);
   };
 
   const handlePageSizeChange = (value) => {
+    console.log("handlePageSizeChange: Setting size to", value);
     setSize(Number(value));
-    setPage(1);
   };
 
   // Handle search input change
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
+
   // On blur or Enter, navigate to /purchase-request/{id}
   const handleSearchAction = () => {
     const value = searchInputRef.current?.value?.trim();
@@ -271,7 +228,7 @@ const AdPurchaseReqList = () => {
             ) : isRequestError ? (
               <PageError />
             ) : (
-              renderTable(requestsData?.content || [], true)
+              renderTable(requestsData?.content || [])
             )}
           </TabsContent>
           <TabsContent value="unassigned">
@@ -284,7 +241,7 @@ const AdPurchaseReqList = () => {
             )}
           </TabsContent>
         </div>
-        {console.log(page, size, totalPages)}
+        {console.log("Pagination:", { page, size, totalPages })}
         <PaginationBar totalPages={totalPages} page={page} setPage={setPage} />
       </Tabs>
     </div>

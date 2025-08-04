@@ -18,7 +18,7 @@ import {
   resetQuotationById,
 } from "@/features/quotation"
 
-export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, requestStatus, children }) {
+export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
   const getDisplayTitle = () => {
     if (subRequest.contactInfo && subRequest.contactInfo.length > 0) {
       return subRequest.contactInfo[0]
@@ -112,14 +112,14 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
 
       <CardContent className="pt-0">
         <div className="space-y-2">{children}</div>
-        <Button
+        {subRequest.status !== "QUOTED" && <Button
           type="button"
           variant="link"
           className="text-blue-600 font-medium mt-2"
           onClick={() => dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }))}
         >
-          {requestStatus == "CHECKING" && isExpanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
-        </Button>
+          {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
+        </Button>}
         {expanded && (
           <Formik
             enableReinitialize

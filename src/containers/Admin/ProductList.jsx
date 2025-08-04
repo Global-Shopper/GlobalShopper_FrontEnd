@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   Card,
   CardHeader,
@@ -31,10 +32,8 @@ import { GroupCreationDialog } from "./GroupCreationDialog";
 const UnGroupItem = ({
   item,
   subRequestId,
-  status,
   requestItems,
   onProductClick,
-  dispatch,
   quotationState,
   isGroupingMode,
   isSelected,
@@ -139,47 +138,6 @@ const UnGroupItem = ({
                 Xem sản phẩm
               </a>
             </div>
-            {/* Quote button and inline form */}
-            {status === "CHECKING" && (
-              <>
-                <div className="flex justify-end mt-3">
-                  <Button
-                    variant={isProductFormOpen ? "secondary" : "outline"}
-                    size="sm"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      dispatch(
-                        toggleExpandProductQuotation({
-                          subRequestId,
-                          requestItemId,
-                        })
-                      );
-                    }}
-                  >
-                    {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
-                  </Button>
-                </div>
-                {isProductFormOpen && (
-                  <div className="mt-3">
-                    <QuotationForm
-                      product={quotationDetails}
-                      errors={productErrors}
-                      onChange={(field, value) => {
-                        dispatch(
-                          setItemDetail({
-                            subRequestId,
-                            itemIndex: itemIndexNumber,
-                            field,
-                            value,
-                          })
-                        );
-                      }}
-                    />
-                  </div>
-                )}
-              </>
-            )}
           </>
         )}
       </CardContent>
@@ -281,7 +239,7 @@ export function ProductList({
   }, [isGroupingMode]);
 
   // Render a single product card, always with explicit subRequestId
-  const renderProductCard = (item, subRequestId, status, requestItems) => {
+  const renderProductCard = (item, subRequestId, status, requestItems, subStatus) => {
     // Compute order number based on position in parentArray
     const itemIndexNumber = requestItems
       ? requestItems.findIndex((i) => i.id === item.id)
@@ -358,10 +316,10 @@ export function ProductList({
             </a>
           </div>
           {/* Quote button and inline form */}
-          {status === "CHECKING" && (
+          {(status === "CHECKING" || status === "QUOTED") && (
             <>
               <div className="flex justify-end mt-3">
-                <Button
+                {subStatus !== "QUOTED" && <Button
                   variant={isProductFormOpen ? "secondary" : "outline"}
                   size="sm"
                   type="button"
@@ -376,7 +334,7 @@ export function ProductList({
                   }}
                 >
                   {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
-                </Button>
+                </Button>}
               </div>
               {isProductFormOpen && (
                 <div className="mt-3">
@@ -489,7 +447,7 @@ export function ProductList({
               requestStatus={status}
             >
               {sub.requestItems.map((item) =>
-                renderProductCard(item, sub.id, status, sub.requestItems)
+                renderProductCard(item, sub.id, status, sub.requestItems, sub.status)
               )}
             </SubRequestDetails>
           ))}

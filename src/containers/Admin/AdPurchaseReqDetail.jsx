@@ -161,12 +161,6 @@ function AdPurchaseReqDetail() {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <PurchaseRequestHeader
-          requestId={req.id}
-          status={req.status}
-          requestType={req.requestType}
-          adminName={req?.admin?.name}
-          createdAt={req.createdAt}
-          expiredAt={req.expiredAt}
           isRequestingUpdate={isRequestingUpdate}
           updateRequested={updateRequested}
           onRequestCustomerUpdate={handleRequestCustomerUpdate}
@@ -175,6 +169,7 @@ function AdPurchaseReqDetail() {
           getStatusColor={getStatusColor}
           getStatusText={getStatusText}
           formatDate={formatDate}
+          purchaseRequest={req}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">

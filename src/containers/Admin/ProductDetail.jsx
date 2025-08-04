@@ -71,7 +71,7 @@ export function ProductDetail({ product, status }) {
                 </div>
                 {product.variants && product.variants.length > 0 && (
                   <div>
-                    <span className="font-medium">Thông số kỹ thuật:</span>
+                    <span className="font-medium">Thông số sản phẩm:</span>
                     <ul className="mt-1 space-y-1 text-xs">
                       {product.variants.map((variant, idx) => (
                         <li key={idx} className="bg-gray-50 px-2 py-1 rounded">
