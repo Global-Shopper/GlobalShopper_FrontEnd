@@ -26,65 +26,9 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-
-// Helper function to format date
-const formatDate = (dateString) => {
-	const date = new Date(parseInt(dateString));
-	const timeStr = date.toLocaleTimeString("vi-VN", {
-		hour: "2-digit",
-		minute: "2-digit",
-	});
-	const dateStr = date.toLocaleDateString("vi-VN", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
-	return `${timeStr} | ${dateStr}`;
-};
-
-// Helper function to get status badge variant
-const getStatusBadgeVariant = (status) => {
-	switch (status) {
-		case "SENT":
-			return "default";
-		case "PROCESSING":
-			return "secondary";
-		case "COMPLETED":
-			return "default";
-		case "CANCELLED":
-			return "destructive";
-		default:
-			return "outline";
-	}
-};
-
-// Helper function to get status text
-const getStatusText = (status) => {
-	switch (status) {
-		case "SENT":
-			return "Đã gửi";
-		case "CHECKING":
-			return "Đang xử lý";
-		case "QUOTED":
-			return "Đã báo giá";
-		case "CANCELLED":
-			return "Đã hủy";
-		default:
-			return status;
-	}
-};
-
-// Helper function to get request type text
-const getRequestTypeText = (type) => {
-	switch (type) {
-		case "ONLINE":
-			return "Có link";
-		case "OFFLINE":
-			return "Không có link";
-		default:
-			return type;
-	}
-};
+import { getRequestTypeText } from "@/utils/reqTypeHandler";
+import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler";
+import { formatDate } from "@/utils/parseDateTime";
 
 const RequestCard = ({ request, listView = false }) => {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);

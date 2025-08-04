@@ -2,7 +2,7 @@ import axios from "axios";
 import axiosRetry from "axios-retry";
 import { setOnLineStatus } from "../features/app";
 import { signout } from "@/features/user";
-
+import qs from "qs";
 // Axios instance setup
 const url = import.meta.env.VITE_GSHOP_API;
 
@@ -14,6 +14,9 @@ export const axiosInstance = axios.create({
   responseType: "json",
   timeout: 300000,
   timeoutErrorMessage: "Connection is timeout exceeded",
+  paramsSerializer: (params) => {
+    return qs.stringify(params, { arrayFormat: "repeat" });
+  },
 });
 
 export const axiosBaseQuery =
@@ -71,18 +74,18 @@ const setUpInterceptor = (store) => {
     async (config) => {
       const appState = await store.getState();
       const accessToken = appState?.rootReducer?.user?.accessToken;
-      const refreshToken = appState?.rootReducer?.user?.refreshToken;
+      // const refreshToken = appState?.rootReducer?.user?.refreshToken;
 
       if (accessToken) {
         config.headers["Authorization"] = `Bearer ${accessToken}`;
       }
 
-      if (isTokenExpired(accessToken)) {
-        const newAccessToken = await refreshAccessToken(refreshToken);
-        if (newAccessToken) {
-          config.headers["Authorization"] = `Bearer ${newAccessToken}`;
-        }
-      }
+      // if (isTokenExpired(accessToken)) {
+      //   const newAccessToken = await refreshAccessToken(refreshToken);
+      //   if (newAccessToken) {
+      //     config.headers["Authorization"] = `Bearer ${newAccessToken}`;
+      //   }
+      // }
 
       if (config.data) {
 				const haveFile = Object.values(config.data).some((e) => e && e.toString() === '[object File]');
@@ -117,16 +120,16 @@ const setUpInterceptor = (store) => {
   );
 };
 
-// Function to check if the token is expired
-const isTokenExpired = (token) => {
-  // Implement your logic to check token expiration
-  // Return true if expired, false otherwise
-};
+// // Function to check if the token is expired
+// const isTokenExpired = (token) => {
+//   // Implement your logic to check token expiration
+//   // Return true if expired, false otherwise
+// };
 
-// Function to refresh the access token
-const refreshAccessToken = async (refreshToken) => {
-  // Implement your logic to refresh the access token using the refresh token
-  // Return the new access token
-};
+// // Function to refresh the access token
+// const refreshAccessToken = async (refreshToken) => {
+//   // Implement your logic to refresh the access token using the refresh token
+//   // Return the new access token
+// };
 
 export default setUpInterceptor;

@@ -13,47 +13,62 @@ export function useURLSync(
       `useURLSync: initialValue must be an array when type is "array"`
     );
   }
-
   if (type === "string" && typeof initialValue !== "string") {
-    throw new Error(`
-        useURLSync: initialValue must be a string when type is "string"`);
+    throw new Error(
+      `useURLSync: initialValue must be a string when type is "string"`
+    );
   }
 
-  // Read the current search parameter value
-  const param = searchParams.get(paramName);
+  // Read current search parameter value(s)
+  const param = type === "array" ? searchParams.getAll(paramName) : searchParams.get(paramName);
 
-  // Memoize the current URLSearchParams parameter value
+  // Memoize the current parameter value
   const parameter = useMemo(() => {
-    if (param !== null) {
-      return type === "array" ? param.split(",") : param;
+    if (type === "array") {
+      return param.length > 0 ? param : initialValue;
     }
-    return initialValue;
-  }, [initialValue, param, type]);
+    return param !== null ? param : initialValue;
+  }, [param, initialValue, type]);
 
-  // Memoized callback handler to update the URLSearchParams parameter
-  const setParameter = useCallback((newParamValue) => {
-    setSearchParams(
-      (searchParams) => {
-        searchParams.set(paramName, newParamValue);
-        return searchParams;
-      },
-      { replace: false }
-    );
-  }, []);
-
-  // Effect to "seed" URLSearchParams if not defined yet
-  useEffect(() => {
-    if (param === null && initialValue) {
+  // Memoized callback to update search parameter
+  const setParameter = useCallback(
+    (newParamValue) => {
       setSearchParams(
-        (searchParams) => {
-          searchParams.set(paramName, initialValue);
-          return searchParams;
+        (prevParams) => {
+          const newParams = new URLSearchParams(prevParams);
+          // Clear existing values for paramName
+          newParams.delete(paramName);
+          if (type === "array") {
+            // Append each value in the array
+            if (Array.isArray(newParamValue) && newParamValue.length > 0) {
+              newParamValue.forEach((value) => {
+                newParams.append(paramName, value);
+              });
+            }
+          } else {
+            // Set single value for string type
+            if (newParamValue) {
+              newParams.set(paramName, newParamValue);
+            }
+          }
+          return newParams;
         },
         { replace: true }
       );
-    }
-  }, [initialValue, param]);
+    },
+    [setSearchParams, paramName, type]
+  );
 
-  // return stable array reference with return values
-  return useMemo(() => [parameter, setParameter], [parameter, setParameter]);
+  // Seed initial value if parameter is not present in URL
+  useEffect(() => {
+    const currentParam = type === "array" ? searchParams.getAll(paramName) : searchParams.get(paramName);
+    if (
+      (type === "array" && currentParam.length === 0 && initialValue.length > 0) ||
+      (type === "string" && currentParam === null && initialValue)
+    ) {
+      setParameter(initialValue);
+    }
+  }, [searchParams, setSearchParams, paramName, initialValue, type, setParameter]);
+
+  return [parameter, setParameter];
 }
