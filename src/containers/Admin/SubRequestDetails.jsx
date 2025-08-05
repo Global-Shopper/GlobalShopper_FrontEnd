@@ -64,7 +64,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
   });
 
   return (
-    <Card className="border-l-4 border-l-blue-500">
+    <Card className={`border-l-4 ${subRequest.status === "QUOTED" ? "border-l-blue-500" : "border-l-gray-500"}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between cursor-pointer" onClick={() => onToggleExpansion(index)}>
           <div className="flex items-center gap-3">
@@ -77,9 +77,13 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
                 {subRequest.ecommercePlatform}
               </Badge>
             )}
-            {subRequest.status === "QUOTED" && (
+            {subRequest.status === "QUOTED" ? (
               <Badge variant="default" className="text-xs">
                 Đã báo giá
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-xs">
+                Chưa báo giá
               </Badge>
             )}
           </div>

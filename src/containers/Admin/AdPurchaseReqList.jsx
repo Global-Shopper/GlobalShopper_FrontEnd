@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Table,
@@ -39,6 +39,7 @@ const AdPurchaseReqList = () => {
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
   const [size, setSize] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
   const [type, setType] = useURLSync(searchParams, setSearchParams, "type", "string", "assigned");
+  const [status, setStatus] = useURLSync(searchParams, setSearchParams, "status", "string", "");
   const [sort] = useURLSync(searchParams, setSearchParams, "sort", "array", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
 
@@ -51,6 +52,7 @@ const AdPurchaseReqList = () => {
     size,
     type,
     sort,
+    ...(status !== "ALL" && { status }),
   });
 
   // Table rendering function
@@ -98,7 +100,7 @@ const AdPurchaseReqList = () => {
               {request.customer?.name || "-"}
             </TableCell>
             <TableCell className="py-3">
-              {request.subRequests?.map((sub) => sub?.seller? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+              {request.subRequests?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
             </TableCell>
             <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
             <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>
@@ -130,8 +132,11 @@ const AdPurchaseReqList = () => {
   // Pagination controls
   const totalPages = requestsData?.totalPages || 1;
 
+  useEffect(() => {
+    setStatus("ALL");
+  }, [setStatus, type]);
+
   const handleTabChange = (value) => {
-    console.log("handleTabChange: Setting type to", value);
     setType(value);
   };
 
@@ -199,6 +204,33 @@ const AdPurchaseReqList = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {/* Status filter dropdown */}
+              {type === "assigned" && <>
+                <label
+                  htmlFor="statusFilter"
+                  className="text-sm text-gray-600 font-medium ml-4"
+                >
+                  Trạng thái:
+                </label>
+                <Select
+                  value={status || ""}
+                  onValueChange={(value) => setStatus(value)}
+                >
+                  <SelectTrigger
+                    id="statusFilter"
+                    className="w-40 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  >
+                    <SelectValue placeholder="Tất cả" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-lg shadow">
+                    <SelectItem value="ALL" className="rounded-lg">Tất cả</SelectItem>
+                    <SelectItem value="CHECKING" className="rounded-lg">Đang xử lý</SelectItem>
+                    <SelectItem value="QUOTED" className="rounded-lg">Đã báo giá</SelectItem>
+                    <SelectItem value="CANCELLED" className="rounded-lg">Đã hủy</SelectItem>
+                    <SelectItem value="INSUFFICIENT" className="rounded-lg">Chờ cập nhật lại</SelectItem>
+                  </SelectContent>
+                </Select>
+              </>}
             </div>
           </div>
 

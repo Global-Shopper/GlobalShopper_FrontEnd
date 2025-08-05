@@ -175,7 +175,7 @@ function AdPurchaseReqDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
           <div className="lg:col-span-3 space-y-4">
             {/* Product List */}
-            <div className="h-auto overflow-y-auto">
+            <div className="h-[calc(100vh-100px)] overflow-y-auto">
               <ProductList
                 requestItems={req.requestItems || []}
                 subRequests={req.subRequests || []}

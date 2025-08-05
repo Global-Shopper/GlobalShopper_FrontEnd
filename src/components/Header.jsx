@@ -330,7 +330,7 @@ const Header = () => {
                         className="h-10 w-10 p-0 bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-300"
                         asChild
                       >
-                        <Link to="/wallet/deposit">
+                        <Link to="/account-center/wallet/deposit">
                           <Plus className="h-4 w-4" />
                         </Link>
                       </Button>
@@ -355,12 +355,7 @@ const Header = () => {
                         icon: User,
                       },
                       {
-                        to: "/wallet",
-                        text: "Lịch sử thanh toán",
-                        icon: ArrowDownUp,
-                      },
-                      {
-                        to: "/wallet",
+                        to: "/account-center/wallet",
                         text: "Quản lý ví",
                         icon: Wallet,
                       },
