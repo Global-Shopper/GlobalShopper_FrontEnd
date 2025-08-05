@@ -1,8 +1,5 @@
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
-import { formatCurrency, getLocaleCurrencyFormat } from "@/utils/formatCurrency";
 
 function StatusBadge({ status }) {
   const color = getStatusColor(status || 'PENDING');
@@ -18,9 +15,9 @@ function RequestItemCard({
   item, 
   showStatus = true, 
   className = '',
-  showQuotation = true,
   showProductLink = true
 }) {
+  console.log(item)
   return (
     <div className={`bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${className}`}>
       <div className="p-4">
@@ -81,40 +78,6 @@ function RequestItemCard({
             </div>
           </div>
         </div>
-
-        {showQuotation && item.quotationDetail && (
-          <div className="mt-3 border-t pt-3">
-            <div className="text-sm font-medium text-gray-700 mb-2">Báo giá:</div>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="text-gray-600">Giá gốc:</div>
-              <div className="text-right font-medium">
-                {formatCurrency(
-                  item.quotationDetail.basePrice, 
-                  item.quotationDetail.currency, 
-                  getLocaleCurrencyFormat(item.quotationDetail.currency)
-                )}
-              </div>
-              
-              <div className="text-gray-600">Phí dịch vụ:</div>
-              <div className="text-right font-medium">
-                {formatCurrency(
-                  item.quotationDetail.serviceFee, 
-                  'VND', 
-                  getLocaleCurrencyFormat('VND')
-                )}
-              </div>
-              
-              <div className="text-gray-600">Tổng tiền:</div>
-              <div className="text-right font-bold text-green-700">
-                {formatCurrency(
-                  item.quotationDetail.totalVNDPrice, 
-                  'VND', 
-                  getLocaleCurrencyFormat('VND')
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

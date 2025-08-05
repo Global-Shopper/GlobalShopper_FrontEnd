@@ -98,7 +98,7 @@ const AdPurchaseReqList = () => {
               {request.customer?.name || "-"}
             </TableCell>
             <TableCell className="py-3">
-              {request.subRequests?.map((sub) => sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+              {request.subRequests?.map((sub) => sub?.seller? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
             </TableCell>
             <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
             <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>

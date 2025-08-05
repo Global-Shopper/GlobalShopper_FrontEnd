@@ -50,12 +50,6 @@ const PurchaseRequestDetail = () => {
   const now = Date.now();
   const expired = purchaseRequestData?.expiredAt && now > purchaseRequestData.expiredAt;
 
-  // Payment handler (stub)
-  const handlePaySubRequest = (subRequest) => {
-    alert(`Thanh toán cho subRequest: ${subRequest.id}`);
-    // TODO: Integrate payment logic/modal here
-  };
-
   // Render loading state
   if (isRequestLoading) {
     return <PageLoading />;
@@ -94,7 +88,6 @@ const PurchaseRequestDetail = () => {
           groupedItems={groupedItems}
           ungroupedItems={ungroupedItems}
           expired={expired}
-          onPay={handlePaySubRequest}
         />
       </div>
     </div>
