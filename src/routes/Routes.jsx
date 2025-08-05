@@ -15,11 +15,12 @@ import WithoutLinkWorkflowPage from "@/containers/CustomerCenter/RequestCreation
 import WithLinkWorkflowPage from "@/containers/CustomerCenter/RequestCreation/WithLinkRequest/WithLinkWorkflowPage";
 import WalletOverview from "@/containers/Wallet/WalletOverview";
 import WalletDeposit from "@/containers/Wallet/WalletDeposit";
-import AdPurchaseReqDetail from "@/containers/Admin/AdPurchaseReqDetail";
-import AdPurchaseReqList from "@/containers/Admin/AdPurchaseReqList";
+import AdPurchaseReqDetail from "@/containers/Admin/PurchaseRequest/AdPurchaseReqDetail";
+import AdPurchaseReqList from "@/containers/Admin/PurchaseRequest/AdPurchaseReqList";
 import PurchaseRequestDetail from "@/containers/CustomerCenter/PurchaseRequestDetail/PurchaseRequestDetail";
 import BusinessManagerLayout from "@/containers/BusinessManager/BusinessManagerLayout";
 import BMDashboard from "@/containers/BusinessManager/Dashboard/BMDashboard";
+import AdOrderList from "@/containers/Admin/Orders/AdOrderList";
 
 const AppRoutes = () => {
   return (
@@ -94,6 +95,7 @@ const AppRoutes = () => {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdPurchaseReqList />} />
         <Route path="purchase-request/:id" element={<AdPurchaseReqDetail />} />
+        <Route path="orders" element={<AdOrderList />} />
       </Route>
 
       {/* Protected Business Manager Routes */}

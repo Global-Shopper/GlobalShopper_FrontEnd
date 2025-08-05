@@ -45,7 +45,7 @@ function SubRequestItemCard({ item }) {
           </div>
           {q && q.totalVNDPrice && (
             <div className="flex flex-col items-end min-w-[110px]">
-              <span className="text-green-600 font-bold text-base">{q.totalVNDPrice.toLocaleString()} VND</span>
+              <span className="text-green-600 font-bold text-base">{formatCurrency(q.totalVNDPrice, "VND", getLocaleCurrencyFormat("VND"))}</span>
             </div>
           )}
         </div>
@@ -128,7 +128,7 @@ function SubRequestItemCard({ item }) {
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold text-green-800 text-base">
                       <span>Tổng tiền (VND):</span>
-                      <span>{q.totalVNDPrice?.toLocaleString()} VND</span>
+                      <span>{formatCurrency(q.totalVNDPrice, "VND", getLocaleCurrencyFormat("VND"))}</span>
                     </div>
                     <div className="flex gap-2 justify-between">
                       {q.note && <div className="text-md text-gray-600 mt-1">Ghi chú của sản phẩm: {q.note}</div>}
@@ -206,7 +206,7 @@ function SubRequestCard({ subRequest, expired }) {
           onClick={() => handlePaySubRequest(subRequest)}
           disabled={expired || isCheckoutLoading}
         >
-          {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${subRequest.quotationForPurchase.totalPriceEstimate?.toLocaleString()} VND`}
+          {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
         </button>
       )}
     </div>

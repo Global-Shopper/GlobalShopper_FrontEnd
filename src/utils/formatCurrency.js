@@ -5,6 +5,10 @@ export const formatCurrency = (amount, currency, locale) => {
   }).format(amount);
 };
 
+export const formatVNDWithoutSymbol = (amount) => {
+  return new Intl.NumberFormat('vi-VN').format(amount);
+};
+
 export const getLocaleCurrencyFormat = (currency) => {
   switch (currency) {
     case "VND":

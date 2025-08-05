@@ -7,10 +7,10 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Package, ExternalLink, Users, X } from "lucide-react";
-import { SubRequestDetails } from "./SubRequestDetails";
+import { SubRequestDetails } from "./PurchaseRequest/SubRequestDetails";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { QuotationForm } from "./QuotationForm";
+import { QuotationForm } from "./PurchaseRequest/QuotationForm";
 import { useDispatch, useSelector } from "react-redux";
 import {
   toggleExpandProductQuotation,
@@ -26,7 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { GroupCreationDialog } from "./GroupCreationDialog";
+import { GroupCreationDialog } from "./PurchaseRequest/GroupCreationDialog";
 
 // Selectable Product Card Component (only when in selection mode)
 const UnGroupItem = ({

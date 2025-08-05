@@ -1,17 +1,4 @@
 import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useGetPurchaseRequestDetailQuery } from "@/services/gshopApi";
 import PageLoading from "@/components/PageLoading";
@@ -19,10 +6,10 @@ import { toast } from "sonner";
 import { getStatusText } from "@/utils/statusHandler";
 import React from "react";
 import { PurchaseRequestHeader } from "./PurchaseRequestHeader";
-import { CustomerInfoCard } from "./CustomerInfoCard";
-import { ProductDetail } from "./ProductDetail";
-import { NotesSection } from "./NotesSection";
-import { ProductList } from "./ProductList";
+import { CustomerInfoCard } from "../CustomerInfoCard";
+import { ProductDetail } from "../ProductDetail";
+import { NotesSection } from "../NotesSection";
+import { ProductList } from "../ProductList";
 
 const getStatusColor = (status) => {
   switch (status) {

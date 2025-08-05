@@ -239,6 +239,14 @@ const gshopApi = createApi({
         method: "POST",
       }),
     }),
+    getAllOrders: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.ORDER,
+        method: "GET",
+      }),
+      providesTags: ["Orders"],
+    }),
     // checkPayment: builder.query({
     //   query: (data) => ({
     //     params: data,
@@ -282,6 +290,7 @@ export const {
   useCalculateQuotationMutation,
   useLazyGetRawDataQuery,
   useCheckoutMutation,
+  useGetAllOrdersQuery,
 } = gshopApi;
 
 export default gshopApi;

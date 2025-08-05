@@ -24,6 +24,7 @@ const endpoints = {
   RAW_DATA: "/ai/get-raw-data",
   QUOTATION_CALCULATE: "/quotation/calculate",
   CHECKOUT: "/orders/checkout",
+  ORDER: "/orders",
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
 };
 export default endpoints;
