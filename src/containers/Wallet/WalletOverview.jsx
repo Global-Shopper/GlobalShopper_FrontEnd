@@ -164,7 +164,7 @@ const getCreditUpdateText = (type, amount, status) => {
               </div>
             </div>
             <Button asChild>
-              <Link to="/wallet/deposit">
+              <Link to="/account-center/wallet/deposit">
                 <Plus className="mr-2 h-4 w-4" />
                 Nạp tiền
               </Link>
@@ -205,7 +205,7 @@ const getCreditUpdateText = (type, amount, status) => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button asChild className="w-full justify-start" variant="outline">
-                  <Link to="/wallet/deposit">
+                  <Link to="/account-center/wallet/deposit">
                     <Plus className="mr-2 h-4 w-4" />
                     Nạp tiền vào ví
                   </Link>
@@ -263,7 +263,7 @@ const getCreditUpdateText = (type, amount, status) => {
                       <Wallet className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600">Chưa có giao dịch nào</p>
                       <Button asChild className="mt-4">
-                        <Link to="/wallet/deposit">Nạp tiền ngay</Link>
+                        <Link to="/account-center/wallet/deposit">Nạp tiền ngay</Link>
                       </Button>
                     </div>
                   )}

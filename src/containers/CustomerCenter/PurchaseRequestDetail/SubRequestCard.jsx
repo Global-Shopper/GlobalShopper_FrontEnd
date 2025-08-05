@@ -22,7 +22,7 @@ function StatusBadge({ status }) {
 function SubRequestItemCard({ item }) {
   const [open, setOpen] = useState(false);
   const q = item.quotationDetail;
-  
+
   return (
     <div>
       <div className="flex flex-col gap-2 mb-4 p-3 bg-white rounded border border-gray-100 shadow-sm">
@@ -60,7 +60,7 @@ function SubRequestItemCard({ item }) {
             >
               <span>Chi tiết báo giá</span>
               <svg
-                className={`transition-transform duration-300 w-4 h-4 ${open ? 'rotate-90' : ''}`}
+                className={`transition-transform duration-300 w-4 h-4 ${open ? '' : 'rotate-180'}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 20 20"
@@ -93,18 +93,12 @@ function SubRequestItemCard({ item }) {
                             {formatCurrency(q.serviceFee, q.currency, getLocaleCurrencyFormat(q.currency))}
                           </TableCell>
                         </TableRow>
-                        <TableRow className="border-b">
+                        {/* <TableRow className="border-b">
                           <TableCell className="text-gray-600">Tỉ giá</TableCell>
                           <TableCell>
-                            {formatCurrency(parseInt(q.exchangeRate), 'VND', getLocaleCurrencyFormat('VND'))} / {q.currency}
+                            {parseInt(q.exchangeRate)}{" "}{"VNĐ"} / {q.currency}
                           </TableCell>
-                        </TableRow>
-                        <TableRow className="border-b">
-                          <TableCell className="text-gray-600">Tổng trước quy đổi</TableCell>
-                          <TableCell>
-                            {formatCurrency(q.totalPriceBeforeExchange, q.currency, getLocaleCurrencyFormat(q.currency))}
-                          </TableCell>
-                        </TableRow>
+                        </TableRow> */}
                         {q.taxRates?.map((tax, idx) => (
                           <TableRow key={idx} className="border-b">
                             <TableCell className="text-gray-600">
@@ -120,9 +114,15 @@ function SubRequestItemCard({ item }) {
                         {q.totalTaxAmount > 0 && (
                           <TableRow className="border-b">
                             <TableCell className="text-gray-600">Tổng thuế</TableCell>
-                            <TableCell>{formatCurrency(q.totalTaxAmount, q.currency, getLocaleCurrencyFormat(q.currency))} <Badge variant="outline">{q.currency}</Badge></TableCell>
+                            <TableCell>{formatCurrency(q.totalTaxAmount, q.currency, getLocaleCurrencyFormat(q.currency))}</TableCell>
                           </TableRow>
                         )}
+                        <TableRow className="border-b">
+                          <TableCell className="text-gray-600">Tổng trước quy đổi</TableCell>
+                          <TableCell>
+                            {formatCurrency(q.totalPriceBeforeExchange, q.currency, getLocaleCurrencyFormat(q.currency))}
+                          </TableCell>
+                        </TableRow>
                       </TableBody>
                     </Table>
                     <Separator className="my-2" />
@@ -130,7 +130,12 @@ function SubRequestItemCard({ item }) {
                       <span>Tổng tiền (VND):</span>
                       <span>{q.totalVNDPrice?.toLocaleString()} VND</span>
                     </div>
-                    {q.note && <div className="text-xs text-gray-400 mt-1">Ghi chú: {q.note}</div>}
+                    <div className="flex gap-2 justify-between">
+                      {q.note && <div className="text-md text-gray-600 mt-1">Ghi chú của sản phẩm: {q.note}</div>}
+                      <div className="text-md text-gray-600 mt-1">
+                        Tỉ giá: {parseInt(q.exchangeRate)}{" "}{"VNĐ"} / {q.currency}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -145,16 +150,16 @@ function SubRequestItemCard({ item }) {
 function SubRequestCard({ subRequest, expired }) {
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
   const handlePaySubRequest = (subRequest) => {
-    checkout({subRequestId: subRequest?.id, totalPriceEstimate: subRequest?.quotationForPurchase?.totalPriceEstimate})
-    .unwrap()
-    .then(() => {
-      toast.success("Thanh toán thành công");
-    })
-    .catch((error) => {
-      toast.error("Thanh toán thất bại", {
-        description: error?.data?.message || "Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại sau.",
+    checkout({ subRequestId: subRequest?.id, totalPriceEstimate: subRequest?.quotationForPurchase?.totalPriceEstimate })
+      .unwrap()
+      .then(() => {
+        toast.success("Thanh toán thành công");
       })
-    });
+      .catch((error) => {
+        toast.error("Thanh toán thất bại", {
+          description: error?.data?.message || "Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại sau.",
+        })
+      });
     // TODO: Integrate payment logic/modal here
   };
   return (
@@ -178,7 +183,7 @@ function SubRequestCard({ subRequest, expired }) {
         {subRequest.quotationForPurchase ? (
           <div className="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
             {subRequest.quotationForPurchase.note && (
-              <div className="text-xs text-gray-500">Ghi chú: {subRequest.quotationForPurchase.note}</div>
+              <div className="text-xs text-gray-500">Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}</div>
             )}
             <div className="text-xs text-gray-700">
               Phí vận chuyển: <span className="font-semibold">

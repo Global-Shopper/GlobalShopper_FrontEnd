@@ -1,4 +1,4 @@
-import { Home, Inbox, Package, RefreshCw, User } from "lucide-react";
+import { Home, Inbox, Package, RefreshCw, User, Wallet } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 // Menu items with proper routing
@@ -27,6 +27,11 @@ const items = [
 		title: "Yêu cầu hoàn tiền",
 		url: "/account-center/refunds",
 		icon: RefreshCw,
+	},
+	{
+		title: "Quản lý ví tiền",
+		url: "/account-center/wallet",
+		icon: Wallet,
 	},
 ];
 

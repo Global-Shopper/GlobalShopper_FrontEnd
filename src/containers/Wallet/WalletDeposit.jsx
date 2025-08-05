@@ -73,7 +73,7 @@ const WalletDeposit = () => {
   }
 
   const handleBack = () => {
-    navigate('/wallet')
+    navigate('/account-center/wallet')
   }
 
 

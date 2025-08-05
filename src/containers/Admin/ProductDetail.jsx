@@ -102,6 +102,11 @@ export function ProductDetail({ product, status }) {
                     {Math.floor(product.quotationDetail.exchangeRate)} VND
                   </div>
                   <div>
+                    {console.log(formatCurrency(
+                      22,
+                      "CNY",
+                      getLocaleCurrencyFormat("CNY")
+                    ))}
                     <span className="font-medium">Giá sản phẩm:</span>{" "}
                     {formatCurrency(
                       product.quotationDetail.basePrice,
@@ -195,7 +200,7 @@ export function ProductDetail({ product, status }) {
                     )}
                   </div>
                   <div>
-                    <span className="font-medium">Tổng giá (VND):</span>{" "}
+                    <span className="font-medium">Tổng giá (VNĐ):</span>{" "}
                     {formatCurrency(
                       Math.floor(product.quotationDetail.totalVNDPrice),
                       "VND",

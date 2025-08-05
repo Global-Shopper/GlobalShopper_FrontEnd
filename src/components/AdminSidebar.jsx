@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, LogOut, Search, Settings } from "lucide-react";
+import { Calendar, Home, Inbox, LogOut, PackageSearch, Search, Settings } from "lucide-react";
 
 import {
   Sidebar,
@@ -21,12 +21,7 @@ const items = [
   {
     title: "Yêu cầu mua hàng",
     url: "/admin",
-    icon: Home,
-  },
-  {
-    title: "Báo giá",
-    url: "/quotes",
-    icon: Inbox,
+    icon: PackageSearch,
   },
   {
     title: "Đơn hàng",
