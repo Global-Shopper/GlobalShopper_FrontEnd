@@ -8,6 +8,7 @@ import RequestInfo from "./RequestInfo";
 import RequestItemList from "./RequestItemList";
 import { ExpiredWarning } from "./ExpiredWarning";
 import { AdminInfo } from "./AdminInfo";
+import HistoryTimeline from "@/components/HistoryTimeline";
 
 const PurchaseRequestDetail = () => {
   const { id } = useParams();
@@ -67,16 +68,23 @@ const PurchaseRequestDetail = () => {
 
   // Main content render
   return (
-    <div className="max-w-3xl mx-auto py-8 px-3">
+    <div className="max-w-7xl mx-auto py-8 px-3">
       <RequestInfo requestData={purchaseRequestData} />
 
-      <AdminInfo admin={purchaseRequestData.admin} />
+      <div className="flex flex-col md:flex-row md:gap-6 mb-4">
+        <div className="flex-1">
+          <AdminInfo admin={purchaseRequestData.admin} className="mb-4 md:mb-0" />
+        </div>
+        <div className="flex-1">
+          <ShippingInfoCard
+            address={purchaseRequestData.shippingAddress}
+            title="Địa chỉ nhận hàng"
+            className="mb-4 md:mb-0"
+          />
+        </div>
+      </div>
 
-      <ShippingInfoCard
-        address={purchaseRequestData.shippingAddress}
-        title="Địa chỉ nhận hàng"
-        className="mb-4"
-      />
+
 
       <ExpiredWarning
         expired={expired}
@@ -90,6 +98,7 @@ const PurchaseRequestDetail = () => {
           expired={expired}
         />
       </div>
+      <div className="mt-6"><HistoryTimeline history={purchaseRequestData?.history} /></div>
     </div>
   );
 };
