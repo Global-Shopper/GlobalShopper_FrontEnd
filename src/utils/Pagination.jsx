@@ -131,7 +131,7 @@ export const PaginationBar = ({ totalPages, page, setPage }) => {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => setPage(Math.max(1, page - 1))}
+                  onClick={() => setPage(Math.max(1, Number(page) - 1))}
                   className={
                     page === 1
                       ? "pointer-events-none opacity-50"
@@ -142,13 +142,13 @@ export const PaginationBar = ({ totalPages, page, setPage }) => {
 
               {generatePaginationItems(
                 totalPages,
-                page - 1, // 0-based for UI components
+                Number(page) - 1, // 0-based for UI components
                 (page) => setPage(page + 1)
               )}
 
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => setPage(Math.min(totalPages, page + 1))}
+                  onClick={() => setPage(Math.min(totalPages, Number(page) + 1))}
                   className={
                     page === totalPages
                       ? "pointer-events-none opacity-50"

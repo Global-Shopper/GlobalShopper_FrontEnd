@@ -17,6 +17,26 @@ export function QuotationForm({ product, errors = {}, onChange }) {
         <div className="col-span-2">
           <Label>{product?.productName || "Sản phẩm"}</Label>
         </div>
+        <div>
+          <Label>Tiền tệ</Label>
+          <select
+            name="currency"
+            value={product?.currency || ""}
+            onChange={(e) => onChange("currency", e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded"
+          >
+            <option value="">Chọn tiền tệ</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="CNY">CNY</option>
+            <option value="JPY">JPY</option>
+            <option value="KRW">KRW</option>
+            <option value="GBP">GBP</option>
+          </select>
+          {errors?.currency && (
+            <div className="text-red-500 text-xs">{errors.currency}</div>
+          )}
+        </div>
 
         <div>
           <Label>Giá gốc</Label>
@@ -45,12 +65,19 @@ export function QuotationForm({ product, errors = {}, onChange }) {
         </div>
         <div>
           <Label>Khu vực</Label>
-          <Input
+          <select
             name="region"
-            placeholder="VD: UK"
             value={product?.region || ""}
             onChange={(e) => onChange("region", e.target.value)}
-          />
+            className="w-full px-4 py-2 border border-gray-300 rounded"
+          >
+            <option value="">Chọn khu vực</option>
+            <option value="US">Mỹ</option>
+            <option value="UK">Anh</option>
+            <option value="JP">Nhật bản</option>
+            <option value="KR"> Hàn Quốc</option>
+            <option value="CHN">Trung Quốc</option>
+          </select>
           {errors?.region && (
             <div className="text-red-500 text-xs">{errors.region}</div>
           )}
@@ -66,26 +93,6 @@ export function QuotationForm({ product, errors = {}, onChange }) {
           />
           {errors?.serviceFee && (
             <div className="text-red-500 text-xs">{errors.serviceFee}</div>
-          )}
-        </div>
-        <div>
-          <Label>Tiền tệ</Label>
-          <select
-            name="currency"
-            value={product?.currency || ""}
-            onChange={(e) => onChange("currency", e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded"
-          >
-            <option value="">Chọn tiền tệ</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="CNY">CNY</option>
-            <option value="JPY">JPY</option>
-            <option value="KRW">KRW</option>
-            <option value="GBP">GBP</option>
-          </select>
-          {errors?.currency && (
-            <div className="text-red-500 text-xs">{errors.currency}</div>
           )}
         </div>
       </div>

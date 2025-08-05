@@ -232,6 +232,13 @@ const gshopApi = createApi({
         method: "GET",
       }),
     }),
+    checkout: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.CHECKOUT,
+        method: "POST",
+      }),
+    }),
     // checkPayment: builder.query({
     //   query: (data) => ({
     //     params: data,
@@ -274,6 +281,7 @@ export const {
   useCreateGroupMutation,
   useCalculateQuotationMutation,
   useLazyGetRawDataQuery,
+  useCheckoutMutation,
 } = gshopApi;
 
 export default gshopApi;

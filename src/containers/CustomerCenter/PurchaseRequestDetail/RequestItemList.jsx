@@ -1,7 +1,7 @@
 import RequestItemCard from "@/components/RequestItemCard";
 import SubRequestCard from "./SubRequestCard";
 
-export default function RequestItemList({ groupedItems, ungroupedItems, expired, onPay }) {
+export default function RequestItemList({ groupedItems, ungroupedItems, expired }) {
   const hasGroupedItems = groupedItems.length > 0;
   const hasUngroupedItems = ungroupedItems.length > 0;
 
@@ -24,7 +24,6 @@ export default function RequestItemList({ groupedItems, ungroupedItems, expired,
               key={`subreq-${subRequest.id}`}
               subRequest={subRequest}
               expired={expired}
-              onPay={onPay}
             />
           ))}
         </div>

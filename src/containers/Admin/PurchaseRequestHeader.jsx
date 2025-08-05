@@ -6,11 +6,6 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 export function PurchaseRequestHeader({
-  requestId,
-  status,
-  adminName,
-  createdAt,
-  expiredAt,
   onRequestUpdate,
   onCreateGroup,
   onSendQuote,
@@ -21,12 +16,14 @@ export function PurchaseRequestHeader({
   getStatusColor,
   getStatusText,
   formatDate,
+  purchaseRequest,
 }) {
+  console.log(purchaseRequest);
   const [checking, { isLoading: isCheckLoading }] =
     useCheckingPurchaseRequestMutation();
   const handleCheckingRequest = async () => {
     try {
-      await checking(requestId)
+      await checking(purchaseRequest.id)
         .unwrap()
         .then(() => {
           toast.success("Yêu cầu đã được tiếp nhận thành công.");
@@ -45,7 +42,7 @@ export function PurchaseRequestHeader({
         </span>
         <ChevronRight className="h-4 w-4 mx-2" />
         <span className="text-foreground font-medium">
-          Yêu cầu #{requestId}
+          Yêu cầu #{purchaseRequest.id}
         </span>
       </div>
 
@@ -55,32 +52,33 @@ export function PurchaseRequestHeader({
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">Yêu cầu mua hàng</h1>
             <span
-              className={`px-2 py-2 rounded-full text-xs font-medium ${getStatusColor(
-                status
-              )}`}
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                purchaseRequest.status
+              )} group-hover:shadow`}
             >
-              {getStatusText(status)}
+              {console.log(purchaseRequest)}
+              {getStatusText(purchaseRequest.status)}{" "}{(purchaseRequest.status === "QUOTED") ? `(${purchaseRequest?.itemsHasQuotation}/${purchaseRequest?.totalItems})` : ""}
             </span>
-            {status === "CHECKING" && adminName && (
+            {purchaseRequest.status === "CHECKING" && purchaseRequest?.admin?.name && (
               <Badge variant="outline" className="text-xs">
-                Assigned to: {adminName}
+                Assigned to: {purchaseRequest?.admin?.name}
               </Badge>
             )}
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              <span>Tạo: {formatDate(createdAt)}</span>
+              <span>Tạo: {formatDate(purchaseRequest.createdAt)}</span>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              <span>Hết hạn: {formatDate(expiredAt)}</span>
+              <span>Hết hạn: {formatDate(purchaseRequest.expiredAt)}</span>
             </div>
           </div>
         </div>
 
         <div className="flex gap-2">
-          {status === "SENT" && (
+          {purchaseRequest.status === "SENT" && (
             <>
               <Button
                 variant="default"
@@ -110,7 +108,6 @@ export function PurchaseRequestHeader({
             className={isGroupingMode ? "bg-blue-600 hover:bg-blue-700" : ""}
           >
             <Users className="h-4 w-4 mr-2" />
-            {console.log(isGroupingMode)}
             <div>{isGroupingMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
           </Button>
 
