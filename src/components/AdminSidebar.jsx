@@ -25,12 +25,12 @@ const items = [
   },
   {
     title: "Đơn hàng",
-    url: "/orders",
+    url: "/admin/orders",
     icon: Calendar,
   },
   {
     title: "Yêu cầu hoàn tiền",
-    url: "/refunds-list",
+    url: "/admin/refunds-list",
     icon: Search,
   },
   {
