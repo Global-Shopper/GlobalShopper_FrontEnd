@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
-export default function RequestFilters({
+export default function PurchaseRequestFilters({
 	status,
 	setStatus,
 	sort,

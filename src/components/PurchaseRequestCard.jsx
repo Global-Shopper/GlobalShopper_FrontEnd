@@ -30,7 +30,7 @@ import { getRequestTypeText } from "@/utils/reqTypeHandler";
 import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler";
 import { formatDate } from "@/utils/parseDateTime";
 
-const RequestCard = ({ request, listView = false }) => {
+const PurchaseRequestCard = ({ request, listView = false }) => {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const allItems = [
 		...(request?.requestItems || []),
@@ -307,4 +307,4 @@ const RequestCard = ({ request, listView = false }) => {
 	);
 };
 
-export default RequestCard;
+export default PurchaseRequestCard;

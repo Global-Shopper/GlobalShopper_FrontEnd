@@ -33,7 +33,7 @@ import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 
 const STATUS_OPTIONS = [
   { value: "ALL", label: "Tất cả" },
-  { value: "ORDER_REQUESTED", label: "Đang yêu cầu" },
+  { value: "ORDER_REQUESTED", label: "Đang đặt hàng" },
   { value: "PURCHASED", label: "Đã mua" },
   { value: "IN_TRANSIT", label: "Đang vận chuyển" },
   { value: "ARRIVED_IN_DESTINATION", label: "Đã đến nơi" },
@@ -50,11 +50,11 @@ const AdOrderList = () => {
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
   const [size, setSize] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
   const [status, setStatus] = useURLSync(searchParams, setSearchParams, "status", "string", "ALL");
-  // const [sort] = useURLSync(searchParams, setSearchParams, "sort", "array", ["createdAt,desc"]);
+  const [sort] = useURLSync(searchParams, setSearchParams, "sort", "array", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
 
   // TODO: Replace DUMMY_DATA with API call
-  const { data: ordersData, isLoading, isError } = useGetAllOrdersQuery({ page: page - 1, size, ...(status !== "ALL" && { status }) });
+  const { data: ordersData, isLoading, isError } = useGetAllOrdersQuery({ page: page - 1, size, sort, ...(status !== "ALL" && { status }) });
 
   // Table rendering function
   const renderTable = (orders) => (
@@ -69,6 +69,9 @@ const AdOrderList = () => {
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
             Cửa hàng
+          </TableHead>
+          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Nền tảng
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
             Trạng thái
@@ -98,6 +101,9 @@ const AdOrderList = () => {
               {order.contactInfo?.find((info) => info.startsWith("Tên cửa hàng:"))?.split(": ")[1] || "-"}
             </TableCell>
             <TableCell className="py-3">
+              {order?.ecommercePlatform || "-"}
+            </TableCell>
+            <TableCell className="py-3">
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                   order.status
@@ -111,7 +117,9 @@ const AdOrderList = () => {
             </TableCell>
             <TableCell className="text-center py-3">
               {/* createdAt will be added in future API; for now, show null */}
-              {null}
+              {order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString("vi-VN")
+                : "-"}
             </TableCell>
           </TableRow>
         ))}

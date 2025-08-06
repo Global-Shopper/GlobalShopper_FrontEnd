@@ -110,7 +110,7 @@ export default function CreateRequestSelection() {
                     <Link className="h-10 w-10" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    Sản phẩm có link
+                    Sản phẩm từ sàn thương mại điện tử
                   </h3>
                   <Badge
                     variant="outline"

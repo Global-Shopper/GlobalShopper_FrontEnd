@@ -48,6 +48,8 @@ export default function Login() {
 						navigate("/");
 					} else if (res?.user?.role === "ADMIN") {
 						navigate("/admin");
+					} else if (res?.user?.role === "BUSINESS_MANAGER") {
+						navigate("/business-manager");
 					}
 				})
 				.catch((e) => {

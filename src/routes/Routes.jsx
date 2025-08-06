@@ -21,6 +21,9 @@ import PurchaseRequestDetail from "@/containers/CustomerCenter/PurchaseRequestDe
 import BusinessManagerLayout from "@/containers/BusinessManager/BusinessManagerLayout";
 import BMDashboard from "@/containers/BusinessManager/Dashboard/BMDashboard";
 import AdOrderList from "@/containers/Admin/Orders/AdOrderList";
+import SystemConfig from "@/containers/BusinessManager/SystemConfig/SystemConfig";
+import AdminManagement from "@/containers/BusinessManager/AdminManagement/AdminManagement";
+import Orders from "@/containers/CustomerCenter/OrderList/Orders";
 
 const AppRoutes = () => {
   return (
@@ -53,24 +56,7 @@ const AppRoutes = () => {
           path="purchase-request/:id"
           element={<PurchaseRequestDetail />}
         />
-        <Route
-          path="quotes"
-          element={
-            <div className="p-6">
-              <h1>Báo giá</h1>
-              <p>Trang xem báo giá từ yêu cầu</p>
-            </div>
-          }
-        />
-        <Route
-          path="orders"
-          element={
-            <div className="p-6">
-              <h1>Đơn hàng</h1>
-              <p>Trang theo dõi đơn hàng</p>
-            </div>
-          }
-        />
+        <Route path="orders" element={<Orders />} />
         <Route
           path="refunds"
           element={
@@ -101,6 +87,8 @@ const AppRoutes = () => {
       {/* Protected Business Manager Routes */}
       <Route path="/business-manager" element={<BusinessManagerLayout />}>
         <Route index element={<BMDashboard />} />
+        <Route path="admin-management" element={<AdminManagement />} />
+        <Route path="config" element={<SystemConfig />} />
       </Route>
     </Routes>
   );

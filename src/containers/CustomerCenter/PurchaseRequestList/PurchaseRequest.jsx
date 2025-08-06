@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Plus, ShoppingCart } from "lucide-react";
-import RequestCard from "@/components/RequestCard";
-import RequestFilters from "./RequestFilters";
+import PurchaseRequestCard from "@/components/PurchaseRequestCard";
+import PurchaseRequestFilters from "./PurchaseRequestFilters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGetPurchaseRequestQuery } from "@/services/gshopApi";
@@ -100,7 +100,7 @@ export default function PurchaseRequest() {
             Tạo yêu cầu mới
           </Button>
         </div>
-        <RequestFilters
+        <PurchaseRequestFilters
           status={status}
           setStatus={setStatus}
           sort={sort}
@@ -155,7 +155,7 @@ export default function PurchaseRequest() {
                       to={`/account-center/purchase-request/${request.id}`}
                       key={request.id}
                     >
-                      <RequestCard request={request} listView={true} />
+                      <PurchaseRequestCard request={request} listView={true} />
                     </Link>
                   ))}
                 </div>

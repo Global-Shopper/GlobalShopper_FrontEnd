@@ -345,7 +345,7 @@ const Header = () => {
                         icon: CalendarArrowUp,
                       },
                       {
-                        to: "/orders",
+                        to: "/account-center/orders",
                         text: "Đơn hàng của tôi",
                         icon: Package,
                       },

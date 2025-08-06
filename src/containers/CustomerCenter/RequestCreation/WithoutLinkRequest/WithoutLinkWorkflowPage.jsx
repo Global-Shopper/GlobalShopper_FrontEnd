@@ -92,7 +92,7 @@ console.log("shippingAddressId", shippingAddressId);
       </Button>
       <span className="text-gray-400">/</span>
       <span className="font-medium text-orange-600">
-        Không có link sản phẩm
+        Sản phẩm nội địa
       </span>
     </div>
   );
@@ -253,7 +253,7 @@ console.log("shippingAddressId", shippingAddressId);
 
         <div className="text-center space-y-2 mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
-            Yêu cầu mua hàng không có link
+            Yêu cầu mua sản phẩm nội địa
           </h1>
           <p className="text-gray-600 max-w-xl mx-auto">
             Cung cấp thông tin cửa hàng và sản phẩm để chúng tôi hỗ trợ bạn mua

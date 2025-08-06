@@ -14,11 +14,6 @@ const items = [
 		icon: Home,
 	},
 	{
-		title: "Báo giá",
-		url: "/account-center/quotes",
-		icon: Inbox,
-	},
-	{
 		title: "Đơn hàng",
 		url: "/account-center/orders",
 		icon: Package,

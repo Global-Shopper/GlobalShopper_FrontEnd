@@ -222,7 +222,7 @@ export default function WithLinkWorkflowPage() {
         Tạo yêu cầu
       </Button>
       <span className="text-gray-400">/</span>
-      <span className="font-medium text-blue-600">Có link sản phẩm</span>
+      <span className="font-medium text-blue-600">Sản phẩm từ sàn thương mại điện tử</span>
     </div>
   );
 
@@ -400,7 +400,7 @@ export default function WithLinkWorkflowPage() {
 
         <div className="text-center space-y-2 mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
-            Yêu cầu mua hàng có link sản phẩm
+            Yêu cầu mua hàng từ sàn thương mại điện tử
           </h1>
           <p className="text-gray-600 max-w-xl mx-auto">
             Nhập link sản phẩm để trích xuất thông tin tự động hoặc nhập thông

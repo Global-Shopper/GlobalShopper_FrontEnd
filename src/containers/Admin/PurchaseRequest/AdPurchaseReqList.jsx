@@ -70,6 +70,9 @@ const AdPurchaseReqList = () => {
             Cửa hàng
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Nền tảng
+          </TableHead>
+          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
             Số điện thoại
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
@@ -101,6 +104,9 @@ const AdPurchaseReqList = () => {
             </TableCell>
             <TableCell className="py-3">
               {request.subRequests?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+            </TableCell>
+            <TableCell className="py-3">
+              {request.subRequests?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
             </TableCell>
             <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
             <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>

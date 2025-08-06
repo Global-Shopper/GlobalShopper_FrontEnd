@@ -39,7 +39,7 @@ export const getStatusText = (status) => {
     case "INSUFFICIENT":
       return "Chờ cập nhật lại";
     case "ORDER_REQUESTED":
-      return "Đang chờ thanh toán";
+      return "Đang đặt hàng";
     case "PURCHASED":
       return "Đã mua";
     case "IN_TRANSIT":
