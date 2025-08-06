@@ -25,6 +25,7 @@ const endpoints = {
   QUOTATION_CALCULATE: "/quotation/calculate",
   CHECKOUT: "/orders/checkout",
   ORDER: "/orders",
+  HS_CODES: "/hs-code/search",
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
 };
 export default endpoints;

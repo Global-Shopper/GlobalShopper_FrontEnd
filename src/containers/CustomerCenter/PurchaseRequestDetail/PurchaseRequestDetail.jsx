@@ -72,16 +72,16 @@ const PurchaseRequestDetail = () => {
       <RequestInfo requestData={purchaseRequestData} />
 
       <div className="flex flex-col md:flex-row md:gap-6 mb-4">
-        <div className="flex-1">
+        {purchaseRequestData.admin && <div className="flex-1">
           <AdminInfo admin={purchaseRequestData.admin} className="mb-4 md:mb-0" />
-        </div>
-        <div className="flex-1">
+        </div>}
+        {purchaseRequestData.shippingAddress && <div className="flex-1">
           <ShippingInfoCard
             address={purchaseRequestData.shippingAddress}
             title="Địa chỉ nhận hàng"
             className="mb-4 md:mb-0"
           />
-        </div>
+        </div>}
       </div>
 
 

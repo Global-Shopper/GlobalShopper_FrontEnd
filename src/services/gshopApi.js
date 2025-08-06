@@ -247,6 +247,7 @@ const gshopApi = createApi({
       }),
       providesTags: ["Orders"],
     }),
+
     // checkPayment: builder.query({
     //   query: (data) => ({
     //     params: data,
@@ -254,6 +255,13 @@ const gshopApi = createApi({
     //     method: 'GET',
     //   }),
     // }),
+    getHsCodes: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.HS_CODES,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -291,6 +299,7 @@ export const {
   useLazyGetRawDataQuery,
   useCheckoutMutation,
   useGetAllOrdersQuery,
+  useGetHsCodesQuery,
 } = gshopApi;
 
 export default gshopApi;

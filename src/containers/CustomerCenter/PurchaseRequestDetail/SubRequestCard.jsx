@@ -150,7 +150,7 @@ function SubRequestItemCard({ item }) {
 function SubRequestCard({ subRequest, expired }) {
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
   const handlePaySubRequest = (subRequest) => {
-    checkout({ subRequestId: subRequest?.id, totalPriceEstimate: subRequest?.quotationForPurchase?.totalPriceEstimate })
+    checkout({ subRequestId: subRequest?.id, totalPriceEstimate: subRequest?.quotationForPurchase?.totalPriceEstimate + subRequest?.quotationForPurchase?.shippingEstimate })
       .unwrap()
       .then(() => {
         toast.success("Thanh toán thành công");
@@ -206,7 +206,7 @@ function SubRequestCard({ subRequest, expired }) {
           onClick={() => handlePaySubRequest(subRequest)}
           disabled={expired || isCheckoutLoading}
         >
-          {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
+          {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate + subRequest.quotationForPurchase.shippingEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
         </button>
       )}
     </div>

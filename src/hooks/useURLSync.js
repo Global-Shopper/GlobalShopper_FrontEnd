@@ -58,7 +58,7 @@ export function useURLSync(
           }
           return newParams;
         },
-        { replace: true }
+        { replace: false }
       );
     },
     [setSearchParams, paramName, type]

@@ -56,7 +56,7 @@ const AdPurchaseReqList = () => {
   });
 
   // Table rendering function
-  const renderTable = (requests) => (
+  const renderTable = (requests, type) => (
     <Table className="w-full rounded-2xl shadow-md border border-gray-200">
       <TableHeader>
         <TableRow className="bg-blue-100 rounded-t-2xl">
@@ -78,9 +78,9 @@ const AdPurchaseReqList = () => {
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
             Email
           </TableHead>
-          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+          {type === "assigned" && <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
             Trạng thái
-          </TableHead>
+          </TableHead>}
           <TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
             Ngày tạo
           </TableHead>
@@ -97,7 +97,7 @@ const AdPurchaseReqList = () => {
             onClick={() => navigate(`purchase-request/${request.id}`)}
           >
             <TableCell className="font-medium text-xs w-20 py-3 group-hover:text-blue-700">
-              <p>{request.id}</p>
+              <p>{request.id.length > 8 ? request.id.slice(0, 8) + "..." : request.id}</p>
             </TableCell>
             <TableCell className="font-medium py-3">
               {request.customer?.name || "-"}
@@ -110,7 +110,7 @@ const AdPurchaseReqList = () => {
             </TableCell>
             <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
             <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>
-            <TableCell className="py-3">
+            {type === "assigned" && <TableCell className="py-3">
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                   request.status
@@ -118,7 +118,7 @@ const AdPurchaseReqList = () => {
               >
                 {getStatusText(request.status)}{" "}{(request?.status === "QUOTED") ? `(${request?.itemsHasQuotation}/${request?.totalItems})` : ""}
               </span>
-            </TableCell>
+            </TableCell>}
             <TableCell className="text-center py-3">
               {request.createdAt
                 ? new Date(request.createdAt).toLocaleDateString("vi-VN")
@@ -266,7 +266,7 @@ const AdPurchaseReqList = () => {
             ) : isRequestError ? (
               <PageError />
             ) : (
-              renderTable(requestsData?.content || [])
+              renderTable(requestsData?.content || [], "assigned")
             )}
           </TabsContent>
           <TabsContent value="unassigned">
@@ -275,7 +275,7 @@ const AdPurchaseReqList = () => {
             ) : isRequestError ? (
               <PageError />
             ) : (
-              renderTable(requestsData?.content || [])
+              renderTable(requestsData?.content || [], "unassigned")
             )}
           </TabsContent>
         </div>
