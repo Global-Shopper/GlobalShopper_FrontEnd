@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useGetHsCodesQuery } from '@/services/gshopApi';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -7,17 +7,17 @@ import PageLoading from '@/components/PageLoading';
 import PageError from '@/components/PageError';
 import { PaginationBar } from '@/utils/Pagination';
 import { useSearchParams } from 'react-router-dom';
-import _ from "lodash";
 import { useURLSync } from "@/hooks/useURLSync";
+import { debounce } from "lodash";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 export default function SystemConfig() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useURLSync(searchParams, setSearchParams, "search", "string", "");
+  const [search] = useURLSync(searchParams, setSearchParams, "search", "string", "");
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
-  const [size, setSize] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
+  const [size] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
 
   const { data: hsCodesData, isLoading, isError } = useGetHsCodesQuery({
     page: page - 1,
@@ -28,27 +28,31 @@ export default function SystemConfig() {
   const hsCodes = hsCodesData?.content || [];
   const totalPages = hsCodesData?.totalPages || 1;
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setSearch(searchInput);
-    }, 1000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchInput, setSearch]);
-
-  const handleSearchChange = (e) => {
-    setSearchInput(e.target.value);
-  };
+  const debounceSearch = useMemo(() => debounce((e) => {
+    setSearchParams((searchParams) => {
+      searchParams.set("search", e.target.value);
+      searchParams.set("page", 1);
+      return searchParams;
+    });
+  }, 1000), [setSearchParams]);
 
   const handlePageSizeChange = (value) => {
-    setSize(Number(value));
+    setSearchParams((searchParams) => {
+      searchParams.set("size", value);
+      searchParams.set("page", "1");
+      return searchParams;
+    });
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
   };
+
+  useEffect(() => {
+    return () => {
+      debounceSearch.cancel();
+    };
+  }, [debounceSearch]);
 
   if (isLoading) return <PageLoading />;
   if (isError) return <PageError />;
@@ -61,7 +65,10 @@ export default function SystemConfig() {
             type="text"
             placeholder="Tìm kiếm HS code hoặc mô tả"
             value={searchInput}
-            onChange={handleSearchChange}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              debounceSearch(e);
+            }}
             className="w-64"
           />
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Table,
@@ -37,10 +37,10 @@ const AdPurchaseReqList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
-  const [size, setSize] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
-  const [type, setType] = useURLSync(searchParams, setSearchParams, "type", "string", "assigned");
-  const [status, setStatus] = useURLSync(searchParams, setSearchParams, "status", "string", "");
-  const [sort] = useURLSync(searchParams, setSearchParams, "sort", "array", ["createdAt,desc"]);
+  const [size] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
+  const [type] = useURLSync(searchParams, setSearchParams, "type", "string", "assigned");
+  const [status, setStatus] = useURLSync(searchParams, setSearchParams, "status", "string", "ALL");
+  const [sort] = useURLSync(searchParams, setSearchParams, "sort", "arraySort", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
 
   const {
@@ -55,100 +55,24 @@ const AdPurchaseReqList = () => {
     ...(status !== "ALL" && { status }),
   });
 
-  // Table rendering function
-  const renderTable = (requests, type) => (
-    <Table className="w-full rounded-2xl shadow-md border border-gray-200">
-      <TableHeader>
-        <TableRow className="bg-blue-100 rounded-t-2xl">
-          <TableHead className="w-20 text-gray-700 font-semibold text-sm rounded-tl-2xl bg-blue-100">
-            Mã yêu cầu
-          </TableHead>
-          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Khách hàng
-          </TableHead>
-          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Cửa hàng
-          </TableHead>
-          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Nền tảng
-          </TableHead>
-          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Số điện thoại
-          </TableHead>
-          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Email
-          </TableHead>
-          {type === "assigned" && <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Trạng thái
-          </TableHead>}
-          <TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
-            Ngày tạo
-          </TableHead>
-          <TableHead className="text-center text-gray-700 font-semibold text-sm rounded-tr-2xl bg-blue-100">
-            Ngày hết hạn
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {requests.map((request) => (
-          <TableRow
-            className="cursor-pointer transition hover:bg-blue-50/70 group"
-            key={request.id}
-            onClick={() => navigate(`purchase-request/${request.id}`)}
-          >
-            <TableCell className="font-medium text-xs w-20 py-3 group-hover:text-blue-700">
-              <p>{request.id.length > 8 ? request.id.slice(0, 8) + "..." : request.id}</p>
-            </TableCell>
-            <TableCell className="font-medium py-3">
-              {request.customer?.name || "-"}
-            </TableCell>
-            <TableCell className="py-3">
-              {request.subRequests?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
-            </TableCell>
-            <TableCell className="py-3">
-              {request.subRequests?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
-            </TableCell>
-            <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
-            <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>
-            {type === "assigned" && <TableCell className="py-3">
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                  request.status
-                )} group-hover:shadow`}
-              >
-                {getStatusText(request.status)}{" "}{(request?.status === "QUOTED") ? `(${request?.itemsHasQuotation}/${request?.totalItems})` : ""}
-              </span>
-            </TableCell>}
-            <TableCell className="text-center py-3">
-              {request.createdAt
-                ? new Date(request.createdAt).toLocaleDateString("vi-VN")
-                : "-"}
-            </TableCell>
-            <TableCell className="text-center py-3">
-              {request.expiredAt
-                ? new Date(request.expiredAt).toLocaleDateString("vi-VN")
-                : "-"}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-
   // Pagination controls
   const totalPages = requestsData?.totalPages || 1;
 
-  useEffect(() => {
-    setStatus("ALL");
-  }, [setStatus, type]);
-
   const handleTabChange = (value) => {
-    setType(value);
+    setSearchParams((searchParams) => {
+      searchParams.set("status", "ALL");
+      searchParams.set("page", "1");
+      searchParams.set("type", value);
+      return searchParams;
+    });
   };
 
   const handlePageSizeChange = (value) => {
-    console.log("handlePageSizeChange: Setting size to", value);
-    setSize(Number(value));
+    setSearchParams((searchParams) => {
+      searchParams.set("size", value);
+      searchParams.set("page", "1");
+      return searchParams;
+    });
   };
 
   // Handle search input change
@@ -163,6 +87,86 @@ const AdPurchaseReqList = () => {
       navigate(`purchase-request/${value}`);
     }
   };
+
+    // Table rendering function
+    const renderTable = (requests, type) => (
+      <Table className="w-full rounded-2xl shadow-md border border-gray-200">
+        <TableHeader>
+          <TableRow className="bg-blue-100 rounded-t-2xl">
+            <TableHead className="w-20 text-gray-700 font-semibold text-sm rounded-tl-2xl bg-blue-100">
+              Mã yêu cầu
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+              Khách hàng
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+              Cửa hàng
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+              Nền tảng
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+              Số điện thoại
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+              Email
+            </TableHead>
+            {type === "assigned" && <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+              Trạng thái
+            </TableHead>}
+            <TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
+              Ngày tạo
+            </TableHead>
+            <TableHead className="text-center text-gray-700 font-semibold text-sm rounded-tr-2xl bg-blue-100">
+              Ngày hết hạn
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {requests.map((request) => (
+            <TableRow
+              className="cursor-pointer transition hover:bg-blue-50/70 group"
+              key={request.id}
+              onClick={() => navigate(`purchase-request/${request.id}`)}
+            >
+              <TableCell className="font-medium text-xs w-20 py-3 group-hover:text-blue-700">
+                <p>{request.id.length > 8 ? request.id.slice(0, 8) + "..." : request.id}</p>
+              </TableCell>
+              <TableCell className="font-medium py-3">
+                {request.customer?.name || "-"}
+              </TableCell>
+              <TableCell className="py-3">
+                {request.subRequests?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+              </TableCell>
+              <TableCell className="py-3">
+                {request.subRequests?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
+              </TableCell>
+              <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
+              <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>
+              {type === "assigned" && <TableCell className="py-3">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                    request.status
+                  )} group-hover:shadow`}
+                >
+                  {getStatusText(request.status)}{" "}{(request?.status === "QUOTED") ? `(${request?.itemsHasQuotation}/${request?.totalItems})` : ""}
+                </span>
+              </TableCell>}
+              <TableCell className="text-center py-3">
+                {request.createdAt
+                  ? new Date(request.createdAt).toLocaleDateString("vi-VN")
+                  : "-"}
+              </TableCell>
+              <TableCell className="text-center py-3">
+                {request.expiredAt
+                  ? new Date(request.expiredAt).toLocaleDateString("vi-VN")
+                  : "-"}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
 
   return (
     <div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
@@ -279,7 +283,6 @@ const AdPurchaseReqList = () => {
             )}
           </TabsContent>
         </div>
-        {console.log("Pagination:", { page, size, totalPages })}
         <PaginationBar totalPages={totalPages} page={page} setPage={setPage} />
       </Tabs>
     </div>

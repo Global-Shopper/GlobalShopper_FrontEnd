@@ -28,7 +28,7 @@ import PageLoading from "@/components/PageLoading";
 import PageError from "@/components/PageError";
 import { useURLSync } from "@/hooks/useURLSync";
 import { useGetAllOrdersQuery } from "@/services/gshopApi";
-import { formatCurrency, formatVNDWithoutSymbol } from "@/utils/formatCurrency";
+import { formatVNDWithoutSymbol } from "@/utils/formatCurrency";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 
 const STATUS_OPTIONS = [
@@ -48,13 +48,42 @@ const AdOrderList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
-  const [size, setSize] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
-  const [status, setStatus] = useURLSync(searchParams, setSearchParams, "status", "string", "ALL");
+  const [size] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
+  const [status] = useURLSync(searchParams, setSearchParams, "status", "string", "ALL");
   const [sort] = useURLSync(searchParams, setSearchParams, "sort", "array", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
 
   // TODO: Replace DUMMY_DATA with API call
   const { data: ordersData, isLoading, isError } = useGetAllOrdersQuery({ page: page - 1, size, sort, ...(status !== "ALL" && { status }) });
+
+  // Pagination controls
+  const totalPages = ordersData?.totalPages || 1;
+
+  const handlePageSizeChange = (value) => {
+    setSearchParams((searchParams) => {
+      searchParams.set("size", value);
+      searchParams.set("page", "1");
+      return searchParams;
+    });
+  };
+
+  const handleStatusChange = (value) => {
+    setSearchParams((searchParams) => {
+      searchParams.set("status", value);
+      searchParams.set("page", "1");
+      return searchParams;
+    });
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // On blur or Enter, do nothing for now
+  const handleSearchAction = () => {
+    // Not implemented yet
+  };
 
   // Table rendering function
   const renderTable = (orders) => (
@@ -127,19 +156,6 @@ const AdOrderList = () => {
     </Table>
   );
 
-  // Pagination controls
-  const totalPages = ordersData?.totalPages || 1;
-
-  // Handle search input change
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  // On blur or Enter, do nothing for now
-  const handleSearchAction = () => {
-    // Not implemented yet
-  };
-
   return (
     <div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
       <div className="flex flex-col gap-4 mb-6">
@@ -151,7 +167,7 @@ const AdOrderList = () => {
             >
               Số dòng/trang:
             </label>
-            <Select value={String(size)} onValueChange={(value) => setSize(Number(value))}>
+            <Select value={String(size)} onValueChange={(value) => handlePageSizeChange(Number(value))}>
               <SelectTrigger
                 id="pageSize"
                 className="w-24 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500"
@@ -179,7 +195,7 @@ const AdOrderList = () => {
             </label>
             <Select
               value={status || ""}
-              onValueChange={(value) => setStatus(value)}
+              onValueChange={(value) => handleStatusChange(value)}
             >
               <SelectTrigger
                 id="statusFilter"
@@ -198,24 +214,24 @@ const AdOrderList = () => {
           </div>
 
         </div>
-          {/* Search Bar */}
-          <div className="relative max-w-md mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Tìm kiếm theo mã đơn hoặc tracking"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              onBlur={handleSearchAction}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearchAction();
-                }
-              }}
-              className="pl-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 py-2 text-base"
-            />
-          </div>
+        {/* Search Bar */}
+        <div className="relative max-w-md mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Tìm kiếm theo mã đơn hoặc tracking"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            onBlur={handleSearchAction}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearchAction();
+              }
+            }}
+            className="pl-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 py-2 text-base"
+          />
+        </div>
       </div>
       <div className="flex-1 flex flex-col">
         {isLoading ? (
