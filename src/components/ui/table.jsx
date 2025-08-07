@@ -23,7 +23,7 @@ function TableHeader({
   return (
     (<thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b bg-primary/90", className)}
+      className={cn("border-none bg-primary/90", className)}
       {...props} />)
   );
 }

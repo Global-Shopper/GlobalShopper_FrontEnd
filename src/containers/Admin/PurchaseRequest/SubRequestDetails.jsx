@@ -2,7 +2,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ChevronDown, ChevronUp, Store, Contact } from "lucide-react"
 import { Formik } from "formik"
-import { useCreateQuotationMutation } from "@/services/gshopApi"
+import { useCalculateQuotationMutation, useCreateQuotationMutation } from "@/services/gshopApi"
 import * as Yup from "yup"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
   const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
   // API mutation (must be above early return)
   const [createQuotation] = useCreateQuotationMutation();
+  const [calculateQuotation] = useCalculateQuotationMutation();
 
   useEffect(() => {
     if (!quotationState) {

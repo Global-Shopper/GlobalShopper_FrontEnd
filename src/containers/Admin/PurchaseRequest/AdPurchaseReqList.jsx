@@ -89,8 +89,8 @@ const AdPurchaseReqList = () => {
   };
 
     // Table rendering function
-    const renderTable = (requests, type) => (
-      <Table className="w-full rounded-2xl shadow-md border border-gray-200">
+    const PurchaseRequestTable = ({requests, type}) => (
+      <Table className="w-full shadow-md border border-gray-200">
         <TableHeader>
           <TableRow className="bg-blue-100 rounded-t-2xl">
             <TableHead className="w-20 text-gray-700 font-semibold text-sm rounded-tl-2xl bg-blue-100">
@@ -270,7 +270,7 @@ const AdPurchaseReqList = () => {
             ) : isRequestError ? (
               <PageError />
             ) : (
-              renderTable(requestsData?.content || [], "assigned")
+              <PurchaseRequestTable requests={requestsData?.content || []} type="assigned" />
             )}
           </TabsContent>
           <TabsContent value="unassigned">
@@ -279,7 +279,7 @@ const AdPurchaseReqList = () => {
             ) : isRequestError ? (
               <PageError />
             ) : (
-              renderTable(requestsData?.content || [], "unassigned")
+              <PurchaseRequestTable requests={requestsData?.content || []} type="unassigned" />
             )}
           </TabsContent>
         </div>

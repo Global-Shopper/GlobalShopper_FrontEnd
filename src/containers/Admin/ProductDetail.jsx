@@ -5,6 +5,7 @@ import {
   formatCurrency,
   getLocaleCurrencyFormat,
 } from "@/utils/formatCurrency";
+import productDefault from "@/assets/productDefault.png";
 
 export function ProductDetail({ product, status }) {
   console.log(product);
@@ -34,13 +35,13 @@ export function ProductDetail({ product, status }) {
                         key={idx}
                         src={
                           image ||
-                          "/placeholder.svg?height=64&width=64&text=No+Image"
+                          productDefault
                         }
                         alt={`${product.productName} ${idx + 1}`}
                         className="w-16 h-16 object-cover rounded border flex-shrink-0"
                         onError={(e) => {
                           e.target.src =
-                            "/placeholder.svg?height=64&width=64&text=No+Image";
+                            productDefault;
                         }}
                       />
                     ))}
@@ -97,11 +98,6 @@ export function ProductDetail({ product, status }) {
                     {Math.floor(product.quotationDetail.exchangeRate)} VND
                   </div>
                   <div>
-                    {console.log(formatCurrency(
-                      22,
-                      "CNY",
-                      getLocaleCurrencyFormat("CNY")
-                    ))}
                     <span className="font-medium">Giá sản phẩm:</span>{" "}
                     {formatCurrency(
                       product.quotationDetail.basePrice,

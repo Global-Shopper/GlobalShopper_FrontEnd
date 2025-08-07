@@ -89,7 +89,7 @@ export default function SystemConfig() {
         </div>
       </div>
       <div className="bg-white rounded-xl shadow-md p-4">
-        <Table className="w-full rounded-2xl border border-gray-200">
+        <Table className="w-full border border-gray-200">
           <TableHeader>
             <TableRow className="bg-blue-100 rounded-t-2xl">
               <TableHead className="text-gray-700 font-semibold text-sm">HS Code</TableHead>

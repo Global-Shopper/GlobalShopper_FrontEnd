@@ -87,15 +87,15 @@ const EditAddressForm = ({
 			setWards([]);
 		}
 	}, [selectedDistrict]);
-
+ console.log(address);
 	const initialValues = {
 		id: address?.id || "",
 		name: address?.name || "",
 		addressLine: address?.addressLine || address?.streetAddress || "",
 		streetAddress: address?.addressLine || address?.streetAddress || "",
-		ward: address?.ward || "",
-		district: address?.district || "",
-		province: address?.province || "",
+		ward: address?.wardCode || "",
+		district: address?.districtCode || "",
+		province: address?.provinceCode || "",
 		phoneNumber: address?.phoneNumber || "",
 		tag: TAG_OPTIONS.includes(address?.tag) ? address?.tag : "Khác",
 		default: address?.default || false,
@@ -111,6 +111,7 @@ const EditAddressForm = ({
 		const combinedLocation = locationParts.join(", ");
 		const finalTag = values.tag === "Khác" ? customTag : values.tag;
 		try {
+			console.log(values);
 			await updateShippingAddress({
 				id: values.id,
 				name: values.name,
@@ -149,6 +150,7 @@ const EditAddressForm = ({
 		>
 			{({ isSubmitting, values, errors, touched, setFieldValue }) => (
 				<Form className="space-y-4">
+					{console.log(values)}
 					{/* Recipient Name */}
 					<div className="space-y-2">
 						<Label htmlFor="name" className="text-sm font-semibold text-slate-700">
