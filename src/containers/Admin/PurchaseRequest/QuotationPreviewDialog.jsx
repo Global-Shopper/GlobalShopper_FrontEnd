@@ -107,7 +107,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                 <TableBody>
                   {quotation?.details?.map((detail, idx) => (
                     <TableRow key={idx}>
-                      <TableCell>{detail.productName}</TableCell>
+                      <TableCell>{detail.productName ? `${detail.productName.slice(0, 100)}...` : `Sản phẩm ${idx + 1}`}</TableCell>
                       <TableCell className="break-all">
                         {formatCurrency(detail.totalVNDPrice, "VND", getLocaleCurrencyFormat("VND"))}
                       </TableCell>
