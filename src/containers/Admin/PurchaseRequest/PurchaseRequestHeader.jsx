@@ -1,3 +1,4 @@
+import RequestUpdatePRDialog from "@/components/RequestUpdatePRDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCheckingPurchaseRequestMutation } from "@/services/gshopApi";
@@ -8,11 +9,8 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 export function PurchaseRequestHeader({
-  onRequestUpdate,
   onCreateGroup,
   isGroupingMode,
-  isCreateGroupDisabled,
-  isRequestUpdateDisabled,
   purchaseRequest,
 }) {
   const [checking, { isLoading: isCheckLoading }] =
@@ -47,7 +45,6 @@ export function PurchaseRequestHeader({
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">Yêu cầu mua hàng</h1>
-            {console.log(purchaseRequest.status)}
             <Badge
               variant={getStatusBadgeVariant(purchaseRequest.status)}
               className="text-xs"
@@ -76,37 +73,31 @@ export function PurchaseRequestHeader({
           {purchaseRequest.status === "SENT" && (
             <>
               <Button
-                variant="default"
-                size="sm"
                 onClick={handleCheckingRequest}
                 disabled={isCheckLoading}
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 {isCheckLoading ? "Đang tiếp nhận..." : "Tiếp nhận yêu cầu"}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onRequestUpdate}
-                disabled={isRequestUpdateDisabled}
-              >
-                Yêu cầu khách cập nhật thông tin
-              </Button>
+              <RequestUpdatePRDialog purchaseRequest={purchaseRequest} />
             </>
           )}
 
           {/* Toggle Tạo Nhóm button */}
           {purchaseRequest.status !== "SENT" && (
-          <Button
-            variant={isGroupingMode ? "default" : "outline"}
-            size="sm"
-            disabled={isCreateGroupDisabled}
-            onClick={onCreateGroup}
-            className={isGroupingMode ? "bg-blue-600 hover:bg-blue-700" : ""}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            {console.log(purchaseRequest.status)}
-            <div>{isGroupingMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
-          </Button>
+            <>
+              <Button
+                variant={isGroupingMode ? "outline" : "default"}
+                disabled={isCheckLoading}
+                onClick={onCreateGroup}
+                className={isGroupingMode ? "" : "bg-blue-600 hover:bg-blue-700"}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                {console.log(purchaseRequest.status)}
+                <div>{isGroupingMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
+              </Button>
+
+            </>
           )}
         </div>
       </div>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetPurchaseRequestDetailQuery } from "@/services/gshopApi";
 import PageLoading from "@/components/PageLoading";
-import { toast } from "sonner";
 import React from "react";
 import { PurchaseRequestHeader } from "./PurchaseRequestHeader";
 import { CustomerInfoCard } from "../CustomerInfoCard";
@@ -17,11 +16,6 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-// Mock API functions - replace with actual API calls
-const requestCustomerUpdate = async () => {
-  console.log("first");
-};
-
 function AdPurchaseReqDetail() {
   const { id } = useParams();
   const {
@@ -33,9 +27,6 @@ function AdPurchaseReqDetail() {
   const [quotePrices, setQuotePrices] = useState({});
   const [notes, setNotes] = useState("");
   const [expandedSubRequest, setExpandedSubRequest] = useState(null);
-
-  const [isRequestingUpdate, setIsRequestingUpdate] = useState(false);
-  const [updateRequested, setUpdateRequested] = useState(false);
   const [isGroupingMode, setIsGroupingMode] = useState(false);
 
   const selectedProduct = React.useMemo(() => {
@@ -89,17 +80,6 @@ function AdPurchaseReqDetail() {
     }
   };
 
-  const handleRequestCustomerUpdate = async () => {
-    setIsRequestingUpdate(true);
-    try {
-      await requestCustomerUpdate(req.id);
-      setUpdateRequested(true);
-    } catch (error) {
-      toast.error(`Lỗi khi gửi yêu cầu cập nhật: ${error.message}`);
-    } finally {
-      setIsRequestingUpdate(false);
-    }
-  };
 
   const handleExitGroupingMode = () => {
     setIsGroupingMode(false);
@@ -122,9 +102,6 @@ function AdPurchaseReqDetail() {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <PurchaseRequestHeader
-          isRequestingUpdate={isRequestingUpdate}
-          updateRequested={updateRequested}
-          onRequestCustomerUpdate={handleRequestCustomerUpdate}
           onCreateGroup={handleCreateGroup}
           isGroupingMode={isGroupingMode}
           purchaseRequest={req}

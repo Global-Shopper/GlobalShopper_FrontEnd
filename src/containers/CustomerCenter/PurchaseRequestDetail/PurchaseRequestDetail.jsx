@@ -9,6 +9,7 @@ import RequestItemList from "./RequestItemList";
 import { ExpiredWarning } from "./ExpiredWarning";
 import { AdminInfo } from "./AdminInfo";
 import HistoryTimeline from "@/components/HistoryTimeline";
+import InsufficientWarning from "./InsufficientWarning";
 
 const PurchaseRequestDetail = () => {
   const { id } = useParams();
@@ -84,12 +85,14 @@ const PurchaseRequestDetail = () => {
         </div>}
       </div>
 
-
-
       <ExpiredWarning
         expired={expired}
         expiredAt={purchaseRequestData.expiredAt}
       />
+
+      {purchaseRequestData.status === "INSUFFICIENT" && (
+        <InsufficientWarning id={purchaseRequestData.id} />
+      )}
 
       <div className="mt-6">
         <RequestItemList

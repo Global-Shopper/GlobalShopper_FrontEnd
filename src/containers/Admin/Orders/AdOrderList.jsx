@@ -127,7 +127,7 @@ const AdOrderList = () => {
               {order.customer?.name || "-"}
             </TableCell>
             <TableCell className="py-3">
-              {order.contactInfo?.find((info) => info.startsWith("Tên cửa hàng:"))?.split(": ")[1] || "-"}
+              {order.seller || "-"}
             </TableCell>
             <TableCell className="py-3">
               {order?.ecommercePlatform || "-"}
@@ -142,7 +142,7 @@ const AdOrderList = () => {
               </span>
             </TableCell>
             <TableCell className="py-3">
-              {formatVNDWithoutSymbol(order.totalPrice)}
+              {formatVNDWithoutSymbol(order.totalPrice.toFixed(0))}
             </TableCell>
             <TableCell className="text-center py-3">
               {/* createdAt will be added in future API; for now, show null */}

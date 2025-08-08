@@ -195,6 +195,28 @@ const gshopApi = createApi({
         method: "POST",
       }),
     }),
+    requestUpdatePurchaseRequest: builder.mutation({
+      query: ({ purchaseRequestId, reason }) => ({
+        data: reason,
+        url: `${endpoints.PURCHASE_REQUEST}/${purchaseRequestId}/request-correction`,
+        method: "POST",
+      }),
+      invalidatesTags: ["PurchaseRequestDetail"],
+    }),
+    getEditInfoPurchaseRequest: builder.query({
+      query: (purchaseRequestId) => ({
+        url: `${endpoints.PURCHASE_REQUEST}/${purchaseRequestId}/edit`,
+        method: "GET",
+      }),
+    }),
+    updatePurchaseRequest: builder.mutation({
+      query: ({ id, payload }) => ({
+        data: payload,
+        url: `${endpoints.PURCHASE_REQUEST}/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["PurchaseRequest", "PurchaseRequestDetail"],
+    }),
     createQuotation: builder.mutation({
       query: (data) => ({
         data: data,
@@ -298,7 +320,10 @@ export const {
   useGetWalletQuery,
   useDepositWalletMutation,
   useCreateQuotationMutation,
+  useRequestUpdatePurchaseRequestMutation,
   useRejectQuotationMutation,
+  useGetEditInfoPurchaseRequestQuery,
+  useUpdatePurchaseRequestMutation,
   // useLazyCheckPaymentQuery,
   useCheckingPurchaseRequestMutation,
   useGetPurchaseRequestDetailQuery,

@@ -24,6 +24,7 @@ import AdOrderList from "@/containers/Admin/Orders/AdOrderList";
 import SystemConfig from "@/containers/BusinessManager/SystemConfig/SystemConfig";
 import AdminManagement from "@/containers/BusinessManager/AdminManagement/AdminManagement";
 import Orders from "@/containers/CustomerCenter/OrderList/Orders";
+import PurchaseRequestEdit from "@/containers/CustomerCenter/PurchaseRequestEdit/PurchaseRequestEdit";
 
 const AppRoutes = () => {
   return (
@@ -56,6 +57,7 @@ const AppRoutes = () => {
           path="purchase-request/:id"
           element={<PurchaseRequestDetail />}
         />
+        <Route path="purchase-request/:id/edit" element={<PurchaseRequestEdit />} />
         <Route path="orders" element={<Orders />} />
         <Route
           path="refunds"
