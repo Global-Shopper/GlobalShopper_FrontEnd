@@ -10,11 +10,9 @@ import { toast } from "sonner";
 export function PurchaseRequestHeader({
   onRequestUpdate,
   onCreateGroup,
-  onSendQuote,
   isGroupingMode,
   isCreateGroupDisabled,
   isRequestUpdateDisabled,
-  isSendQuoteDisabled,
   purchaseRequest,
 }) {
   const [checking, { isLoading: isCheckLoading }] =
@@ -97,6 +95,7 @@ export function PurchaseRequestHeader({
           )}
 
           {/* Toggle Tạo Nhóm button */}
+          {purchaseRequest.status !== "SENT" && (
           <Button
             variant={isGroupingMode ? "default" : "outline"}
             size="sm"
@@ -105,16 +104,10 @@ export function PurchaseRequestHeader({
             className={isGroupingMode ? "bg-blue-600 hover:bg-blue-700" : ""}
           >
             <Users className="h-4 w-4 mr-2" />
+            {console.log(purchaseRequest.status)}
             <div>{isGroupingMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
           </Button>
-
-          <Button
-            size="sm"
-            disabled={isSendQuoteDisabled}
-            onClick={onSendQuote}
-          >
-            Gửi Báo Giá
-          </Button>
+          )}
         </div>
       </div>
     </div>
