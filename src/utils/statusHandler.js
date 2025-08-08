@@ -59,7 +59,7 @@ export const getStatusBadgeVariant = (status) => {
 		case "CHECKING":
 			return "secondary";
 		case "QUOTED":
-			return "outline";
+			return "default";
 		case "CANCELLED":
 			return "destructive";
     case "INSUFFICIENT":

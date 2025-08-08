@@ -34,7 +34,7 @@ export function GroupCreationDialog({
 }) {
   const [createGroup, { isLoading }] = useCreateGroupMutation();
   // Common options for dropdowns
-  const commonPlatforms = ["Amazon", "eBay", "Taobao", "Other"];
+  const commonPlatforms = ["Amazon", "eBay", "Taobao", "Khác"];
 
   // Formik + Yup validation
   const formik = useFormik({
@@ -47,7 +47,7 @@ export function GroupCreationDialog({
       ecommercePlatform: Yup.string().required("Platform is required"),
 
       customPlatform: Yup.string().when("ecommercePlatform", {
-        is: (val) => val === "Other", // ✅ safer way
+        is: (val) => val === "Khác", // ✅ safer way
         then: () => Yup.string().required("Custom platform is required"), // ✅ wrapped in a function
         otherwise: () => Yup.string().notRequired(), // ✅ must be a function that returns schema
       }),
@@ -56,7 +56,7 @@ export function GroupCreationDialog({
     onSubmit: async (values, { resetForm }) => {
       try {
         const platform =
-          values.ecommercePlatform === "Other"
+          values.ecommercePlatform === "Khác"
             ? values.customPlatform
             : values.ecommercePlatform;
         const seller = values.seller;
@@ -181,7 +181,7 @@ export function GroupCreationDialog({
                 </SelectContent>
               </Select>
               {/* Custom Platform Input */}
-              {formik.values.ecommercePlatform === "Other" && (
+              {formik.values.ecommercePlatform === "Khác" && (
                 <Input
                   placeholder="Nhập tên platform khác"
                   name="customPlatform"
@@ -202,7 +202,7 @@ export function GroupCreationDialog({
                     {formik.errors.ecommercePlatform}
                   </p>
                 )}
-              {formik.values.ecommercePlatform === "Other" &&
+              {formik.values.ecommercePlatform === "Khác" &&
                 formik.touched.customPlatform &&
                 formik.errors.customPlatform && (
                   <p className="text-red-500 text-xs">

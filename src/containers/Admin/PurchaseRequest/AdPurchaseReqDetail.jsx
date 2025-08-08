@@ -3,38 +3,12 @@ import { useParams } from "react-router-dom";
 import { useGetPurchaseRequestDetailQuery } from "@/services/gshopApi";
 import PageLoading from "@/components/PageLoading";
 import { toast } from "sonner";
-import { getStatusText } from "@/utils/statusHandler";
 import React from "react";
 import { PurchaseRequestHeader } from "./PurchaseRequestHeader";
 import { CustomerInfoCard } from "../CustomerInfoCard";
 import { ProductDetail } from "../ProductDetail";
 import { NotesSection } from "../NotesSection";
 import { ProductList } from "../ProductList";
-
-const getStatusColor = (status) => {
-  switch (status) {
-    case "SENT":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "PENDING":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "APPROVED":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "REJECTED":
-      return "bg-red-100 text-red-800 border-red-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
-};
-
-const formatDate = (timestamp) => {
-  return new Date(timestamp).toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -153,9 +127,6 @@ function AdPurchaseReqDetail() {
           onRequestCustomerUpdate={handleRequestCustomerUpdate}
           onCreateGroup={handleCreateGroup}
           isGroupingMode={isGroupingMode}
-          getStatusColor={getStatusColor}
-          getStatusText={getStatusText}
-          formatDate={formatDate}
           purchaseRequest={req}
         />
 

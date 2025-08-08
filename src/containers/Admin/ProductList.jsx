@@ -81,11 +81,9 @@ const UnGroupItem = ({
 
   return (
     <Card
-      className={`transition-all hover:shadow-md cursor-pointer ${
-        isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
-      } ${
-        isGroupingMode && isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""
-      } ${isGroupingMode ? "border-2 border-dashed border-blue-300" : ""}`}
+      className={`transition-all hover:shadow-md cursor-pointer ${isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
+        } ${isGroupingMode && isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""
+        } ${isGroupingMode ? "border-2 border-dashed border-blue-300" : ""}`}
       onClick={handleCardClick}
     >
       <CardContent className="p-4">
@@ -102,11 +100,10 @@ const UnGroupItem = ({
               />
             )}
             <span
-              className={`text-xs px-2 py-1 rounded shrink-0 ${
-                subRequestId
+              className={`text-xs px-2 py-1 rounded shrink-0 ${subRequestId
                   ? "bg-orange-100 text-orange-600"
                   : "bg-gray-100 text-orange-600"
-              }`}
+                }`}
             >
               #{orderNumber}
             </span>
@@ -116,9 +113,8 @@ const UnGroupItem = ({
           </div>
           <div className="flex items-center gap-3">
             <span
-              className={`font-bold text-lg ${
-                subRequestId ? "text-orange-600" : "text-blue-600"
-              }`}
+              className={`font-bold text-lg ${subRequestId ? "text-orange-600" : "text-blue-600"
+                }`}
             >
               ×{item.quantity}
             </span>
@@ -272,20 +268,18 @@ export function ProductList({
     return (
       <Card
         key={requestItemId}
-        className={`transition-all hover:shadow-md ${
-          isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
-        }`}
+        className={`transition-all hover:shadow-md ${isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
+          }`}
         onClick={() => onProductClick(item.id)}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <span
-                className={`text-xs px-2 py-1 rounded shrink-0 ${
-                  subRequestId
+                className={`text-xs px-2 py-1 rounded shrink-0 ${subRequestId
                     ? "bg-orange-100 text-orange-600"
                     : "bg-gray-100 text-orange-600"
-                }`}
+                  }`}
               >
                 #{orderNumber}
               </span>
@@ -295,9 +289,8 @@ export function ProductList({
             </div>
             <div className="flex items-center gap-3">
               <span
-                className={`font-bold text-lg ${
-                  subRequestId ? "text-orange-600" : "text-blue-600"
-                }`}
+                className={`font-bold text-lg ${subRequestId ? "text-orange-600" : "text-blue-600"
+                  }`}
               >
                 ×{item.quantity}
               </span>
@@ -378,8 +371,8 @@ export function ProductList({
           {isGroupingMode
             ? "Chọn các sản phẩm bằng checkbox để tạo nhóm"
             : status === "SENT"
-            ? "Xem thông tin sản phẩm trong yêu cầu mua hàng"
-            : "Chọn sản phẩm để xem chi tiết và nhập giá báo giá"}
+              ? "Xem thông tin sản phẩm trong yêu cầu mua hàng"
+              : "Chọn sản phẩm để xem chi tiết và nhập giá báo giá"}
         </CardDescription>
         {isGroupingMode && (
           <div className="flex justify-end">
@@ -399,7 +392,7 @@ export function ProductList({
         {/* Render main requestItems if any */}
         {requestItems?.length > 0 && (
           <div>
-            <h3 className="font-semibold mb-3 text-lg">
+            <h3 className="font-semibold mb-3 text-md">
               Sản phẩm chưa được tạo nhóm
             </h3>
 
@@ -436,21 +429,25 @@ export function ProductList({
 
         {/* Consolidated SubRequests */}
         {subRequests?.length > 0 &&
-          subRequests.map((sub, idx) => (
-            <SubRequestDetails
-              key={idx}
-              subRequest={sub}
-              index={idx}
-              isExpanded={expandedSubRequest === idx}
-              onToggleExpansion={onToggleSubRequestExpansion}
-              requestType={requestType}
-              requestStatus={status}
-            >
-              {sub.requestItems.map((item) =>
-                renderProductCard(item, sub.id, status, sub.requestItems, sub.status)
-              )}
-            </SubRequestDetails>
-          ))}
+          <>
+            <p className="font-semibold mb-3 text-md">Các nhóm sản phẩm</p>
+            {subRequests.map((sub, idx) => (
+              <SubRequestDetails
+                key={idx}
+                subRequest={sub}
+                index={idx}
+                isExpanded={expandedSubRequest === idx}
+                onToggleExpansion={onToggleSubRequestExpansion}
+                requestType={requestType}
+                requestStatus={status}
+              >
+                {sub.requestItems.map((item) =>
+                  renderProductCard(item, sub.id, status, sub.requestItems, sub.status)
+                )}
+              </SubRequestDetails>
+            ))}
+          </>
+        }
       </CardContent>
 
       {/* Group Creation Dialog (reusable component) */}

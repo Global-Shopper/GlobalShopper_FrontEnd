@@ -45,11 +45,6 @@ export function CustomerInfoCard({ customer, shippingAddress, formatCurrency }) 
             </div>
           </div>
         </div>
-        <Separator />
-        <div className="bg-green-50 p-3 rounded-lg">
-          <div className="text-sm font-medium text-green-800">Số dư ví</div>
-          <div className="text-lg font-bold text-green-600">{formatCurrency(customer?.wallet?.balance || 0)}</div>
-        </div>
       </CardContent>
     </Card>
   )

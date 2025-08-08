@@ -39,7 +39,7 @@ const AdPurchaseReqList = () => {
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
   const [size] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
   const [type] = useURLSync(searchParams, setSearchParams, "type", "string", "assigned");
-  const [status, setStatus] = useURLSync(searchParams, setSearchParams, "status", "string", "ALL");
+  const [status] = useURLSync(searchParams, setSearchParams, "status", "string", "ALL");
   const [sort] = useURLSync(searchParams, setSearchParams, "sort", "arraySort", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
 
@@ -61,7 +61,7 @@ const AdPurchaseReqList = () => {
   const handleTabChange = (value) => {
     setSearchParams((searchParams) => {
       searchParams.set("status", "ALL");
-      searchParams.set("page", "1");
+      searchParams.set("page", 1);
       searchParams.set("type", value);
       return searchParams;
     });
@@ -70,7 +70,15 @@ const AdPurchaseReqList = () => {
   const handlePageSizeChange = (value) => {
     setSearchParams((searchParams) => {
       searchParams.set("size", value);
-      searchParams.set("page", "1");
+      searchParams.set("page", 1);
+      return searchParams;
+    });
+  };
+
+  const handleStatusChange = (value) => {
+    setSearchParams((searchParams) => {
+      searchParams.set("page", 1);
+      searchParams.set("status", value);
       return searchParams;
     });
   };
@@ -224,7 +232,7 @@ const AdPurchaseReqList = () => {
                 </label>
                 <Select
                   value={status || ""}
-                  onValueChange={(value) => setStatus(value)}
+                  onValueChange={(value) => handleStatusChange(value)}
                 >
                   <SelectTrigger
                     id="statusFilter"

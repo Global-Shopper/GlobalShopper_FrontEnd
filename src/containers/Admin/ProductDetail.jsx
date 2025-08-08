@@ -142,7 +142,7 @@ export function ProductDetail({ product, status }) {
                             <tr key={idx}>
                               <td className="border px-2 py-1">{tax.region}</td>
                               <td className="border px-2 py-1">
-                                {tax.taxType}
+                                {`${tax.taxName} (${tax.taxType})`}
                               </td>
                               <td className="border px-2 py-1">{tax.rate}</td>
                             </tr>

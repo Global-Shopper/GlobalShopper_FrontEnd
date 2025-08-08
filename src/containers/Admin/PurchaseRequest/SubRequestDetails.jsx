@@ -17,20 +17,23 @@ import {
   initializeSubRequest,
   resetQuotationById,
 } from "@/features/quotation"
+import { useState } from "react"
+import QuotationPreviewDialog from "./QuotationPreviewDialog"
+import { Dialog, DialogTrigger } from "@/components/ui/dialog"
 
 export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
+  // Remove manual dialog open state; will use DialogTrigger pattern
+  const dispatch = useDispatch();
+  const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
+  // API mutation (must be above early return)
+  const [createQuotation] = useCreateQuotationMutation();
+
   const getDisplayTitle = () => {
     if (subRequest.contactInfo && subRequest.contactInfo.length > 0) {
       return subRequest.contactInfo[0]
     }
     return subRequest.seller
   }
-
-  const dispatch = useDispatch();
-  const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
-  // API mutation (must be above early return)
-  const [createQuotation] = useCreateQuotationMutation();
-  const [calculateQuotation] = useCalculateQuotationMutation();
 
   useEffect(() => {
     if (!quotationState) {
@@ -65,157 +68,141 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
   });
 
   return (
-    <Card className={`border-l-4 ${subRequest.status === "QUOTED" ? "border-l-blue-500" : "border-l-gray-500"}`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between cursor-pointer" onClick={() => onToggleExpansion(index)}>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Store className="h-4 w-4 text-blue-600" />
-              <span className="font-semibold">{getDisplayTitle()}</span>
+    <>
+      <Card className={`border-l-4 ${subRequest.status === "QUOTED" ? "border-l-blue-500" : "border-l-gray-500"}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between cursor-pointer" onClick={() => onToggleExpansion(index)}>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Store className="h-4 w-4 text-blue-600" />
+                <span className="font-semibold">{getDisplayTitle()}</span>
+              </div>
+              {requestType === "ONLINE" && subRequest.ecommercePlatform && (
+                <Badge variant="secondary" className="text-xs">
+                  {subRequest.ecommercePlatform}
+                </Badge>
+              )}
+              {subRequest.status === "QUOTED" ? (
+                <Badge variant="default" className="text-xs">
+                  Đã báo giá
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-xs">
+                  Chưa báo giá
+                </Badge>
+              )}
             </div>
-            {requestType === "ONLINE" && subRequest.ecommercePlatform && (
-              <Badge variant="secondary" className="text-xs">
-                {subRequest.ecommercePlatform}
-              </Badge>
-            )}
-            {subRequest.status === "QUOTED" ? (
-              <Badge variant="default" className="text-xs">
-                Đã báo giá
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="text-xs">
-                Chưa báo giá
-              </Badge>
-            )}
+            <Button variant="ghost" size="sm">
+              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
           </div>
-          <Button variant="ghost" size="sm">
-            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-        </div>
 
-        {/* Contact Info - Only show when expanded */}
-        {isExpanded && subRequest.contactInfo && subRequest.contactInfo.length > 0 && (
-          <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Contact className="h-4 w-4 text-blue-600" />
-              <span className="font-medium text-blue-900">Thông tin liên hệ</span>
-            </div>
-            <div className="space-y-2">
-              {subRequest.contactInfo.map((info, i) => (
-                <div key={i} className="text-sm bg-white px-3 py-2 rounded border border-blue-100">
-                  {info.split("\n").map((line, lineIdx) => (
-                    <div key={lineIdx} className={lineIdx > 0 ? "mt-1" : ""}>
-                      {line}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardHeader>
-
-      <CardContent className="pt-0">
-        <div className="space-y-2">{children}</div>
-        {subRequest.status !== "QUOTED" && <Button
-          type="button"
-          variant="link"
-          className="text-blue-600 font-medium mt-2"
-          onClick={() => dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }))}
-        >
-          {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
-        </Button>}
-        {expanded && (
-          <Formik
-            enableReinitialize
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={async (values, actions) => {
-              // Build details from latest Redux state
-              const details = quotationDetails.map((detail) => ({ ...detail }));
-              const payload = {
-                subRequestId: subRequest.id,
-                note: values.note,
-                shippingEstimate: Number(values.shippingEstimate),
-                details,
-                expiredDate: 1
-              };
-              try {
-                await createQuotation(payload).unwrap()
-                .then(() => {
-                  dispatch(resetQuotationById({ subRequestId: subRequest.id }));
-                  toast.success("Gửi báo giá thành công!")})
-              } catch (err) {
-                toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
-              }
-              actions.setSubmitting(false);
-            }}
-          >
-            {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div>
-                  <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
-                  <Textarea
-                    name="note"
-                    placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
-                    value={values.note}
-                    onChange={e => {
-                      handleChange(e);
-                      dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
-                    }}
-                    onBlur={handleBlur}
-                  />
-                  {touched.note && errors.note && (
-                    <div className="text-red-500 text-xs">{errors.note}</div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block font-medium mb-1">Ước tính phí vận chuyển cho đơn hàng</label>
-                  <Input
-                    name="shippingEstimate"
-                    type="number"
-                    placeholder="Nhập phí vận chuyển"
-                    value={values.shippingEstimate}
-                    onChange={e => {
-                      handleChange(e);
-                      dispatch(setShippingEstimate({ subRequestId: subRequest.id, shippingEstimate: e.target.value }));
-                    }}
-                    onBlur={handleBlur}
-                  />
-                  {touched.shippingEstimate && errors.shippingEstimate && (
-                    <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
-                  )}
-                </div>
-
-                {/* Display product quotation details (read-only) */}
-                <div className="mt-6">
-                  <div className="font-semibold mb-2">Chi tiết sản phẩm báo giá</div>
-                  <div className="space-y-2">
-                    {quotationDetails.map((detail, idx) => (
-                      <div key={detail.requestItemId || detail.id || idx} className="p-3 bg-gray-50 rounded border">
-                        <div className="flex flex-wrap gap-4">
-                          <div><span className="font-medium">Sản phẩm:</span> {subRequest.requestItems[idx]?.productName || detail.requestItemId}</div>
-                          <div><span className="font-medium">Giá gốc:</span> {detail.basePrice}</div>
-                          <div><span className="font-medium">HS Code:</span> {detail.hsCodeId}</div>
-                          <div><span className="font-medium">Khu vực:</span> {detail.region}</div>
-                          <div><span className="font-medium">Phí dịch vụ:</span> {detail.serviceFee}</div>
-                          <div><span className="font-medium">Tiền tệ:</span> {detail.currency}</div>
-                          <div><span className="font-medium">Ghi chú:</span> {detail.note}</div>
-                        </div>
+          {/* Contact Info - Only show when expanded */}
+          {isExpanded && subRequest.contactInfo && subRequest.contactInfo.length > 0 && (
+            <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Contact className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-blue-900">Thông tin liên hệ</span>
+              </div>
+              <div className="space-y-2">
+                {subRequest.contactInfo.map((info, i) => (
+                  <div key={i} className="text-sm bg-white px-3 py-2 rounded border border-blue-100">
+                    {info.split("\n").map((line, lineIdx) => (
+                      <div key={lineIdx} className={lineIdx > 0 ? "mt-1" : ""}>
+                        {line}
                       </div>
                     ))}
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardHeader>
 
-                <div className="flex gap-2 mt-4">
-                  <Button type="submit" disabled={isSubmitting}>Gửi báo giá</Button>
-                </div>
-              </form>
-            )}
-          </Formik>
-        )}
-      </CardContent>
-    </Card>
+        <CardContent className="pt-0">
+          <div className="space-y-2">{children}</div>
+          {subRequest.status !== "QUOTED" && <Button
+            type="button"
+            variant="link"
+            className="text-blue-600 font-medium mt-2"
+            onClick={() => dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }))}
+          >
+            {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
+          </Button>}
+          {expanded && (
+            <Formik
+              enableReinitialize
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={async (values, actions) => {
+                // Build details from latest Redux state
+                const details = quotationDetails.map((detail) => ({ ...detail }));
+                const payload = {
+                  subRequestId: subRequest.id,
+                  note: values.note,
+                  shippingEstimate: Number(values.shippingEstimate),
+                  details,
+                  expiredDate: 1
+                };
+                try {
+                  await createQuotation(payload).unwrap()
+                    .then(() => {
+                      dispatch(resetQuotationById({ subRequestId: subRequest.id }));
+                      toast.success("Gửi báo giá thành công!")
+                    })
+                } catch (err) {
+                  toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
+                }
+                actions.setSubmitting(false);
+              }}
+            >
+              {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+                <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                  <div>
+                    <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
+                    <Textarea
+                      name="note"
+                      placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
+                      value={values.note}
+                      onChange={e => {
+                        handleChange(e);
+                        dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
+                      }}
+                      onBlur={handleBlur}
+                    />
+                    {touched.note && errors.note && (
+                      <div className="text-red-500 text-xs">{errors.note}</div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block font-medium mb-1">Ước tính phí vận chuyển cho đơn hàng</label>
+                    <Input
+                      name="shippingEstimate"
+                      type="number"
+                      placeholder="Nhập phí vận chuyển"
+                      value={values.shippingEstimate}
+                      onChange={e => {
+                        handleChange(e);
+                        dispatch(setShippingEstimate({ subRequestId: subRequest.id, shippingEstimate: e.target.value }));
+                      }}
+                      onBlur={handleBlur}
+                    />
+                    {touched.shippingEstimate && errors.shippingEstimate && (
+                      <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                    <Button type="submit" name="submit" disabled={isSubmitting}>Gửi báo giá</Button>
+                  <QuotationPreviewDialog subRequest={subRequest} values={values} quotationDetails={quotationDetails} handleSubmit={handleSubmit} />
+                  </div>
+                </form>
+              )}
+            </Formik>
+          )}
+        </CardContent>
+      </Card>
+    </>
   )
 }
