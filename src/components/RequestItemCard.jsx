@@ -1,5 +1,6 @@
 import React from 'react';
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
+import productDefaultImage from "@/assets/productDefault.png";
 
 function StatusBadge({ status }) {
   const color = getStatusColor(status || 'PENDING');
@@ -32,15 +33,13 @@ function RequestItemCard({
         
         <div className="flex gap-4">
           <div className="flex-shrink-0">
-            <img 
-              src={item.images?.[0]} 
-              alt={item.productName} 
-              className="w-20 h-20 object-cover rounded border" 
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/80';
-              }}
-            />
+            {item.images?.length > 0 ? (
+              item.images.map((image, index) => (
+                <img key={index} src={image} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+              ))
+            ) : (
+              <img src={productDefaultImage} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+            )}
           </div>
           
           <div className="flex-1 min-w-0">

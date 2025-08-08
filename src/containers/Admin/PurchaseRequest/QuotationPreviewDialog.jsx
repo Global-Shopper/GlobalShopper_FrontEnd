@@ -122,7 +122,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                   <TableRow>
                     <TableCell>Tổng tiền dự kiến</TableCell>
                     <TableCell className="break-all">
-                      {formatCurrency(quotation?.totalPriceEstimate, "VND", getLocaleCurrencyFormat("VND"))}
+                      {formatCurrency((quotation?.totalPriceEstimate + quotation?.shippingEstimate), "VND", getLocaleCurrencyFormat("VND"))}
                     </TableCell>
                   </TableRow>
                 </TableBody>

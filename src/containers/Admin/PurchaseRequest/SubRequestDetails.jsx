@@ -2,7 +2,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ChevronDown, ChevronUp, Store, Contact } from "lucide-react"
 import { Formik } from "formik"
-import { useCalculateQuotationMutation, useCreateQuotationMutation } from "@/services/gshopApi"
+import { useCreateQuotationMutation, useRejectQuotationMutation } from "@/services/gshopApi"
 import * as Yup from "yup"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -17,9 +17,9 @@ import {
   initializeSubRequest,
   resetQuotationById,
 } from "@/features/quotation"
-import { useState } from "react"
 import QuotationPreviewDialog from "./QuotationPreviewDialog"
-import { Dialog, DialogTrigger } from "@/components/ui/dialog"
+import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler"
+import RejectDialog from "@/components/RejectDialog"
 
 export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
   // Remove manual dialog open state; will use DialogTrigger pattern
@@ -82,15 +82,9 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
                   {subRequest.ecommercePlatform}
                 </Badge>
               )}
-              {subRequest.status === "QUOTED" ? (
-                <Badge variant="default" className="text-xs">
-                  Đã báo giá
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="text-xs">
-                  Chưa báo giá
-                </Badge>
-              )}
+              <Badge variant={getStatusBadgeVariant(subRequest.status)} className="text-xs">
+                {getStatusText(subRequest.status)}
+              </Badge>
             </div>
             <Button variant="ghost" size="sm">
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -121,86 +115,97 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
 
         <CardContent className="pt-0">
           <div className="space-y-2">{children}</div>
-          {subRequest.status !== "QUOTED" && <Button
-            type="button"
-            variant="link"
-            className="text-blue-600 font-medium mt-2"
-            onClick={() => dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }))}
-          >
-            {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
-          </Button>}
-          {expanded && (
-            <Formik
-              enableReinitialize
-              initialValues={initialValues}
-              validationSchema={validationSchema}
-              onSubmit={async (values, actions) => {
-                // Build details from latest Redux state
-                const details = quotationDetails.map((detail) => ({ ...detail }));
-                const payload = {
-                  subRequestId: subRequest.id,
-                  note: values.note,
-                  shippingEstimate: Number(values.shippingEstimate),
-                  details,
-                  expiredDate: 1
-                };
-                try {
-                  await createQuotation(payload).unwrap()
-                    .then(() => {
-                      dispatch(resetQuotationById({ subRequestId: subRequest.id }));
-                      toast.success("Gửi báo giá thành công!")
-                    })
-                } catch (err) {
-                  toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
-                }
-                actions.setSubmitting(false);
-              }}
-            >
-              {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-                <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                  <div>
-                    <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
-                    <Textarea
-                      name="note"
-                      placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
-                      value={values.note}
-                      onChange={e => {
-                        handleChange(e);
-                        dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
-                      }}
-                      onBlur={handleBlur}
-                    />
-                    {touched.note && errors.note && (
-                      <div className="text-red-500 text-xs">{errors.note}</div>
-                    )}
-                  </div>
+          {console.log(subRequest.status)}
+          {subRequest.status === "PENDING" && (
+            <>
+              <Button
+                type="button"
+                variant="link"
+                className="text-blue-600 font-medium mt-2"
+                onClick={() => dispatch(toggleExpandQuotation({ subRequestId: subRequest.id }))}
+              >
+                {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
+              </Button>
+              {expanded && (
+                <Formik
+                  enableReinitialize
+                  initialValues={initialValues}
+                  validationSchema={validationSchema}
+                  onSubmit={async (values, actions) => {
+                    // Build details from latest Redux state
+                    const details = quotationDetails.map((detail) => ({ ...detail }));
+                    const payload = {
+                      subRequestId: subRequest.id,
+                      note: values.note,
+                      shippingEstimate: Number(values.shippingEstimate),
+                      details,
+                      expiredDate: 1
+                    };
+                    try {
+                      await createQuotation(payload).unwrap()
+                        .then(() => {
+                          dispatch(resetQuotationById({ subRequestId: subRequest.id }));
+                          toast.success("Gửi báo giá thành công!")
+                        })
+                    } catch (err) {
+                      toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
+                    }
+                    actions.setSubmitting(false);
+                  }}
+                >
+                  {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+                    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                      <div>
+                        <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
+                        <Textarea
+                          name="note"
+                          placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
+                          value={values.note}
+                          onChange={e => {
+                            handleChange(e);
+                            dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
+                          }}
+                          onBlur={handleBlur}
+                        />
+                        {touched.note && errors.note && (
+                          <div className="text-red-500 text-xs">{errors.note}</div>
+                        )}
+                      </div>
 
-                  <div>
-                    <label className="block font-medium mb-1">Ước tính phí vận chuyển cho đơn hàng</label>
-                    <Input
-                      name="shippingEstimate"
-                      type="number"
-                      placeholder="Nhập phí vận chuyển"
-                      value={values.shippingEstimate}
-                      onChange={e => {
-                        handleChange(e);
-                        dispatch(setShippingEstimate({ subRequestId: subRequest.id, shippingEstimate: e.target.value }));
-                      }}
-                      onBlur={handleBlur}
-                    />
-                    {touched.shippingEstimate && errors.shippingEstimate && (
-                      <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
-                    )}
-                  </div>
+                      <div>
+                        <label className="block font-medium mb-1">Ước tính phí vận chuyển cho đơn hàng</label>
+                        <Input
+                          name="shippingEstimate"
+                          type="number"
+                          placeholder="Nhập phí vận chuyển"
+                          value={values.shippingEstimate}
+                          onChange={e => {
+                            handleChange(e);
+                            dispatch(setShippingEstimate({ subRequestId: subRequest.id, shippingEstimate: e.target.value }));
+                          }}
+                          onBlur={handleBlur}
+                        />
+                        {touched.shippingEstimate && errors.shippingEstimate && (
+                          <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
+                        )}
+                      </div>
 
-                  <div className="flex gap-2 mt-4">
-                    <Button type="submit" name="submit" disabled={isSubmitting}>Gửi báo giá</Button>
-                  <QuotationPreviewDialog subRequest={subRequest} values={values} quotationDetails={quotationDetails} handleSubmit={handleSubmit} />
-                  </div>
-                </form>
+                      <div className="flex gap-2 mt-4">
+                        {subRequest.status !== "REJECTED" && (
+                          <>
+                            <Button type="submit" name="submit" disabled={isSubmitting}>Gửi báo giá</Button>
+                            <QuotationPreviewDialog subRequest={subRequest} values={values} quotationDetails={quotationDetails} handleSubmit={handleSubmit} />
+                            <RejectDialog subRequestId={subRequest.id} />
+                          </>
+                        )}
+                      </div>
+                    </form>
+                  )}
+                </Formik>
               )}
-            </Formik>
-          )}
+            </>
+          )
+          }
         </CardContent>
       </Card>
     </>
