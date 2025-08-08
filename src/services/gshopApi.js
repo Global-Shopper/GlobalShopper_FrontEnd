@@ -203,6 +203,14 @@ const gshopApi = createApi({
       }),
       invalidatesTags: ["PurchaseRequestDetail"],
     }),
+    rejectQuotation: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.REJECT_QUOTATION,
+        method: "POST",
+      }),
+      invalidatesTags: ["PurchaseRequestDetail"],
+    }),
     createGroup: builder.mutation({
       query: (data) => ({
         data: data,
@@ -290,6 +298,7 @@ export const {
   useGetWalletQuery,
   useDepositWalletMutation,
   useCreateQuotationMutation,
+  useRejectQuotationMutation,
   // useLazyCheckPaymentQuery,
   useCheckingPurchaseRequestMutation,
   useGetPurchaseRequestDetailQuery,

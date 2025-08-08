@@ -312,7 +312,7 @@ export function ProductList({
           {(status === "CHECKING" || status === "QUOTED") && (
             <>
               <div className="flex justify-end mt-3">
-                {subStatus !== "QUOTED" && <Button
+                {subStatus === "PENDING" && <Button
                   variant={isProductFormOpen ? "secondary" : "outline"}
                   size="sm"
                   type="button"

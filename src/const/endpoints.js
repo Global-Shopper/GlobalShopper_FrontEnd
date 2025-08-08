@@ -20,6 +20,7 @@ const endpoints = {
   WALLET: "/wallet",
   TRANSACTION_HISTORY: "/transactions/current-user",
   QUOTATION: "/quotation",
+  REJECT_QUOTATION: "/quotation/reject",
   QUOTATION_CALCULATE: "/quotation/calculate",
   SUB_REQUEST: "/purchase-request/create-sub-request",
   RAW_DATA: "/ai/get-raw-data",

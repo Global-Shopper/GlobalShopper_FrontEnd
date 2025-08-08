@@ -48,6 +48,8 @@ export const getStatusText = (status) => {
       return "Đã đến nơi";
     case "DELIVERED":
       return "Đã giao hàng";
+    case "REJECTED":
+      return "Đã từ chối";
     default:
       return "Đã gửi";
   }
@@ -74,6 +76,8 @@ export const getStatusBadgeVariant = (status) => {
       return "default";
     case "DELIVERED":
       return "default";
+    case "REJECTED":
+      return "destructive";
 		default:
 			return "outline";
 	}
