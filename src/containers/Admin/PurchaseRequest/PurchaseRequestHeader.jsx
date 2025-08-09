@@ -79,13 +79,13 @@ export function PurchaseRequestHeader({
               >
                 {isCheckLoading ? "Đang tiếp nhận..." : "Tiếp nhận yêu cầu"}
               </Button>
-              <RequestUpdatePRDialog purchaseRequest={purchaseRequest} />
             </>
           )}
 
           {/* Toggle Tạo Nhóm button */}
           {purchaseRequest.status !== "SENT" && (
             <>
+            {purchaseRequest.status === "CHECKING" && <RequestUpdatePRDialog purchaseRequest={purchaseRequest} />}
               <Button
                 variant={isGroupingMode ? "outline" : "default"}
                 disabled={isCheckLoading}
