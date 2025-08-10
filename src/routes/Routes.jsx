@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import AdminLayout from "../containers/Admin/AdminLayout";
 import Homelayout from "../containers/Home/Homelayout";
 import Homepage from "../containers/Home/Homepage";
@@ -92,6 +92,7 @@ const AppRoutes = () => {
         <Route path="admin-management" element={<AdminManagement />} />
         <Route path="config" element={<SystemConfig />} />
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

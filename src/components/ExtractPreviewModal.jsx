@@ -27,7 +27,7 @@ export default function ExtractPreviewModal({ open, onClose, onApply, product })
                 </div>
               )}
               <div className="text-sm text-red-500 mt-2">
-                Lưu ý: Thông tin của AI đưa ra có thể không chính xác, vui lòng kiểm tra lại thông tin.
+                Lưu ý: Thông tin của AI đưa ra có thể không chính xác, vui lòng đối chiếu với thông tin từ mục bên phải được lấy trực tiếp từ website.
               </div>
             </div>
 

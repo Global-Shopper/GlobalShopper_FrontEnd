@@ -16,130 +16,8 @@ import {
   toggleExpandProductQuotation,
   setItemDetail,
 } from "@/features/quotation";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { GroupCreationDialog } from "./PurchaseRequest/GroupCreationDialog";
-
-// Selectable Product Card Component (only when in selection mode)
-const UnGroupItem = ({
-  item,
-  subRequestId,
-  requestItems,
-  onProductClick,
-  quotationState,
-  isGroupingMode,
-  isSelected,
-  onSelectionChange,
-}) => {
-  // Compute order number based on position in parentArray
-  const itemIndexNumber = requestItems
-    ? requestItems.findIndex((i) => i.id === item.id)
-    : 0;
-  const orderNumber = itemIndexNumber + 1;
-
-  // Use subRequestId directly for Redux selectors and actions
-  const expandedProductForms = subRequestId
-    ? quotationState?.subRequests?.[subRequestId]?.expandedProductForms || {}
-    : quotationState?.expandedProductForms || {};
-
-  const requestItemId = item.id;
-  const isProductFormOpen = expandedProductForms[requestItemId];
-
-  // Get product object from Redux for SUB REQUEST item
-  let quotationDetails = item;
-  if (
-    subRequestId &&
-    quotationState?.subRequests?.[subRequestId]?.quotationDetails
-  ) {
-    const foundIdx = quotationState.subRequests[
-      subRequestId
-    ].quotationDetails.findIndex(
-      (d) => d.requestItemId === requestItemId || d.id === requestItemId
-    );
-    quotationDetails =
-      quotationState.subRequests[subRequestId].quotationDetails[foundIdx] ||
-      item;
-  }
-
-  const productErrors = {};
-
-  const handleCardClick = () => {
-    if (isGroupingMode) {
-      onSelectionChange(item.id, !isSelected);
-    } else {
-      onProductClick(item.id);
-    }
-  };
-
-  return (
-    <Card
-      className={`transition-all hover:shadow-md cursor-pointer ${isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
-        } ${isGroupingMode && isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""
-        } ${isGroupingMode ? "border-2 border-dashed border-blue-300" : ""}`}
-      onClick={handleCardClick}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            {isGroupingMode && (
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={(checked) =>
-                  onSelectionChange(item.id, checked)
-                }
-                onClick={(e) => e.stopPropagation()}
-                className="shrink-0"
-              />
-            )}
-            <span
-              className={`text-xs px-2 py-1 rounded shrink-0 ${subRequestId
-                  ? "bg-orange-100 text-orange-600"
-                  : "bg-gray-100 text-orange-600"
-                }`}
-            >
-              #{orderNumber}
-            </span>
-            <span className="font-semibold text-base truncate">
-              {item.productName}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span
-              className={`font-bold text-lg ${subRequestId ? "text-orange-600" : "text-blue-600"
-                }`}
-            >
-              ×{item.quantity}
-            </span>
-          </div>
-        </div>
-        {!isGroupingMode && (
-          <>
-            <div className="flex justify-start mt-3">
-              <a
-                href={item.productURL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-start gap-1 text-blue-600 hover:underline text-sm"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink className="h-4 w-4" />
-                Xem sản phẩm
-              </a>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
+import NonSubItems from "./NonSubItems";
 
 // Group Creation Controls Component
 const GroupCreationControls = ({
@@ -181,7 +59,6 @@ const GroupCreationControls = ({
 };
 
 export function ProductList({
-  requestItems,
   subRequests,
   expandedSubRequest,
   status,
@@ -191,6 +68,7 @@ export function ProductList({
   isGroupingMode,
   onCreateGroup,
   onExitGroupingMode,
+  requestItemsGroupByPlatform
 }) {
   // Redux hooks for expanded state
   const dispatch = useDispatch();
@@ -233,6 +111,12 @@ export function ProductList({
       setSelectedItems([]);
     }
   }, [isGroupingMode]);
+
+  // Flatten ungrouped items and compute a stable order index
+  const flatUngroupedItems = React.useMemo(
+    () => (requestItemsGroupByPlatform || []).flatMap((g) => g.items || []),
+    [requestItemsGroupByPlatform]
+  );
 
   // Render a single product card, always with explicit subRequestId
   const renderProductCard = (item, subRequestId, status, requestItems, subStatus) => {
@@ -309,10 +193,10 @@ export function ProductList({
             </a>
           </div>
           {/* Quote button and inline form */}
-          {(status === "CHECKING" || status === "QUOTED") && (
+          {(subStatus === "PENDING" && (status === "CHECKING" || status === "QUOTED")) && (
             <>
               <div className="flex justify-end mt-3">
-                {subStatus === "PENDING" && <Button
+                <Button
                   variant={isProductFormOpen ? "secondary" : "outline"}
                   size="sm"
                   type="button"
@@ -327,7 +211,7 @@ export function ProductList({
                   }}
                 >
                   {isProductFormOpen ? "Đóng báo giá" : "Báo giá sản phẩm"}
-                </Button>}
+                </Button>
               </div>
               {isProductFormOpen && (
                 <div className="mt-3">
@@ -390,7 +274,7 @@ export function ProductList({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Render main requestItems if any */}
-        {requestItems?.length > 0 && (
+        {requestItemsGroupByPlatform?.length > 0 && (
           <div>
             <h3 className="font-semibold mb-3 text-md">
               Sản phẩm chưa được tạo nhóm
@@ -407,21 +291,24 @@ export function ProductList({
             )}
 
             {/* Product items */}
-            <div className="space-y-2 mb-4">
-              {requestItems.map((item) => (
-                <UnGroupItem
-                  key={item.id}
-                  item={item}
-                  subRequestId={null}
-                  status={status}
-                  requestItems={requestItems}
-                  onProductClick={onProductClick}
-                  dispatch={dispatch}
-                  quotationState={quotationState}
-                  isGroupingMode={isGroupingMode}
-                  isSelected={selectedItems.includes(item.id)}
-                  onSelectionChange={handleSelectionChange}
-                />
+            <div className="space-y-4 mb-4">
+              {requestItemsGroupByPlatform.map((group, gIdx) => (
+                <div key={gIdx} className="space-y-2">
+                  <div className="space-y-2">
+                    {group.items.map((item) => (
+                      <NonSubItems
+                        key={item.id}
+                        platform={group.ecommercePlatform}
+                        item={item}
+                        subRequestId={null}
+                        onProductClick={onProductClick}
+                        isGroupingMode={isGroupingMode}
+                        isSelected={selectedItems.includes(item.id)}
+                        onSelectionChange={handleSelectionChange}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -431,12 +318,12 @@ export function ProductList({
         {subRequests?.length > 0 &&
           <>
             <p className="font-semibold mb-3 text-md">Các nhóm sản phẩm</p>
-            {subRequests.map((sub, idx) => (
+            {subRequests.map((sub) => (
               <SubRequestDetails
-                key={idx}
+                key={sub.id}
                 subRequest={sub}
-                index={idx}
-                isExpanded={expandedSubRequest === idx}
+                requestItemsGroupByPlatform={requestItemsGroupByPlatform}
+                isExpanded={expandedSubRequest === sub.id}
                 onToggleExpansion={onToggleSubRequestExpansion}
                 requestType={requestType}
                 requestStatus={status}
@@ -456,7 +343,7 @@ export function ProductList({
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         selectedItems={selectedItems}
-        requestItems={requestItems}
+        requestItems={flatUngroupedItems}
         onCreateGroup={(selectedItemsArray) => {
           if (onCreateGroup) onCreateGroup(selectedItemsArray);
           setSelectedItems([]);

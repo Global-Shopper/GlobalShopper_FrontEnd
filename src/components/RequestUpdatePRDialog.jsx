@@ -19,7 +19,7 @@ const RequestUpdatePRDialog = ({ purchaseRequest }) => {
   });
   const handleRequestUpdate = async (values) => {
     try {
-      await requestUpdate({ subRequestId: purchaseRequest.id, reason: values.reason }).unwrap()
+      await requestUpdate({ purchaseRequestId: purchaseRequest.id, reason: values.reason }).unwrap()
         .then(() => {
           toast.success("Yêu cầu đã được yêu cầu khách hàng cập nhật thông tin thành công.");
           setIsDialogOpen(false);

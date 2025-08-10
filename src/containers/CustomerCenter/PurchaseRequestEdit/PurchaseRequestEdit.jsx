@@ -512,7 +512,7 @@ const PurchaseRequestEdit = () => {
                                     </Select>
                                   </div>
                                 </div>
-
+{/* 
                                 <div className="flex justify-end">
                                   <Button
                                     type="button"
@@ -523,12 +523,12 @@ const PurchaseRequestEdit = () => {
                                   >
                                     Xóa sản phẩm
                                   </Button>
-                                </div>
+                                </div> */}
                               </CardContent>
                             </Card>
                           )})}
 
-                          <div className="pt-2">
+                          {/* <div className="pt-2">
                             <Button
                               type="button"
                               onClick={() =>
@@ -546,7 +546,7 @@ const PurchaseRequestEdit = () => {
                             >
                               Thêm sản phẩm
                             </Button>
-                          </div>
+                          </div> */}
                         </>
                       )}
                     </FieldArray>

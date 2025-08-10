@@ -236,8 +236,30 @@ const gshopApi = createApi({
     createGroup: builder.mutation({
       query: (data) => ({
         data: data,
-        url: endpoints.SUB_REQUEST,
+        url: endpoints.CREATE_SUB_REQUEST,
         method: "POST",
+      }),
+      invalidatesTags: ["PurchaseRequestDetail"],
+    }),
+    updateSubRequest: builder.mutation({
+      query: ({ id, payload }) => ({
+        data: payload,
+        url: `${endpoints.SUB_REQUEST}/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["PurchaseRequestDetail"],
+    }),
+    addItemToSubRequest: builder.mutation({
+      query: ({ subRequestId, itemId }) => ({
+        url: `${endpoints.SUB_REQUEST}/${subRequestId}/items/${itemId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["PurchaseRequestDetail"],
+    }),
+    removeItemFromSubRequest: builder.mutation({
+      query: ({ subRequestId, itemId }) => ({
+        url: `${endpoints.SUB_REQUEST}/${subRequestId}/items/${itemId}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["PurchaseRequestDetail"],
     }),
@@ -329,6 +351,9 @@ export const {
   useGetPurchaseRequestDetailQuery,
   useTransactionHistoryQuery,
   useCreateGroupMutation,
+  useUpdateSubRequestMutation,
+  useAddItemToSubRequestMutation,
+  useRemoveItemFromSubRequestMutation,
   useCalculateQuotationMutation,
   useLazyGetRawDataQuery,
   useCheckoutMutation,

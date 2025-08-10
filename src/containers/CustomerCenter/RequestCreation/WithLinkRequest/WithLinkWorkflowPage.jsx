@@ -16,13 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   Link as LinkIcon,
   Plus,
   X,
@@ -44,6 +37,36 @@ import { useEffect, useState } from "react";
 import ExtractPreviewModal from "@/components/ExtractPreviewModal";
 import { resetAllPurchaseReq } from "@/features/purchaseReq.action";
 
+// ----- Constants & helpers -----
+const STEPS = ["linkInput", "confirmation", "success"];
+const STEP_LABELS = [
+  "Nhập link sản phẩm",
+  "Xác nhận đơn hàng",
+  "Hoàn thành",
+];
+
+const createVariantRows = (variants = []) =>
+  (variants || []).map((v) => ({ attributeName: v, fieldValue: "" }));
+
+const buildProductFromRaw = (rawData, link, index) => ({
+  name: rawData?.name || "",
+  description: rawData?.description || "",
+  quantity: 1,
+  variants: rawData?.variants || [],
+  variantRows: createVariantRows(rawData?.variants || []),
+  images: rawData?.images || [],
+  link,
+  id: `product_${Date.now()}_${index}`,
+  ecommercePlatform: rawData?.ecommercePlatform ?? null,
+});
+
+const makeEmptyProduct = (link, index) =>
+  buildProductFromRaw(
+    { name: "", description: "", variants: [], images: [], ecommercePlatform: null },
+    link,
+    index
+  );
+
 
 export default function WithLinkWorkflowPage() {
   const navigate = useNavigate();
@@ -59,6 +82,12 @@ export default function WithLinkWorkflowPage() {
   const [previewIndex, setPreviewIndex] = useState(null);
   const [previewProduct, setPreviewProduct] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  const resetPreview = () => {
+    setPreviewOpen(false);
+    setPreviewIndex(null);
+    setPreviewProduct(null);
+  };
 
   // Remove a product link
   const handleRemoveItemLink = (index) => {
@@ -84,53 +113,19 @@ export default function WithLinkWorkflowPage() {
         dispatch(updateProductField({
           index,
           field: "product",
-          value: {
-            name: "",
-            description: "",
-            quantity: 1,
-            variants: [],
-            variantRows: [],
-            images: [],
-            link: itemLinks[index].link,
-            id: `product_${Date.now()}_${index}`,
-          },
+          value: makeEmptyProduct(itemLinks[index].link, index),
         }));
         dispatch(updateProductField({ index, field: "status", value: "failed" }));
         toast.error("Không thể trích xuất thông tin từ link này. Vui lòng nhập thông tin thủ công.");
       } else {
-        const variantRows = (rawData?.variants || []).map((variant) => ({
-          attributeName: variant,
-          fieldValue: "",
-        }));
         // Instead of dispatching, show preview modal
-        setPreviewProduct({
-          name: rawData?.name || "",
-          description: rawData?.description || "",
-          quantity: 1,
-          variants: rawData?.variants || [],
-          variantRows,
-          images: rawData?.images || [],
-          link: itemLinks[index].link,
-          id: `product_${Date.now()}_${index}`,
-        });
+        setPreviewProduct(buildProductFromRaw(rawData, itemLinks[index].link, index));
         setPreviewIndex(index);
         setPreviewOpen(true);
         dispatch(updateProductField({ index, field: "status", value: "success" }));
       }
     } catch {
-      dispatch(updateProductFields({
-        index,
-        fields: {
-          name: "",
-          description: "",
-          quantity: 1,
-          variants: [],
-          variantRows: [],
-          images: [],
-          link: itemLinks[index].link,
-          id: `product_${Date.now()}_${index}`,
-        },
-      }));
+      dispatch(updateProductFields({ index, fields: makeEmptyProduct(itemLinks[index].link, index) }));
       dispatch(updateProductField({ index, field: "status", value: "failed" }));
       toast.error("Trích xuất thất bại. Vui lòng nhập thông tin thủ công.");
     }
@@ -142,16 +137,12 @@ export default function WithLinkWorkflowPage() {
       dispatch(updateProductFields({ index: previewIndex, fields: previewProduct }));
       toast.success("Đã áp dụng thông tin sản phẩm vào form!");
     }
-    setPreviewOpen(false);
-    setPreviewIndex(null);
-    setPreviewProduct(null);
+    resetPreview();
   };
 
   // Handler for discarding preview
   const handleClosePreview = () => {
-    setPreviewOpen(false);
-    setPreviewIndex(null);
-    setPreviewProduct(null);
+    resetPreview();
   };
 
   const canContinue =
@@ -165,7 +156,6 @@ export default function WithLinkWorkflowPage() {
       return;
     }
     const requestItems = itemLinks.map((p) => p.product).filter(Boolean);
-    console.log(requestItems)
     createPurchaseRequest({
       shippingAddressId,
       requestItems: requestItems.map((item) => ({
@@ -175,6 +165,7 @@ export default function WithLinkWorkflowPage() {
         images: item?.images,
         quantity: item?.quantity,
         description: item?.description,
+        ecommercePlatform: item?.ecommercePlatform,
       })),
     })
       .unwrap()
@@ -228,12 +219,8 @@ export default function WithLinkWorkflowPage() {
 
   // Render step indicator
   const renderStepIndicator = () => {
-    const steps = ["linkInput", "confirmation", "success"];
-    const stepLabels = [
-      "Nhập link sản phẩm",
-      "Xác nhận đơn hàng",
-      "Hoàn thành",
-    ];
+    const steps = STEPS;
+    const stepLabels = STEP_LABELS;
     const currentIndex = steps.indexOf(currentStep);
 
     return (

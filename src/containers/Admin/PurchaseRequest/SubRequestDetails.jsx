@@ -20,8 +20,9 @@ import {
 import QuotationPreviewDialog from "./QuotationPreviewDialog"
 import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler"
 import RejectDialog from "@/components/RejectDialog"
+import EditSubDialog from "./EditSubDialog"
 
-export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpansion, requestType, children }) {
+export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, requestType, requestStatus, children, requestItemsGroupByPlatform }) {
   // Remove manual dialog open state; will use DialogTrigger pattern
   const dispatch = useDispatch();
   const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
@@ -71,7 +72,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
     <>
       <Card className={`border-l-4 ${subRequest.status === "QUOTED" ? "border-l-blue-500" : "border-l-gray-500"}`}>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between cursor-pointer" onClick={() => onToggleExpansion(index)}>
+          <div className="flex items-center justify-between cursor-pointer" onClick={() => onToggleExpansion(subRequest.id)}>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <Store className="h-4 w-4 text-blue-600" />
@@ -116,7 +117,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
         <CardContent className="pt-0">
           <div className="space-y-2">{children}</div>
           {console.log(subRequest.status)}
-          {subRequest.status === "PENDING" && (
+          {(subRequest.status === "PENDING" && (requestStatus === "CHECKING" || requestStatus === "QUOTED")) && (
             <>
               <Button
                 type="button"
@@ -126,6 +127,7 @@ export function SubRequestDetails({ subRequest, index, isExpanded, onToggleExpan
               >
                 {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
               </Button>
+              <EditSubDialog subRequest={subRequest} requestItemsGroupByPlatform={requestItemsGroupByPlatform} />
               {expanded && (
                 <Formik
                   enableReinitialize

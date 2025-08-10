@@ -8,7 +8,6 @@ export default function Iframely(props) {
 	const [html, setHtml] = useState({
 		__html: '<div />'
 	});
-console.log(props)
 	useEffect(() => {
 		if (props && props.url) {
 			fetch(

@@ -28,20 +28,21 @@ import {
   RefreshCw,
   Eye,
 } from "lucide-react";
-import { signout } from "@/features/user";
+import { setUserInfo, signout } from "@/features/user";
 import defaultAvt from "@/assets/defaultAvt.jpg";
-import gshopApi, { useGetWalletQuery } from "@/services/gshopApi";
+import gshopApi, { useGetCustomerInfoQuery, useGetWalletQuery } from "@/services/gshopApi";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect } from "react";
 
 const Header = () => {
+  const { data: customerInfo } = useGetCustomerInfoQuery();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery();
   const isLoggedIn = useSelector(
     (state) => state.rootReducer?.user?.isLoggedIn
   );
-  const name =
-    useSelector((state) => state.rootReducer?.user?.name) || "Người dùng";
+  const name = useSelector((state) => state.rootReducer?.user?.name);
   const email = useSelector((state) => state.rootReducer?.user?.email);
   const avatar = useSelector((state) => state.rootReducer?.user?.avatar);
 
@@ -57,6 +58,17 @@ const Header = () => {
       currency: "VND",
     }).format(amount || 0);
   };
+
+  useEffect(() => {
+    if (!customerInfo) return;
+    if (customerInfo?.role === "admin") {
+      navigate("/admin");
+    }
+    if (customerInfo?.role === "business-manager") {
+      navigate("/business-manager");
+    }
+    dispatch(setUserInfo(customerInfo));
+  }, [isLoggedIn, customerInfo, dispatch, navigate]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-lg shadow-black/5">
