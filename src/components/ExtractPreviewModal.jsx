@@ -7,15 +7,26 @@ export default function ExtractPreviewModal({ open, onClose, onApply, product })
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-        <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
-          <h2 className="text-lg font-bold mb-3 text-blue-700">Xem trước thông tin sản phẩm</h2>
-          <div className="space-y-2 mb-4">
-            <div className="font-medium">Tên sản phẩm: <span className="font-normal">{product.name || "-"}</span></div>
-            <div className="font-medium">Mô tả: <span className="font-normal">{product.description || "-"}</span></div>
-            <div className="font-medium">Số lượng: <span className="font-normal">{product.quantity || 1}</span></div>
-            {product.variants && product.variants.length > 0 && (
-              <div className="font-medium">Thuộc tính sản phẩm:
-                <span className="font-normal"> {product.variants.join(", ")}</span>
+        <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-6">
+          <h2 className="text-lg font-bold mb-4 text-blue-700">Xem trước thông tin sản phẩm</h2>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <div className="md:col-span-2 space-y-2">
+              <div className="font-medium">Tên sản phẩm: <span className="font-normal">{product.name || "-"}</span></div>
+              <div className="font-medium">Mô tả: <span className="font-normal">{product.description || "-"}</span></div>
+              {product.variants && product.variants.length > 0 && (
+                <div className="font-medium">Thuộc tính sản phẩm:
+                  <span className="font-normal"> {product.variants.join(", ")}</span>
+                </div>
+              )}
+              {product.images && product.images.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {product.images.map((img, i) => (
+                    <img key={i} src={img} alt="Ảnh sản phẩm" className="w-16 h-16 object-cover rounded border" />
+                  ))}
+                </div>
+              )}
+              <div className="text-sm text-red-500 mt-2">
+                Lưu ý: Thông tin của AI đưa ra có thể không chính xác, vui lòng đối chiếu với thông tin từ mục bên phải được lấy trực tiếp từ website.
               </div>
             )}
             {product.images && product.images.length > 0 && (

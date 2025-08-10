@@ -7,7 +7,6 @@ import React from "react";
 import { PurchaseRequestHeader } from "./PurchaseRequestHeader";
 import { CustomerInfoCard } from "../CustomerInfoCard";
 import { ProductDetail } from "../ProductDetail";
-import { NotesSection } from "../NotesSection";
 import { ProductList } from "../ProductList";
 
 const formatCurrency = (amount) => {
@@ -31,7 +30,6 @@ function AdPurchaseReqDetail() {
   } = useGetPurchaseRequestDetailQuery(id);
   const [selectedProductId, setSelectedProductId] = useState(undefined);
   const [quotePrices, setQuotePrices] = useState({});
-  const [notes, setNotes] = useState("");
   const [expandedSubRequest, setExpandedSubRequest] = useState(null);
 
   const [isRequestingUpdate, setIsRequestingUpdate] = useState(false);
@@ -74,9 +72,9 @@ function AdPurchaseReqDetail() {
     setSelectedProductId(productId);
   };
 
-  const toggleSubRequestExpansion = (subRequestIndex) => {
+  const toggleSubRequestExpansion = (subRequestId) => {
     setExpandedSubRequest(
-      expandedSubRequest === subRequestIndex ? null : subRequestIndex
+      expandedSubRequest === subRequestId ? null : subRequestId
     );
   };
 
@@ -135,7 +133,6 @@ function AdPurchaseReqDetail() {
             {/* Product List */}
             <div className="h-[calc(100vh-100px)] overflow-y-auto">
               <ProductList
-                requestItems={req.requestItems || []}
                 subRequests={req.subRequests || []}
                 selectedProductId={selectedProductId}
                 expandedSubRequest={expandedSubRequest}
@@ -146,14 +143,7 @@ function AdPurchaseReqDetail() {
                 isGroupingMode={isGroupingMode}
                 onCreateGroup={handleCreateGroup}
                 onExitGroupingMode={handleExitGroupingMode}
-              />
-            </div>
-            {/* Notes */}
-            <div className="h-auto overflow-y-auto">
-              <NotesSection
-                notes={notes}
-                status={req.status}
-                onNotesChange={setNotes}
+                requestItemsGroupByPlatform={req.requestItemsGroupByPlatform}
               />
             </div>
           </div>

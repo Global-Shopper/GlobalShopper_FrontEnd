@@ -17,6 +17,7 @@ const initialState = {
         variantRows: [],
         images: [],
         link: '',
+        ecommercePlatform: '',
       },
     },
   ],
@@ -50,6 +51,7 @@ const onlineReqSlice = createSlice({
           variantRows: [],
           images: [],
           link: '',
+          ecommercePlatform: '',
         },
       });
     },

@@ -54,13 +54,13 @@ function SubRequestItemCard({ item }) {
           <div className="mt-2">
             <button
               type="button"
-              className="flex items-center gap-2 text-green-700 font-semibold text-sm focus:outline-none select-none"
+              className="flex items-center gap-2 text-green-700 font-semibold text-sm focus:outline-none select-none hover:opacity-70 hover:text-blue-600"
               onClick={() => setOpen((prev) => !prev)}
               aria-expanded={open}
             >
               <span>Chi tiết báo giá</span>
               <svg
-                className={`transition-transform duration-300 w-4 h-4 ${open ? '' : 'rotate-180'}`}
+                className={`transition-transform duration-300 w-4 h-4 mt-1 ${open ? 'rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 20 20"
