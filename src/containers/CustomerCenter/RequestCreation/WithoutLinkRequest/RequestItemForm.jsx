@@ -166,7 +166,7 @@ export default function RequestItemForm({
                                 key={img}
                                 src={img}
                                 alt={`Product preview ${idx + 1}`}
-                                className="w-16 h-16 object-cover rounded-lg border"
+                                className="w-16 h-16 object-contain rounded-lg border"
                               />
                             ))}
                           </div>
@@ -268,7 +268,7 @@ export default function RequestItemForm({
                   <img
                     src={url}
                     alt={`Product preview ${idx + 1}`}
-                    className="w-24 h-24 object-cover rounded-lg border"
+                    className="w-24 h-24 object-contain rounded-lg border"
                   />
                   {isUploading && (
                     <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white/60 rounded-lg">

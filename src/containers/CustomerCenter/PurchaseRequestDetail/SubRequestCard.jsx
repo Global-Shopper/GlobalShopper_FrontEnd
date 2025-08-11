@@ -32,10 +32,10 @@ function SubRequestItemCard({ item }) {
           <div className="flex items-start gap-4 flex-1">
             {item.images?.length > 0 ? (
               item.images.map((image) => (
-                <img key={image} src={image} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+                <img key={image} src={image} alt={item.productName} className="w-20 h-20 object-contain rounded border" />
               ))
             ) : (
-              <img src={productDefaultImage} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+              <img src={productDefaultImage} alt={item.productName} className="w-20 h-20 object-contain rounded border" />
             )}
             <div>
               <div className="font-semibold text-gray-900">{item.productName}</div>

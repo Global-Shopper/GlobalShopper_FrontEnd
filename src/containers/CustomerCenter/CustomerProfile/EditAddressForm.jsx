@@ -111,7 +111,6 @@ const EditAddressForm = ({
 		const combinedLocation = locationParts.join(", ");
 		const finalTag = values.tag === "Khác" ? customTag : values.tag;
 		try {
-			console.log(values);
 			await updateShippingAddress({
 				id: values.id,
 				name: values.name,
@@ -148,9 +147,8 @@ const EditAddressForm = ({
 			enableReinitialize
 			onSubmit={handleSubmit}
 		>
-			{({ isSubmitting, values, errors, touched, setFieldValue }) => (
+			{({ isSubmitting, values, errors, touched, setFieldValue, dirty }) => (
 				<Form className="space-y-4">
-					{console.log(values)}
 					{/* Recipient Name */}
 					<div className="space-y-2">
 						<Label htmlFor="name" className="text-sm font-semibold text-slate-700">
@@ -328,7 +326,7 @@ const EditAddressForm = ({
 					<div className="flex gap-3">
 						<Button
 							type="submit"
-							disabled={isSubmitting}
+							disabled={isSubmitting || !dirty}
 							className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all duration-200"
 						>
 							<Save className="h-4 w-4" />

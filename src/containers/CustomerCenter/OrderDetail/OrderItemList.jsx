@@ -1,15 +1,10 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExternalLink, Package } from "lucide-react"
-
-function formatVND(value) {
-  if (typeof value !== 'number') return value
-  return value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
-}
+import { formatCurrency, getLocaleCurrencyFormat } from '@/utils/formatCurrency'
 
 const OrderItemList = ({ orderItems = [], ecommercePlatform, seller }) => {
   if (!orderItems.length) return null
-  const totalQty = orderItems.reduce((sum, it) => sum + (it.quantity || 0), 0)
 
   return (
     <Card>
@@ -20,15 +15,15 @@ const OrderItemList = ({ orderItems = [], ecommercePlatform, seller }) => {
         </CardTitle>
         <CardDescription>
           {ecommercePlatform || ''}{seller ? ` • ${seller}` : ''}
-          {orderItems.length ? ` • ${orderItems.length} mặt hàng • Tổng SL: ${totalQty}` : ''}
+          {orderItems.length ? ` • ${orderItems.length} mặt hàng` : ''}
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
         {orderItems.map((item, idx) => (
-          <div key={item.id || idx} className="p-3 border rounded-lg transition flex gap-3 items-start">
+          <div key={item.id} className="p-3 border rounded-lg transition flex gap-3 items-start">
             <div className="w-14 h-14 flex-shrink-0 bg-gray-50 rounded overflow-hidden border">
               {item?.images?.[0] ? (
-                <img src={item.images[0]} alt={item.productName} className="w-full h-full object-cover" />
+                <img src={item.images[0]} alt={item.productName} className="w-full h-full object-contain" />
               ) : (
                 <div className="w-full h-full grid place-content-center text-gray-400 text-[10px]">No image</div>
               )}
@@ -67,9 +62,7 @@ const OrderItemList = ({ orderItems = [], ecommercePlatform, seller }) => {
 
               <div className="mt-2 text-sm text-gray-700">
                 <span>Giá: </span>
-                <span className="font-medium">{formatVND(item.basePrice)} </span>
-                <span className="text-gray-400">× {item.quantity} = </span>
-                <span className="font-semibold">{formatVND((item.basePrice || 0) * (item.quantity || 0))}</span>
+                <span className="font-medium">{formatCurrency(item.basePrice, 'VND', getLocaleCurrencyFormat('VND'))}</span>
               </div>
             </div>
           </div>

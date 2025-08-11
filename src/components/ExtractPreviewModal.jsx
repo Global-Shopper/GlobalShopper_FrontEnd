@@ -22,7 +22,7 @@ export default function ExtractPreviewModal({ open, onClose, onApply, product })
               {product.images && product.images.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {product.images.map((img, i) => (
-                    <img key={i} src={img} alt="Ảnh sản phẩm" className="w-16 h-16 object-cover rounded border" />
+                    <img key={i} src={img} alt="Ảnh sản phẩm" className="w-16 h-16 object-contain rounded border" />
                   ))}
                 </div>
               )}

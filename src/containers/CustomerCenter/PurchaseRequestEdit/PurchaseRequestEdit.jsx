@@ -396,7 +396,7 @@ const PurchaseRequestEdit = () => {
                                   <div className="flex flex-wrap gap-3">
                                     {(item.localImages || []).map((url, imgIdx) => (
                                       <div key={`${url}-${imgIdx}`} className="relative">
-                                        <img src={url} alt={`Ảnh ${imgIdx + 1}`} className="w-20 h-20 object-cover rounded-lg border" />
+                                        <img src={url} alt={`Ảnh ${imgIdx + 1}`} className="w-20 h-20 object-contain rounded-lg border" />
                                         {uploadingIndex === idx && (
                                           <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg">
                                             <Loader2 className="h-5 w-5 animate-spin text-blue-500" />

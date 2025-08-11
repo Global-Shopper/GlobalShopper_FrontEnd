@@ -127,7 +127,7 @@ export default function ProductManagement({ products, onProductsChange, failedLi
                     <img
                       src={product.image}
                       alt={product.name || "Product image"}
-                      className="w-full h-32 object-cover rounded border"
+                      className="w-full h-32 object-contain rounded border"
                     />
                   </div>
                 )}
