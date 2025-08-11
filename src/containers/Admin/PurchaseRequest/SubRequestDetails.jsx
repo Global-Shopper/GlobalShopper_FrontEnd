@@ -18,7 +18,7 @@ import {
   resetQuotationById,
 } from "@/features/quotation"
 import QuotationPreviewDialog from "./QuotationPreviewDialog"
-import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler"
+import { getStatusColor, getStatusText } from "@/utils/statusHandler"
 import RejectDialog from "@/components/RejectDialog"
 import EditSubDialog from "./EditSubDialog"
 
@@ -70,7 +70,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
 
   return (
     <>
-      <Card className={`border-l-4 ${subRequest.status === "QUOTED" ? "border-l-blue-500" : "border-l-gray-500"}`}>
+      <Card className={`border-l-4 ${subRequest.status === "QUOTED" || subRequest.status === "PAID" ? "border-l-blue-500" : "border-l-gray-500"}`}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between cursor-pointer" onClick={() => onToggleExpansion(subRequest.id)}>
             <div className="flex items-center gap-3">
@@ -83,9 +83,13 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                   {subRequest.ecommercePlatform}
                 </Badge>
               )}
-              <Badge variant={getStatusBadgeVariant(subRequest.status)} className="text-xs">
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                  subRequest.status
+                )}`}
+              >
                 {getStatusText(subRequest.status)}
-              </Badge>
+              </span>
             </div>
             <Button variant="ghost" size="sm">
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

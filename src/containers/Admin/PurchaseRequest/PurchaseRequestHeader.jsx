@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCheckingPurchaseRequestMutation } from "@/services/gshopApi";
 import { formatDate } from "@/utils/parseDateTime";
-import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler";
-import { ChevronRight, Calendar, Clock, Users } from "lucide-react";
+import { getStatusColor, getStatusText } from "@/utils/statusHandler";
+import { ChevronRight, Calendar, Clock, Users, Blocks } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -46,12 +46,13 @@ export function PurchaseRequestHeader({
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">Yêu cầu mua hàng</h1>
-            <Badge
-              variant={getStatusBadgeVariant(purchaseRequest.status)}
-              className="text-xs"
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                purchaseRequest.status
+              )}`}
             >
               {getStatusText(purchaseRequest.status)}{" "}{(purchaseRequest.status === "QUOTED") ? `(${purchaseRequest?.itemsHasQuotation}/${purchaseRequest?.totalItems})` : ""}
-            </Badge>
+            </span>
             {purchaseRequest.status !== "SENT" && purchaseRequest?.admin?.name && (
               <Badge variant="outline" className="text-xs">
                 Admin: {purchaseRequest?.admin?.name}
@@ -93,7 +94,7 @@ export function PurchaseRequestHeader({
                 onClick={onCreateGroup}
                 className={isGroupingMode ? "" : "bg-blue-600 hover:bg-blue-700"}
               >
-                <Users className="h-4 w-4 mr-2" />
+                <Blocks className="h-4 w-4 mr-2" />
                 {console.log(purchaseRequest.status)}
                 <div>{isGroupingMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
               </Button>
