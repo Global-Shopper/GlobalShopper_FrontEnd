@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useGetAllOrdersQuery } from "@/services/gshopApi";
 import { useURLSync } from "@/hooks/useURLSync";
 import PageLoading from "@/components/PageLoading";
@@ -15,7 +15,7 @@ export default function Orders() {
   const [status, setStatus] = useURLSync(searchParams, setSearchParams, "status", "string", "");
   const [sort, setSort] = useURLSync(searchParams, setSearchParams, "sort", "string", "createdAt,desc");
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
-  const [size, setSize] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
+  const [size] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
   const [cancellingId, setCancellingId] = useState(null);
 
   // Fetch orders
@@ -84,12 +84,14 @@ export default function Orders() {
           ) : (
             <div className="flex flex-col gap-4">
               {allOrders.map((order) => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  onCancel={handleCancelOrder}
+                <Link to={`/account-center/orders/${order.id}`}>
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    onCancel={handleCancelOrder}
                   cancelling={cancellingId === order.id}
                 />
+                </Link>
               ))}
             </div>
           )}

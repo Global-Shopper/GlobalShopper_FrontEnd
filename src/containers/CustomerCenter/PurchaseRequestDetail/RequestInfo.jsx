@@ -1,8 +1,7 @@
 import React from "react";
 import { CalendarArrowUp, Clock } from "lucide-react";
 import { parseDateTime } from "@/utils/parseDateTime";
-import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler";
-import { Badge } from "@/components/ui/badge";
+import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 
 const RequestInfo = ({ requestData }) => {
   return (
@@ -17,12 +16,13 @@ const RequestInfo = ({ requestData }) => {
           <Clock className="h-4 w-4 text-gray-500" />
           <span>Hết hạn: {parseDateTime(requestData.expiredAt)}</span>
         </div>
-        <Badge
-          variant={getStatusBadgeVariant(requestData.status)}
-          className="text-xs"
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+            requestData.status
+          )} group-hover:shadow`}
         >
           {getStatusText(requestData.status)}{" "}{(requestData.status === "QUOTED") ? `(${requestData?.itemsHasQuotation}/${requestData?.totalItems})` : ""}
-        </Badge>
+        </span>
       </div>
     </div>
   );

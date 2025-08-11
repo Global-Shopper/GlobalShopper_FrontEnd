@@ -291,6 +291,13 @@ const gshopApi = createApi({
         method: "POST",
       }),
     }),
+    directCheckout: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.DIRECT_CHECKOUT,
+        method: "POST",
+      }),
+    }),
     getAllOrders: builder.query({
       query: (data) => ({
         params: data,
@@ -298,6 +305,29 @@ const gshopApi = createApi({
         method: "GET",
       }),
       providesTags: ["Orders"],
+    }),
+    getOrderByID: builder.query({
+      query: (id) => ({
+        url: `${endpoints.ORDER}/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Orders"],
+    }),
+    updateShipping: builder.mutation({
+      query: ({orderId, payload}) => ({
+        data: payload,
+        url: `${endpoints.UPDATE_SHIPPING}/${orderId}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Orders", "OrderDetail"],
+    }),
+    cancelOrder: builder.mutation({
+      query: ({orderId, payload}) => ({
+        data: payload,
+        url: `${endpoints.CANCEL_ORDER}/${orderId}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Orders", "OrderDetail"],
     }),
 
     // checkPayment: builder.query({
@@ -358,6 +388,10 @@ export const {
   useLazyGetRawDataQuery,
   useCheckoutMutation,
   useGetAllOrdersQuery,
+  useDirectCheckoutMutation,
+  useGetOrderByIDQuery,
+  useCancelOrderMutation,
+  useUpdateShippingMutation,
   useGetHsCodesQuery,
 } = gshopApi;
 

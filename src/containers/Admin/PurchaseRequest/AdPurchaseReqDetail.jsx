@@ -8,13 +8,6 @@ import { CustomerInfoCard } from "../CustomerInfoCard";
 import { ProductDetail } from "../ProductDetail";
 import { ProductList } from "../ProductList";
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount);
-};
-
 function AdPurchaseReqDetail() {
   const { id } = useParams();
   const {
@@ -142,7 +135,6 @@ function AdPurchaseReqDetail() {
               <CustomerInfoCard
                 customer={req.customer}
                 shippingAddress={req.shippingAddress}
-                formatCurrency={formatCurrency}
               />
             </div>
           </div>

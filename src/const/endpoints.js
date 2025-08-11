@@ -27,7 +27,10 @@ const endpoints = {
   RAW_DATA: "/ai/get-raw-data",
   CHECKOUT: "/orders/checkout",
   ORDER: "/orders",
+  UPDATE_SHIPPING: "/orders/update-shipping",
+  CANCEL_ORDER: "/orders/cancel",
   HS_CODES: "/hs-code/search",
+  DIRECT_CHECKOUT: "/orders/direct-checkout",
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
 };
 export default endpoints;

@@ -4,7 +4,8 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User, MapPin, Phone, Mail } from "lucide-react"
 
-export function CustomerInfoCard({ customer, shippingAddress, formatCurrency }) {
+export function CustomerInfoCard({ customer, shippingAddress }) {
+  console.log(customer)
   return (
     <Card className="col-span-1">
       <CardHeader>

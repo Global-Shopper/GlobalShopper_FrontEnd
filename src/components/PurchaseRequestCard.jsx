@@ -27,7 +27,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { getRequestTypeText } from "@/utils/reqTypeHandler";
-import { getStatusBadgeVariant, getStatusText } from "@/utils/statusHandler";
+import { getStatusBadgeVariant, getStatusColor, getStatusText } from "@/utils/statusHandler";
 import { formatDate } from "@/utils/parseDateTime";
 
 const PurchaseRequestCard = ({ request, listView = false }) => {
@@ -159,14 +159,13 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 									<span className="text-sm text-gray-500 font-medium">
 										Trạng thái:
 									</span>
-									<Badge
-										variant={getStatusBadgeVariant(
+									<span
+										className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
 											request.status
-										)}
-										className="px-2 py-1 text-xs font-semibold"
+											)} group-hover:shadow`}
 									>
 										{getStatusText(request.status)}
-									</Badge>
+									</span>
 								</div>
 							</div>
 
