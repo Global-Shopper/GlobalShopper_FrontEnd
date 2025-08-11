@@ -8,6 +8,7 @@ import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 import productDefaultImage from "@/assets/productDefault.png";
 import { useCheckoutMutation } from '@/services/gshopApi';
 import { toast } from 'sonner';
+import PaymentDialog from './PaymentDialog';
 
 function StatusBadge({ status }) {
   const color = getStatusColor(status);
@@ -148,20 +149,6 @@ function SubRequestItemCard({ item }) {
 }
 
 function SubRequestCard({ subRequest, expired }) {
-  const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
-  const handlePaySubRequest = (subRequest) => {
-    checkout({ subRequestId: subRequest?.id, totalPriceEstimate: subRequest?.quotationForPurchase?.totalPriceEstimate + subRequest?.quotationForPurchase?.shippingEstimate })
-      .unwrap()
-      .then(() => {
-        toast.success("Thanh toán thành công");
-      })
-      .catch((error) => {
-        toast.error("Thanh toán thất bại", {
-          description: error?.data?.message || "Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại sau.",
-        })
-      });
-    // TODO: Integrate payment logic/modal here
-  };
   return (
     <div className="relative mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
       <div className="flex items-center gap-4 mb-2">
@@ -196,8 +183,7 @@ function SubRequestCard({ subRequest, expired }) {
             Đang chờ báo giá
           </div>
         )}
-      </div>
-      {subRequest.status === "QUOTED" && (
+              {/* {subRequest.status === "QUOTED" && (
         <button
           className={`mt-2 px-4 py-2 rounded shadow ${expired
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -208,7 +194,9 @@ function SubRequestCard({ subRequest, expired }) {
         >
           {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate + subRequest.quotationForPurchase.shippingEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
         </button>
-      )}
+      )} */}
+        <PaymentDialog subRequest={subRequest} expired={expired} />
+      </div>
     </div>
   );
 }

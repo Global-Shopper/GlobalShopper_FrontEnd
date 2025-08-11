@@ -11,6 +11,10 @@ export const getStatusColor = (status) => {
       return "bg-red-100 text-red-800";
     case "INSUFFICIENT":
       return "bg-yellow-100 text-yellow-800";
+    case "PAID":
+      return "bg-green-100 text-green-800";
+    case "AWAITING_PAYMENT":
+      return "bg-yellow-100 text-yellow-800";
     case "ORDER_REQUESTED":
       return "bg-blue-100 text-blue-800";
     case "PURCHASED":
@@ -38,6 +42,10 @@ export const getStatusText = (status) => {
       return "Đã hủy";
     case "INSUFFICIENT":
       return "Chờ cập nhật lại";
+    case "PAID":
+      return "Đã thanh toán";
+    case "AWAITING_PAYMENT":
+      return "Đang chờ thanh toán";
     case "ORDER_REQUESTED":
       return "Đang đặt hàng";
     case "PURCHASED":
@@ -65,6 +73,8 @@ export const getStatusBadgeVariant = (status) => {
 		case "CANCELLED":
 			return "destructive";
     case "INSUFFICIENT":
+      return "outline";
+    case "AWAITING_PAYMENT":
       return "outline";
     case "ORDER_REQUESTED":
       return "default";

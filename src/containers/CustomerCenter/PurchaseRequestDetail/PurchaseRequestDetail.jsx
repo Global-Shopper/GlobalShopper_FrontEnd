@@ -7,7 +7,7 @@ import ShippingInfoCard from "@/components/ShippingInfoCard";
 import RequestInfo from "./RequestInfo";
 import RequestItemList from "./RequestItemList";
 import { ExpiredWarning } from "./ExpiredWarning";
-import { AdminInfo } from "./AdminInfo";
+import { AdminInfo } from "../../../components/AdminInfo";
 import HistoryTimeline from "@/components/HistoryTimeline";
 import InsufficientWarning from "./InsufficientWarning";
 

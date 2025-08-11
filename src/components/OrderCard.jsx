@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { Package, Calendar, MoreVertical, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,9 +19,7 @@ export default function OrderCard({ order, onCancel, cancelling }) {
       <CardContent className="px-3 py-0">
         <div className="flex items-center justify-between mb-2">
           <div className="text-lg font-bold text-blue-600">
-            <Link to={`/account-center/orders/${order.id}`} className="hover:underline">
               #{order.id}
-            </Link>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-sm text-gray-500 font-medium">

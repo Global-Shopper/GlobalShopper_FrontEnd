@@ -25,6 +25,8 @@ import SystemConfig from "@/containers/BusinessManager/SystemConfig/SystemConfig
 import AdminManagement from "@/containers/BusinessManager/AdminManagement/AdminManagement";
 import Orders from "@/containers/CustomerCenter/OrderList/Orders";
 import PurchaseRequestEdit from "@/containers/CustomerCenter/PurchaseRequestEdit/PurchaseRequestEdit";
+import AdOrderDetail from "@/containers/Admin/Orders/AdOrderDetail";
+import OrderDetail from "@/containers/CustomerCenter/OrderDetail/OrderDetail";
 
 const AppRoutes = () => {
   return (
@@ -59,6 +61,7 @@ const AppRoutes = () => {
         />
         <Route path="purchase-request/:id/edit" element={<PurchaseRequestEdit />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="orders/:id" element={<OrderDetail />} />
         <Route
           path="refunds"
           element={
@@ -84,6 +87,7 @@ const AppRoutes = () => {
         <Route index element={<AdPurchaseReqList />} />
         <Route path="purchase-request/:id" element={<AdPurchaseReqDetail />} />
         <Route path="orders" element={<AdOrderList />} />
+        <Route path="orders/:id" element={<AdOrderDetail />} />
       </Route>
 
       {/* Protected Business Manager Routes */}

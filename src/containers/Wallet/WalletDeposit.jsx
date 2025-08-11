@@ -52,7 +52,7 @@ const WalletDeposit = () => {
       console.log(values)
       await depositWallet({
         balance: values.amount,
-        redirectUri: REDIRECT_URI
+        redirectUri: `${REDIRECT_URI}/account-center/wallet`
       }).unwrap()
         .then((res) => {
           toast.success("Yêu cầu nạp tiền thành công", {

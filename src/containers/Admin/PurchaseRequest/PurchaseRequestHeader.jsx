@@ -1,3 +1,4 @@
+import HistoryDialog from "@/components/HistoryDialog";
 import RequestUpdatePRDialog from "@/components/RequestUpdatePRDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,9 +52,9 @@ export function PurchaseRequestHeader({
             >
               {getStatusText(purchaseRequest.status)}{" "}{(purchaseRequest.status === "QUOTED") ? `(${purchaseRequest?.itemsHasQuotation}/${purchaseRequest?.totalItems})` : ""}
             </Badge>
-            {purchaseRequest.status === "CHECKING" && purchaseRequest?.admin?.name && (
+            {purchaseRequest.status !== "SENT" && purchaseRequest?.admin?.name && (
               <Badge variant="outline" className="text-xs">
-                Assigned to: {purchaseRequest?.admin?.name}
+                Admin: {purchaseRequest?.admin?.name}
               </Badge>
             )}
           </div>
@@ -99,6 +100,7 @@ export function PurchaseRequestHeader({
 
             </>
           )}
+          <HistoryDialog history={purchaseRequest.history} />
         </div>
       </div>
     </div>
