@@ -35,10 +35,10 @@ function RequestItemCard({
           <div className="flex-shrink-0">
             {item.images?.length > 0 ? (
               item.images.map((image, index) => (
-                <img key={index} src={image} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+                <img key={index} src={image} alt={item.productName} className="w-20 h-20 object-contain rounded border" />
               ))
             ) : (
-              <img src={productDefaultImage} alt={item.productName} className="w-20 h-20 object-cover rounded border" />
+              <img src={productDefaultImage} alt={item.productName} className="w-20 h-20 object-contain rounded border" />
             )}
           </div>
           

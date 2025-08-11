@@ -136,7 +136,7 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                                 key={img}
                                 src={img}
                                 alt={`Product preview ${idx + 1}`}
-                                className="w-16 h-16 object-cover rounded-lg border"
+                                className="w-16 h-16 object-contain rounded-lg border"
                               />
                             ))}
                           </div>
@@ -192,7 +192,7 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                                 key={img}
                                 src={img}
                                 alt={`Product preview ${idx + 1}`}
-                                className="w-16 h-16 object-cover rounded-lg border"
+                                className="w-16 h-16 object-contain rounded-lg border"
                               />
                             ))}
                           </div>

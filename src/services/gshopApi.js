@@ -290,6 +290,7 @@ const gshopApi = createApi({
         url: endpoints.CHECKOUT,
         method: "POST",
       }),
+      invalidatesTags: ["PurchaseRequestDetail", "Wallet", "Orders", "OrderDetail"]
     }),
     directCheckout: builder.mutation({
       query: (data) => ({
@@ -297,6 +298,7 @@ const gshopApi = createApi({
         url: endpoints.DIRECT_CHECKOUT,
         method: "POST",
       }),
+      invalidatesTags: ["PurchaseRequestDetail", "Wallet", "Orders", "OrderDetail"]
     }),
     getAllOrders: builder.query({
       query: (data) => ({

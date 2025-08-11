@@ -38,7 +38,7 @@ export function ProductDetail({ product, status }) {
                           productDefault
                         }
                         alt={`${product.productName} ${idx + 1}`}
-                        className="w-16 h-16 object-cover rounded border flex-shrink-0"
+                        className="w-16 h-16 object-contain rounded border flex-shrink-0"
                         onError={(e) => {
                           e.target.src =
                             productDefault;

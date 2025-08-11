@@ -130,7 +130,7 @@ export default function ItemExtractForm({ index }) {
                 <img
                   src={url}
                   alt={`Item preview ${idx + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg border"
+                  className="w-20 h-20 object-contain rounded-lg border"
                 />
                 {isUploading && (
                   <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white/60 rounded-lg">

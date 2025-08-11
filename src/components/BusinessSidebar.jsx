@@ -88,7 +88,7 @@ export function BusinessSidebar() {
             defaultAvt
           }
           alt="Avatar"
-          className="w-14 h-14 rounded-full border border-gray-300 object-cover shadow mb-1"
+          className="w-14 h-14 rounded-full border border-gray-300 object-contain shadow mb-1"
         />
         <div className="text-sm font-semibold text-gray-900 truncate w-full text-center max-w-[150px]">
           {name || "Admin"}
