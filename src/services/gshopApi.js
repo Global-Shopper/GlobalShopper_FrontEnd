@@ -346,6 +346,13 @@ const gshopApi = createApi({
         method: "GET",
       }),
     }),
+    createFeedback: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.FEEDBACK,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -395,6 +402,7 @@ export const {
   useCancelOrderMutation,
   useUpdateShippingMutation,
   useGetHsCodesQuery,
+  useCreateFeedbackMutation,
 } = gshopApi;
 
 export default gshopApi;
