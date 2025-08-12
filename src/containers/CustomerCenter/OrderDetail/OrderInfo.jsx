@@ -58,7 +58,10 @@ const OrderInfo = ({ order }) => {
 
             {order.status === "DELIVERED" && (
               <span className="text-xs text-gray-500 flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setFbOpen(true)}>Feedback</Button>
+                {!order.feedback ?
+                  <Button variant="outline" size="sm" onClick={() => setFbOpen(true)}>Feedback</Button> :
+                  <Button variant="outline" size="sm" onClick={() => setFbOpen(true)}><span className="text-yellow-500">{order.feedback?.rating}★</span>  </Button>
+                }
                 <Button variant="outline" size="sm" onClick={() => setRfOpen(true)}>Yêu cầu hoàn tiền</Button>
               </span>
             )}
@@ -99,40 +102,50 @@ const OrderInfo = ({ order }) => {
               Gửi đánh giá cho đơn hàng #{order?.id}
             </DialogDescription>
           </DialogHeader>
+            {order.feedback ?
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Đánh giá</div>
+                <div className="text-yellow-500">{order.feedback?.rating}★</div>
+                <div className="text-sm font-medium">Nội dung</div>
+                <div className="text-sm">{order.feedback?.comment}</div>
+              </div> : 
+              <>
+                {/* Rating */}
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Đánh giá</div>
+                    <Rating onValueChange={setFbRating} value={fbRating}>
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <RatingButton className="text-yellow-500" key={index} />
+                      ))}
+                    </Rating>
+                </div>
 
-          {/* Rating */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Đánh giá</div>
-              <Rating onValueChange={setFbRating} value={fbRating}>
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <RatingButton className="text-yellow-500" key={index} />
-                ))}
-              </Rating>
-          </div>
+                {/* Content input */}
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Nội dung</div>
+                  <Textarea
+                    placeholder="Nhập cảm nhận của bạn…"
+                    value={fbContent}
+                    onChange={(e) => setFbContent(e.target.value)}
+                    rows={5}
+                  />
+                </div>
 
-          {/* Content input */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Nội dung</div>
-            <Textarea
-              placeholder="Nhập cảm nhận của bạn…"
-              value={fbContent}
-              onChange={(e) => setFbContent(e.target.value)}
-              rows={5}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setFbOpen(false)}>Đóng</Button>
-            <Button
-              onClick={() => {
-                handleCreateFeedback()
-                setFbOpen(false)
-              }}
-              disabled={!fbContent.trim()}
-            >
-              Gửi
-            </Button>
-          </DialogFooter>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setFbOpen(false)}>Đóng</Button>
+                  <Button
+                    onClick={() => {
+                      handleCreateFeedback()
+                      setFbOpen(false)
+                    }}
+                    disabled={!fbContent.trim()}
+                  >
+                    Gửi
+                  </Button>
+                </DialogFooter>              
+              </> 
+            }
+          
         </DialogContent>
       </Dialog>
 
