@@ -32,6 +32,10 @@ const endpoints = {
 	HS_CODES: "/hs-code/search",
 	DIRECT_CHECKOUT: "/orders/direct-checkout",
 	GET_ALL_ADMINS: "/admin",
+	GET_ALL_CUSTOMERS: "/customer",
+	CREATE_CUSTOMER: "/customer",
+	UPDATE_CUSTOMER: "/customer",
+	BAN_CUSTOMER: "/customer/ban",
 	// CHECKPAYMENT: '/wallet/check-payment-vnpay',
 };
 export default endpoints;

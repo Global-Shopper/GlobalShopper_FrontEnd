@@ -11,6 +11,7 @@ const gshopApi = createApi({
 		"Wallet",
 		"PurchaseRequestDetail",
 		"AdminList",
+		"CustomerList",
 	],
 	baseQuery: axiosBaseQuery(),
 	endpoints: (builder) => ({
@@ -395,6 +396,31 @@ const gshopApi = createApi({
 			}),
 			invalidatesTags: ["AdminList"],
 		}),
+
+		// Customer Management APIs
+		getAllCustomers: builder.query({
+			query: (params) => ({
+				params: params,
+				url: endpoints.GET_ALL_CUSTOMERS,
+				method: "GET",
+			}),
+			providesTags: ["CustomerList"],
+		}),
+		updateCustomer: builder.mutation({
+			query: ({ id, data }) => ({
+				data: data,
+				url: `${endpoints.UPDATE_CUSTOMER}/${id}`,
+				method: "PUT",
+			}),
+			invalidatesTags: ["CustomerList"],
+		}),
+		banCustomer: builder.mutation({
+			query: (id) => ({
+				url: `${endpoints.BAN_CUSTOMER}/${id}`,
+				method: "PUT",
+			}),
+			invalidatesTags: ["CustomerList"],
+		}),
 	}),
 });
 
@@ -449,6 +475,9 @@ export const {
 	useCreateAdminMutation,
 	useUpdateAdminMutation,
 	useBanAdminMutation,
+	useGetAllCustomersQuery,
+	useUpdateCustomerMutation,
+	useBanCustomerMutation,
 } = gshopApi;
 
 export default gshopApi;
