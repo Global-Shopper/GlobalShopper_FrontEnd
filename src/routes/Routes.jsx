@@ -124,8 +124,14 @@ const AppRoutes = () => {
 						</div>
 					}
 				/>
-				<Route path="user-management/admin" element={<AdminManagement />} />
-				<Route path="user-management/customer" element={<CustomerManagement />} />
+				<Route
+					path="user-management/admin"
+					element={<AdminManagement />}
+				/>
+				<Route
+					path="user-management/customer"
+					element={<CustomerManagement />}
+				/>
 				<Route path="config" element={<SystemConfig />} />
 			</Route>
 			<Route path="*" element={<Navigate to="/" replace />} />
