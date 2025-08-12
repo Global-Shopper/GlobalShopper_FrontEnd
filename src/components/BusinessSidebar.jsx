@@ -25,7 +25,7 @@ import {
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signout } from "@/features/user";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import logo from "@/assets/LOGO_Gshop.png";
 import defaultAvt from "@/assets/defaultAvt.jpg";
 import {
@@ -83,6 +83,25 @@ export function BusinessSidebar() {
 		(state) => state.rootReducer.user
 	);
 
+	const isSubmenuActive = useCallback(
+		(submenuItems) => {
+			return submenuItems?.some((item) => location.pathname === item.url);
+		},
+		[location.pathname]
+	);
+
+	// Auto-open submenu if current path matches any submenu item
+	useEffect(() => {
+		items.forEach((item) => {
+			if (item.submenu && isSubmenuActive(item.submenu)) {
+				setOpenSubmenu((prev) => ({
+					...prev,
+					[item.title]: true,
+				}));
+			}
+		});
+	}, [location.pathname, isSubmenuActive]);
+
 	const toggleSubmenu = (itemTitle) => {
 		setOpenSubmenu((prev) => ({
 			...prev,
@@ -90,24 +109,18 @@ export function BusinessSidebar() {
 		}));
 	};
 
-	const isSubmenuActive = (submenuItems) => {
-		return submenuItems?.some((item) => location.pathname === item.url);
-	};
-
 	return (
 		<Sidebar className="border-r border-gray-200 bg-white">
 			<SidebarContent className="bg-gradient-to-b from-gray-50 to-white">
 				<SidebarGroup>
-					<SidebarGroupLabel className="flex justify-center items-center py-6 px-4">
-						<div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-							<img
-								src={logo}
-								alt="GSHOP Logo"
-								className="h-16 w-auto"
-							/>
-						</div>
+					<SidebarGroupLabel className="flex justify-center items-center py-6 px-2">
+						<img
+							src={logo}
+							alt="GSHOP Logo"
+							className="h-14 w-auto"
+						/>
 					</SidebarGroupLabel>
-					<SidebarGroupContent className="px-3">
+					<SidebarGroupContent className="px-2 pt-4">
 						<SidebarMenu className="space-y-2">
 							{items
 								.filter((item) => item.url !== "/login")
@@ -115,39 +128,32 @@ export function BusinessSidebar() {
 									<SidebarMenuItem key={item.title}>
 										{item.submenu ? (
 											<Collapsible
-												open={
-													openSubmenu[item.title] ||
-													isSubmenuActive(
-														item.submenu
-													)
-												}
+												open={openSubmenu[item.title]}
 												onOpenChange={() =>
 													toggleSubmenu(item.title)
 												}
 											>
 												<CollapsibleTrigger asChild>
 													<SidebarMenuButton
-														className={`w-full justify-between rounded-lg px-3 py-3 transition-all duration-200 hover:bg-orange-50 hover:text-orange-700 ${
+														className={`w-full justify-between rounded-lg px-2 py-3 transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 ${
 															isSubmenuActive(
 																item.submenu
 															)
-																? "bg-orange-100 text-orange-700 shadow-sm border border-orange-200"
+																? "bg-blue-100 text-blue-700 shadow-sm border border-blue-200"
 																: "text-gray-700 hover:shadow-sm"
 														}`}
 													>
-														<div className="flex items-center gap-3">
-															<div
-																className={`p-1.5 rounded-lg transition-colors ${
+														<div className="flex items-center gap-2">
+															<item.icon
+																className={`h-4 w-4 ${
 																	isSubmenuActive(
 																		item.submenu
 																	)
-																		? "bg-orange-200 text-orange-700"
-																		: "bg-gray-100 text-gray-600"
+																		? "text-blue-700"
+																		: "text-gray-600"
 																}`}
-															>
-																<item.icon className="h-4 w-4" />
-															</div>
-															<span className="font-medium">
+															/>
+															<span className="font-medium text-sm">
 																{item.title}
 															</span>
 														</div>
@@ -159,14 +165,14 @@ export function BusinessSidebar() {
 																isSubmenuActive(
 																	item.submenu
 																)
-																	? "rotate-90 text-orange-600"
+																	? "rotate-90 text-blue-600"
 																	: "text-gray-400"
 															}`}
 														/>
 													</SidebarMenuButton>
 												</CollapsibleTrigger>
 												<CollapsibleContent className="mt-1">
-													<SidebarMenuSub className="ml-6 border-l-2 border-gray-200 pl-3 space-y-1">
+													<SidebarMenuSub className="ml-4 border-l-2 border-gray-200 pl-2 space-y-1">
 														{item.submenu.map(
 															(subItem) => (
 																<SidebarMenuSubItem
@@ -176,11 +182,11 @@ export function BusinessSidebar() {
 																>
 																	<SidebarMenuSubButton
 																		asChild
-																		className={`rounded-lg px-3 py-2.5 transition-all duration-200 ${
+																		className={`rounded-lg px-2 py-2 transition-all duration-200 ${
 																			location.pathname ===
 																			subItem.url
-																				? "bg-orange-600 text-white shadow-md"
-																				: "text-gray-600 hover:bg-orange-50 hover:text-orange-700"
+																				? "bg-blue-600 text-white shadow-md"
+																				: "text-gray-600 hover:bg-blue-50 hover:text-blue-700"
 																		}`}
 																	>
 																		<Link
@@ -188,17 +194,15 @@ export function BusinessSidebar() {
 																				subItem.url
 																			}
 																		>
-																			<div
-																				className={`p-1 rounded-md transition-colors ${
+																			<subItem.icon
+																				className={`h-3.5 w-3.5 ${
 																					location.pathname ===
 																					subItem.url
-																						? "bg-orange-500 text-white"
-																						: "bg-gray-100 text-gray-500"
+																						? "!text-white"
+																						: "text-gray-500"
 																				}`}
-																			>
-																				<subItem.icon className="h-3.5 w-3.5" />
-																			</div>
-																			<span className="font-medium text-sm">
+																			/>
+																			<span className="font-medium text-xs">
 																				{
 																					subItem.title
 																				}
@@ -214,25 +218,23 @@ export function BusinessSidebar() {
 										) : (
 											<SidebarMenuButton
 												asChild
-												className={`rounded-lg px-3 py-3 transition-all duration-200 ${
+												className={`rounded-lg px-2 py-3 transition-all duration-200 ${
 													location.pathname ===
 													item.url
-														? "bg-orange-600 text-white shadow-md"
-														: "text-gray-700 hover:bg-orange-50 hover:text-orange-700 hover:shadow-sm"
+														? "bg-blue-600 text-white shadow-md"
+														: "text-gray-700 hover:bg-blue-50 hover:text-blue-700 hover:shadow-sm"
 												}`}
 											>
 												<Link to={item.url}>
-													<div
-														className={`p-1.5 rounded-lg transition-colors ${
+													<item.icon
+														className={`h-4 w-4 ${
 															location.pathname ===
 															item.url
-																? "bg-orange-500 text-white"
-																: "bg-gray-100 text-gray-600"
+																? "!text-white"
+																: "text-gray-600"
 														}`}
-													>
-														<item.icon className="h-4 w-4" />
-													</div>
-													<span className="font-medium">
+													/>
+													<span className="font-medium text-sm">
 														{item.title}
 													</span>
 												</Link>
@@ -245,7 +247,7 @@ export function BusinessSidebar() {
 				</SidebarGroup>
 			</SidebarContent>
 			{/* Bottom sticky user info and signout section */}
-			<div className="sticky bottom-0 left-0 w-full bg-gradient-to-t from-white via-white to-gray-50/50 border-t border-gray-200 px-3 pt-4 pb-4 flex flex-col items-center select-none">
+			<div className="sticky bottom-0 left-0 w-full bg-gradient-to-t from-white via-white to-gray-50/50 border-t border-gray-200 px-2 pt-4 pb-4 flex flex-col items-center select-none">
 				<div className="bg-white rounded-xl shadow-lg border border-gray-100 p-3 w-full mb-3">
 					<div className="flex flex-col items-center">
 						<div className="relative mb-2">
