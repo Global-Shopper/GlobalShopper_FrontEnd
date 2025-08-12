@@ -22,83 +22,115 @@ import BusinessManagerLayout from "@/containers/BusinessManager/BusinessManagerL
 import BMDashboard from "@/containers/BusinessManager/Dashboard/BMDashboard";
 import AdOrderList from "@/containers/Admin/Orders/AdOrderList";
 import SystemConfig from "@/containers/BusinessManager/SystemConfig/SystemConfig";
-import AdminManagement from "@/containers/BusinessManager/AdminManagement/AdminManagement";
+import AdminManagement from "@/containers/BusinessManager/UserManagement/AdminManagement";
+import CustomerManagement from "@/containers/BusinessManager/UserManagement/CustomerManagement";
 import Orders from "@/containers/CustomerCenter/OrderList/Orders";
 import PurchaseRequestEdit from "@/containers/CustomerCenter/PurchaseRequestEdit/PurchaseRequestEdit";
 import AdOrderDetail from "@/containers/Admin/Orders/AdOrderDetail";
 import OrderDetail from "@/containers/CustomerCenter/OrderDetail/OrderDetail";
 
 const AppRoutes = () => {
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/otp-verify" element={<OTPverification />} />
-      <Route
-        path="/otp-verify/change-email"
-        element={<OTPverification changeEmail />}
-      />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+	return (
+		<Routes>
+			<Route path="/login" element={<Login />} />
+			<Route path="/signup" element={<Signup />} />
+			<Route path="/otp-verify" element={<OTPverification />} />
+			<Route
+				path="/otp-verify/change-email"
+				element={<OTPverification changeEmail />}
+			/>
+			<Route path="/forgot-password" element={<ForgotPassword />} />
 
-      <Route path="/" element={<Homelayout />}>
-        <Route index element={<Homepage />} />
-        <Route path="create-request" element={<CreateRequestLayout />}>
-          <Route index element={<CreateRequestSelection />} />
-          <Route path="without-link" element={<WithoutLinkWorkflowPage />} />
-          <Route path="with-link" element={<WithLinkWorkflowPage />} />
-        </Route>
-      </Route>
+			<Route path="/" element={<Homelayout />}>
+				<Route index element={<Homepage />} />
+				<Route path="create-request" element={<CreateRequestLayout />}>
+					<Route index element={<CreateRequestSelection />} />
+					<Route
+						path="without-link"
+						element={<WithoutLinkWorkflowPage />}
+					/>
+					<Route
+						path="with-link"
+						element={<WithLinkWorkflowPage />}
+					/>
+				</Route>
+			</Route>
 
-      {/* Customer Account Center Routes */}
-      <Route path="/account-center" element={<AccountCenterLayout />}>
-        <Route path="wallet" element={<WalletOverview />} />
-        <Route path="wallet/deposit" element={<WalletDeposit />} />
-        <Route index element={<CustomerProfile />} />
-        <Route path="purchase-request-list" element={<PurchaseRequest />} />
-        <Route
-          path="purchase-request/:id"
-          element={<PurchaseRequestDetail />}
-        />
-        <Route path="purchase-request/:id/edit" element={<PurchaseRequestEdit />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="orders/:id" element={<OrderDetail />} />
-        <Route
-          path="refunds"
-          element={
-            <div className="p-6">
-              <h1>Yêu cầu hoàn tiền</h1>
-              <p>Trang quản lý yêu cầu hoàn tiền</p>
-            </div>
-          }
-        />
-        <Route
-          path="settings"
-          element={
-            <div className="p-6">
-              <h1>Cài đặt</h1>
-              <p>Trang cài đặt tài khoản</p>
-            </div>
-          }
-        />
-      </Route>
+			{/* Customer Account Center Routes */}
+			<Route path="/account-center" element={<AccountCenterLayout />}>
+				<Route path="wallet" element={<WalletOverview />} />
+				<Route path="wallet/deposit" element={<WalletDeposit />} />
+				<Route index element={<CustomerProfile />} />
+				<Route
+					path="purchase-request-list"
+					element={<PurchaseRequest />}
+				/>
+				<Route
+					path="purchase-request/:id"
+					element={<PurchaseRequestDetail />}
+				/>
+				<Route
+					path="purchase-request/:id/edit"
+					element={<PurchaseRequestEdit />}
+				/>
+				<Route path="orders" element={<Orders />} />
+				<Route path="orders/:id" element={<OrderDetail />} />
+				<Route
+					path="refunds"
+					element={
+						<div className="p-6">
+							<h1>Yêu cầu hoàn tiền</h1>
+							<p>Trang quản lý yêu cầu hoàn tiền</p>
+						</div>
+					}
+				/>
+				<Route
+					path="settings"
+					element={
+						<div className="p-6">
+							<h1>Cài đặt</h1>
+							<p>Trang cài đặt tài khoản</p>
+						</div>
+					}
+				/>
+			</Route>
 
-      {/* Protected Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdPurchaseReqList />} />
-        <Route path="purchase-request/:id" element={<AdPurchaseReqDetail />} />
-        <Route path="orders" element={<AdOrderList />} />
-        <Route path="orders/:id" element={<AdOrderDetail />} />
-      </Route>
+			{/* Protected Admin Routes */}
+			<Route path="/admin" element={<AdminLayout />}>
+				<Route index element={<AdPurchaseReqList />} />
+				<Route
+					path="purchase-request/:id"
+					element={<AdPurchaseReqDetail />}
+				/>
+				<Route path="orders" element={<AdOrderList />} />
+				<Route path="orders/:id" element={<AdOrderDetail />} />
+			</Route>
 
-      {/* Protected Business Manager Routes */}
-      <Route path="/business-manager" element={<BusinessManagerLayout />}>
-        <Route index element={<BMDashboard />} />
-        <Route path="admin-management" element={<AdminManagement />} />
-        <Route path="config" element={<SystemConfig />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+			{/* Protected Business Manager Routes */}
+			<Route path="/business-manager" element={<BusinessManagerLayout />}>
+				<Route index element={<BMDashboard />} />
+				<Route path="overview" element={<BMDashboard />} />
+				<Route
+					path="revenue"
+					element={
+						<div className="p-6">
+							<h1 className="text-2xl font-bold">
+								Thống kê doanh thu
+							</h1>
+							<p className="text-gray-600 mt-2">
+								Tính năng thống kê doanh thu đang được phát
+								triển...
+							</p>
+						</div>
+					}
+				/>
+				<Route path="user-management/admin" element={<AdminManagement />} />
+				<Route path="user-management/customer" element={<CustomerManagement />} />
+				<Route path="config" element={<SystemConfig />} />
+			</Route>
+			<Route path="*" element={<Navigate to="/" replace />} />
+		</Routes>
+	);
 };
 
 export default AppRoutes;
