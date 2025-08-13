@@ -21,7 +21,9 @@ import PurchaseRequestDetail from "@/containers/CustomerCenter/PurchaseRequestDe
 import BusinessManagerLayout from "@/containers/BusinessManager/BusinessManagerLayout";
 import BMDashboard from "@/containers/BusinessManager/Dashboard/BMDashboard";
 import AdOrderList from "@/containers/Admin/Orders/AdOrderList";
-import SystemConfig from "@/containers/BusinessManager/SystemConfig/SystemConfig";
+import HsCodeConfig from "@/containers/BusinessManager/SystemConfig/HsCodeConfig";
+import ServiceConfig from "@/containers/BusinessManager/SystemConfig/ServiceConfig";
+import VariantConfig from "@/containers/BusinessManager/SystemConfig/VariantConfig";
 import AdminManagement from "@/containers/BusinessManager/UserManagement/AdminManagement";
 import CustomerManagement from "@/containers/BusinessManager/UserManagement/CustomerManagement";
 import Orders from "@/containers/CustomerCenter/OrderList/Orders";
@@ -132,7 +134,9 @@ const AppRoutes = () => {
 					path="user-management/customer"
 					element={<CustomerManagement />}
 				/>
-				<Route path="config" element={<SystemConfig />} />
+				<Route path="config/hs-code" element={<HsCodeConfig />} />
+				<Route path="config/service" element={<ServiceConfig />} />
+				<Route path="config/variant" element={<VariantConfig />} />
 			</Route>
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>

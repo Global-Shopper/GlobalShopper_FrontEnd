@@ -48,8 +48,24 @@ const items = [
 	},
 	{
 		title: "Cấu hình hệ thống",
-		url: "/business-manager/config",
 		icon: Settings,
+		submenu: [
+			{
+				title: "Cấu hình HS Code",
+				url: "/business-manager/config/hs-code",
+				icon: Settings,
+			},
+			{
+				title: "Cấu hình phí",
+				url: "/business-manager/config/service",
+				icon: Settings,
+			},
+			{
+				title: "Cấu hình biến",
+				url: "/business-manager/config/variant",
+				icon: Settings,
+			},
+		],
 	},
 	{
 		title: "Quản lý người dùng",
