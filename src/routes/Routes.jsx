@@ -20,6 +20,7 @@ import AdPurchaseReqList from "@/containers/Admin/PurchaseRequest/AdPurchaseReqL
 import PurchaseRequestDetail from "@/containers/CustomerCenter/PurchaseRequestDetail/PurchaseRequestDetail";
 import BusinessManagerLayout from "@/containers/BusinessManager/BusinessManagerLayout";
 import BMDashboard from "@/containers/BusinessManager/Dashboard/BMDashboard";
+import RevenueDashboard from "@/containers/BusinessManager/Dashboard/RevenueDashboard";
 import AdOrderList from "@/containers/Admin/Orders/AdOrderList";
 import HsCodeConfig from "@/containers/BusinessManager/SystemConfig/HsCodeConfig";
 import ServiceConfig from "@/containers/BusinessManager/SystemConfig/ServiceConfig";
@@ -112,20 +113,7 @@ const AppRoutes = () => {
 			<Route path="/business-manager" element={<BusinessManagerLayout />}>
 				<Route index element={<BMDashboard />} />
 				<Route path="overview" element={<BMDashboard />} />
-				<Route
-					path="revenue"
-					element={
-						<div className="p-6">
-							<h1 className="text-2xl font-bold">
-								Thống kê doanh thu
-							</h1>
-							<p className="text-gray-600 mt-2">
-								Tính năng thống kê doanh thu đang được phát
-								triển...
-							</p>
-						</div>
-					}
-				/>
+				<Route path="revenue" element={<RevenueDashboard />} />
 				<Route
 					path="user-management/admin"
 					element={<AdminManagement />}
