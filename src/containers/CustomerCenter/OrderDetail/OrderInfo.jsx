@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Rating, RatingButton } from '@/components/ui/shadcn-io/rating';
-import { useCreateFeedbackMutation } from "@/services/gshopApi"
+import { useCreateFeedbackMutation, useCreateRefundMutation } from "@/services/gshopApi"
 import { toast } from "sonner"
 
 function formatVND(value) {
@@ -21,6 +21,7 @@ function formatDateTime(ts) {
 
 const OrderInfo = ({ order }) => {
   const [createFeedback] = useCreateFeedbackMutation()
+  const [createRefund] = useCreateRefundMutation()
   const statusCls = getStatusColor(order.status)
   const statusText = getStatusText(order.status)
   const itemCount = order.orderItems?.length || 0
@@ -44,6 +45,23 @@ const OrderInfo = ({ order }) => {
       toast.success("Gửi đánh giá thành công")
     }).catch((error) => {
       toast.error("Gửi đánh giá thất bại")
+      console.error(error)
+    })
+  }
+
+  const handleCreateRefund = () => {
+    createRefund({
+      orderId: order.id,
+      reason: rfContent,
+      evidence: [
+        "image1.jpg",
+        "image2.jpg",
+        "image3.jpg"
+      ]
+    }).unwrap().then(() => {
+      toast.success("Gửi yêu cầu hoàn tiền thành công")
+    }).catch((error) => {
+      toast.error("Gửi yêu cầu hoàn tiền thất bại")
       console.error(error)
     })
   }
@@ -174,7 +192,7 @@ const OrderInfo = ({ order }) => {
             <Button variant="outline" onClick={() => setRfOpen(false)}>Đóng</Button>
             <Button
               onClick={() => {
-                console.log("submit refund", { orderId: order.id, content: rfContent })
+                handleCreateRefund()
                 setRfOpen(false)
               }}
               disabled={!rfContent.trim()}

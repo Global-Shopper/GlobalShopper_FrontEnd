@@ -353,6 +353,13 @@ const gshopApi = createApi({
         method: "POST",
       }),
     }),
+    createRefund: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.REFUND,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -403,6 +410,7 @@ export const {
   useUpdateShippingMutation,
   useGetHsCodesQuery,
   useCreateFeedbackMutation,
+  useCreateRefundMutation,
 } = gshopApi;
 
 export default gshopApi;
