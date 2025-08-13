@@ -474,12 +474,20 @@ const BMDashboard = () => {
 							</div>
 							<ResponsiveContainer width="100%" height={300}>
 								<AreaChart data={monthlyMetrics}>
-									<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+									<CartesianGrid
+										strokeDasharray="3 3"
+										stroke="#f0f0f0"
+									/>
 									<XAxis dataKey="month" fontSize={12} />
 									<YAxis fontSize={12} />
 									<Tooltip
-										formatter={(value) => [value, "Yêu cầu"]}
-										labelFormatter={(label) => `Tháng ${label}`}
+										formatter={(value) => [
+											value,
+											"Yêu cầu",
+										]}
+										labelFormatter={(label) =>
+											`Tháng ${label}`
+										}
 									/>
 									<Area
 										type="monotone"
@@ -512,7 +520,10 @@ const BMDashboard = () => {
 					<CardContent>
 						<ResponsiveContainer width="100%" height={200}>
 							<LineChart data={monthlyMetrics}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+								<CartesianGrid
+									strokeDasharray="3 3"
+									stroke="#f0f0f0"
+								/>
 								<XAxis dataKey="month" fontSize={10} />
 								<YAxis fontSize={10} />
 								<Tooltip
@@ -524,7 +535,11 @@ const BMDashboard = () => {
 									dataKey="withdrawals"
 									stroke="#f97316"
 									strokeWidth={2}
-									dot={{ fill: "#f97316", strokeWidth: 2, r: 4 }}
+									dot={{
+										fill: "#f97316",
+										strokeWidth: 2,
+										r: 4,
+									}}
 								/>
 							</LineChart>
 						</ResponsiveContainer>
@@ -545,14 +560,21 @@ const BMDashboard = () => {
 					<CardContent>
 						<ResponsiveContainer width="100%" height={200}>
 							<BarChart data={monthlyMetrics}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+								<CartesianGrid
+									strokeDasharray="3 3"
+									stroke="#f0f0f0"
+								/>
 								<XAxis dataKey="month" fontSize={10} />
 								<YAxis fontSize={10} />
 								<Tooltip
 									formatter={(value) => [value, "Hoàn tiền"]}
 									labelFormatter={(label) => `Tháng ${label}`}
 								/>
-								<Bar dataKey="refunds" fill="#ef4444" radius={[4, 4, 0, 0]} />
+								<Bar
+									dataKey="refunds"
+									fill="#ef4444"
+									radius={[4, 4, 0, 0]}
+								/>
 							</BarChart>
 						</ResponsiveContainer>
 					</CardContent>
@@ -572,7 +594,10 @@ const BMDashboard = () => {
 					<CardContent>
 						<ResponsiveContainer width="100%" height={200}>
 							<AreaChart data={monthlyMetrics}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+								<CartesianGrid
+									strokeDasharray="3 3"
+									stroke="#f0f0f0"
+								/>
 								<XAxis dataKey="month" fontSize={10} />
 								<YAxis fontSize={10} />
 								<Tooltip
