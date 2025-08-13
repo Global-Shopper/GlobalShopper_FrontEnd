@@ -1,20 +1,34 @@
 import React, { useMemo, useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { useCheckoutMutation, useDirectCheckoutMutation, useGetWalletQuery } from '@/services/gshopApi';
+import { useCheckoutMutation, useCreateShipmentMutation, useDirectCheckoutMutation, useGetShipmentRateQuery, useGetWalletQuery } from '@/services/gshopApi';
 import { toast } from 'sonner';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { getLocaleCurrencyFormat } from '@/utils/formatCurrency';
 import { REDIRECT_URI } from '@/const/urlconst';
+import { getFedexCreateShipPayload, getFedexRatePayload } from '@/utils/fedexPayload';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const PaymentDialog = ({ subRequest, expired }) => {
+const PaymentDialog = ({ subRequest, expired, requestType }) => {
+  console.log(requestType)
   const { data: wallet } = useGetWalletQuery()
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
   const [directCheckout, { isLoading: isDirectCheckoutLoading }] = useDirectCheckoutMutation();
+  console.log(subRequest?.quotationForPurchase?.packageType)
+  const { data: rate } = useGetShipmentRateQuery({inputJson: getFedexRatePayload(
+    subRequest?.quotationForPurchase?.totalWeightEstimate,
+    subRequest?.quotationForPurchase?.shipper,
+    subRequest?.quotationForPurchase?.recipient,
+    "VND",
+    subRequest?.quotationForPurchase?.packageType
+  )})
+  const [createShipment, { isLoading: isCreateShipmentLoading }] = useCreateShipmentMutation();
   const [open, setOpen] = useState(false)
   const [method, setMethod] = useState('wallet') // 'wallet' | 'vnpay'
-
+  const [selectedRateType, setSelectedRateType] = useState(null)
+  const rateReplyDetails = rate?.output?.rateReplyDetails
+  console.log(subRequest)
   const totalAmount = useMemo(() => {
     const q = subRequest?.quotationForPurchase
     if (!q) return 0
@@ -24,15 +38,43 @@ const PaymentDialog = ({ subRequest, expired }) => {
   const handleConfirm = async () => {
     try {
       if (method === 'wallet') {
-        await checkout({ subRequestId: subRequest?.id, totalPriceEstimate: totalAmount }).unwrap()
+        await checkout(
+          {
+            subRequestId: subRequest?.id,
+            totalPriceEstimate: totalAmount
+          }
+        ).unwrap()
         .then(() => {
           toast.success('Thanh toán thành công')
           setOpen(false)
         })
       } else {
-        await directCheckout({ subRequestId: subRequest?.id, totalPriceEstimate: totalAmount, redirectUri: `${REDIRECT_URI}/account-center/orders/:id` }).unwrap()
+        await directCheckout(
+          {
+            subRequestId: subRequest?.id,
+            totalPriceEstimate: totalAmount,
+            redirectUri: `${REDIRECT_URI}/account-center/orders/:id`
+          }
+        ).unwrap()
         .then((res) => {
           window.location.href = res?.url
+          setOpen(false)
+        })
+      }
+      if (requestType === "OFFLINE") {
+        await createShipment(
+          {
+            inputJson: getFedexCreateShipPayload(
+              subRequest?.quotationForPurchase?.totalWeightEstimate,
+              subRequest?.quotationForPurchase?.shipper,
+              subRequest?.quotationForPurchase?.recipient,
+              selectedRateType,
+              subRequest?.quotationForPurchase?.packageType
+            )
+          }
+        ).unwrap()
+        .then(() => {
+          toast.success('Thanh toán thành công')
           setOpen(false)
         })
       }
@@ -70,6 +112,17 @@ const PaymentDialog = ({ subRequest, expired }) => {
         <div className="mb-3 text-sm">
           Số dư ví GSHOP: <span className="font-semibold">{formatCurrency(wallet?.balance, 'VND', getLocaleCurrencyFormat('VND'))}</span>
         </div>
+        {
+          requestType === "OFFLINE" && <Select value={selectedRateType} onValueChange={setSelectedRateType}>
+          <SelectTrigger>
+            <SelectValue placeholder="Chọn loại phí" >{selectedRateType || "Chọn loại vận chuyển"}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+          {rateReplyDetails?.map((rate, index) => (
+            <SelectItem key={index} value={rate?.serviceType}>{rate?.serviceName} - {formatCurrency(rate?.ratedShipmentDetails[0]?.totalNetCharge, 'GBP', getLocaleCurrencyFormat('GBP'))}</SelectItem>
+          ))}
+          </SelectContent>
+        </Select>}
         <RadioGroup value={method} onValueChange={setMethod}>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="wallet" id="wallet" />

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function QuotationForm({ product, errors = {}, onChange }) {
+export function QuotationForm({ requestType, product, errors = {}, onChange }) {
   return (
     <div className="p-4 rounded space-y-2">
       <div className="grid grid-cols-2 gap-4">
@@ -51,37 +51,41 @@ export function QuotationForm({ product, errors = {}, onChange }) {
             <div className="text-red-500 text-xs">{errors.basePrice}</div>
           )}
         </div>
-        <div>
-          <Label>HS Code</Label>
-          <Input
-            name="hsCodeId"
-            placeholder="HS Code"
-            value={product?.hsCodeId || ""}
-            onChange={(e) => onChange("hsCodeId", e.target.value)}
-          />
-          {errors?.hsCodeId && (
-            <div className="text-red-500 text-xs">{errors.hsCodeId}</div>
-          )}
-        </div>
-        <div>
-          <Label>Khu vực</Label>
-          <select
-            name="region"
-            value={product?.region || ""}
-            onChange={(e) => onChange("region", e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded"
-          >
-            <option value="">Chọn khu vực</option>
-            <option value="US">Mỹ</option>
-            <option value="UK">Anh</option>
-            <option value="JP">Nhật bản</option>
-            <option value="KR"> Hàn Quốc</option>
-            <option value="CHN">Trung Quốc</option>
-          </select>
-          {errors?.region && (
-            <div className="text-red-500 text-xs">{errors.region}</div>
-          )}
-        </div>
+        {requestType === "OFFLINE" && (
+          <>
+            <div>
+              <Label>HS Code</Label>
+              <Input
+                name="hsCodeId"
+                placeholder="HS Code"
+                value={product?.hsCodeId || ""}
+                onChange={(e) => onChange("hsCodeId", e.target.value)}
+              />
+              {errors?.hsCodeId && (
+                <div className="text-red-500 text-xs">{errors.hsCodeId}</div>
+              )}
+            </div>
+            <div>
+              <Label>Khu vực</Label>
+              <select
+                name="region"
+                value={product?.region || ""}
+                onChange={(e) => onChange("region", e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded"
+              >
+                <option value="">Chọn khu vực</option>
+                <option value="US">Mỹ</option>
+                <option value="UK">Anh</option>
+                <option value="JP">Nhật bản</option>
+                <option value="KR"> Hàn Quốc</option>
+                <option value="CHN">Trung Quốc</option>
+              </select>
+              {errors?.region && (
+                <div className="text-red-500 text-xs">{errors.region}</div>
+              )}
+            </div>
+          </>
+        )}
         <div>
           <Label>Phí dịch vụ</Label>
           <Input
@@ -96,18 +100,20 @@ export function QuotationForm({ product, errors = {}, onChange }) {
           )}
         </div>
       </div>
-      <div>
-        <Label>Ghi chú sản phẩm</Label>
-        <Textarea
-          name="note"
-          placeholder="Ghi chú cho sản phẩm này..."
-          value={product?.note || ""}
-          onChange={(e) => onChange("note", e.target.value)}
-        />
-        {errors?.note && (
-          <div className="text-red-500 text-xs">{errors.note}</div>
-        )}
-      </div>
+      {requestType === "OFFLINE" && (
+        <div>
+          <Label>Ghi chú sản phẩm</Label>
+          <Textarea
+            name="note"
+            placeholder="Ghi chú cho sản phẩm này..."
+            value={product?.note || ""}
+            onChange={(e) => onChange("note", e.target.value)}
+          />
+          {errors?.note && (
+            <div className="text-red-500 text-xs">{errors.note}</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

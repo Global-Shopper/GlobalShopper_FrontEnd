@@ -1,6 +1,6 @@
 export const PREDEFINED_VARIANT_FIELDS = [
   "Màu sắc",
-  "kích cỡ",
+  "Kích cỡ",
   "Chất liệu",
   "Kiểu dáng",
   "Thương hiệu",

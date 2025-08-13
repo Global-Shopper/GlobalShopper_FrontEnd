@@ -290,7 +290,7 @@ const PurchaseRequestEdit = () => {
                   <div className="space-y-4">
                     <Label className="text-base font-medium">Sản phẩm yêu cầu</Label>
                     <FieldArray name="requestItems">
-                      {({ push, remove }) => (
+                      {() => (
                         <>
                           {values.requestItems?.map((item, idx) => {
                             const variantRows = item.variantRows || []

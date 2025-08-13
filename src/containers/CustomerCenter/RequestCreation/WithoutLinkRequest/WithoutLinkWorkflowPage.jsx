@@ -12,6 +12,8 @@ import RequestSuccess from "../RequestSuccess";
 import { useCreateWithoutLinkPurchaseRequestMutation } from "@/services/gshopApi";
 import { toast } from "sonner";
 import { setCurrentStep, setShopInfoField } from "@/features/offlineReq";
+import { useEffect } from "react";
+import { resetAllPurchaseReq } from "@/features/purchaseReq.action";
 
 export default function WithoutLinkWorkflowPage() {
   const navigate = useNavigate();
@@ -41,9 +43,9 @@ console.log("shippingAddressId", shippingAddressId);
       shippingAddressId,
       contactInfo,
       requestItems: items.map((item) => ({
-        productName: item?.name,
-        productURL: item?.link,
-        variants: item?.variantRows?.map((variant) => `${variant?.attributeName}: ${variant?.fieldValue}`),
+        productName: item?.productName,
+        productURL: item?.productURL,
+        variants: item?.variantRows?.map((variant) => `${variant?.fieldType}: ${variant?.fieldValue}`),
         images: item?.images,
         quantity: item?.quantity,
         description: item?.description,
@@ -69,6 +71,9 @@ console.log("shippingAddressId", shippingAddressId);
   const handleBackToHome = () => {
     navigate("/");
   };
+  useEffect(() => {
+    dispatch(resetAllPurchaseReq());
+  }, [dispatch]);
 
   const renderBreadcrumb = () => (
     <div className="flex items-center gap-2 text-sm text-gray-500">

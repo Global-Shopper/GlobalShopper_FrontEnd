@@ -31,6 +31,9 @@ const endpoints = {
   CANCEL_ORDER: "/orders/cancel",
   HS_CODES: "/hs-code/search",
   DIRECT_CHECKOUT: "/orders/direct-checkout",
+  SHIPMENT_RATE: "/shipping/rate",
+  CREATE_SHIPMENT: "/shipping/ship",
+  SHIPMENT_TRACKING: "/shipping/tracking",
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
 };
 export default endpoints;
