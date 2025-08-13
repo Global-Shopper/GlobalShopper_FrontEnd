@@ -10,6 +10,8 @@ import { PaginationBar } from "@/utils/Pagination";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import { REFUND_STATUS } from "@/const/refundStatus";
+import { Badge } from "@/components/ui/badge";
 
 function formatVND(value) {
   if (typeof value !== "number") return "";
@@ -47,11 +49,10 @@ const RefundList = () => {
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              <TableHead>Evidence</TableHead>
-              <TableHead>Reason</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Rejection Reason</TableHead>
+              <TableHead>Lý do</TableHead>
+              <TableHead className="text-right">Số tiền</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Lý do từ chối</TableHead>
               <TableHead>Xem đơn hàng</TableHead>
             </TableRow>
           </TableHeader>
@@ -66,14 +67,9 @@ const RefundList = () => {
               rows.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell>#{r.id}</TableCell>
-                  <TableCell>
-                    {Array.isArray(r.evidence) && r.evidence.length > 0
-                      ? r.evidence.join(", ")
-                      : "—"}
-                  </TableCell>
                   <TableCell>{r.reason || "—"}</TableCell>
                   <TableCell className="text-right">{formatVND(r.amount)}</TableCell>
-                  <TableCell>{r.status || "—"}</TableCell>
+                  <TableCell> <Badge  variant={REFUND_STATUS[r.status].color}>{REFUND_STATUS[r.status].label}</Badge> </TableCell>
                   <TableCell>{r.rejectionReason || "—"}</TableCell>
                   <TableCell><Link to={`/account-center/orders/${r.orderId}`}>Đến đơn hàng</Link></TableCell>
                 </TableRow>
