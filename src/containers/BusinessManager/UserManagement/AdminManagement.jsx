@@ -17,17 +17,39 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, Edit, Ban, UserCheck } from "lucide-react";
+import {
+	Search,
+	Plus,
+	Edit,
+	Ban,
+	UserCheck,
+	ChevronUp,
+	ChevronDown,
+	ArrowUpDown,
+} from "lucide-react";
 import { useGetAllAdminsQuery, useBanAdminMutation } from "@/services/gshopApi";
 import { PaginationBar } from "@/utils/Pagination";
 import PageLoading from "@/components/PageLoading";
 import { toast } from "sonner";
+import CreateAdminForm from "@/components/AccountForm";
+import defaultAvt from "@/assets/defaultAvt.jpg";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 const AdminManagement = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [searchTerm, setSearchTerm] = useState("");
+	const [statusFilter, setStatusFilter] = useState("all");
+	const [countryFilter, setCountryFilter] = useState("all");
+	const [sortConfig, setSortConfig] = useState({
+		key: null,
+		direction: null,
+	});
+
+	// Form modal state
+	const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+	const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+	const [editingAdmin, setEditingAdmin] = useState(null);
 
 	// URL sync for pagination
 	const page = parseInt(searchParams.get("page")) || 1;
@@ -71,12 +93,116 @@ const AdminManagement = () => {
 		? adminsData
 		: adminsData?.content || [];
 
-	// Filter admins based on search term (search by name)
-	const filteredAdmins = searchTerm
-		? allAdmins.filter((admin) =>
-				admin.name?.toLowerCase().includes(searchTerm.toLowerCase())
-		  )
-		: allAdmins;
+	// Sort function
+	const handleSort = (key) => {
+		let direction = "asc";
+		if (sortConfig.key === key) {
+			if (sortConfig.direction === "asc") {
+				direction = "desc";
+			} else {
+				direction = "asc"; // Keep cycling between asc and desc only
+			}
+		}
+		setSortConfig({ key, direction });
+	};
+
+	// Sort icon component
+	const SortIcon = ({ column }) => {
+		if (sortConfig.key !== column) {
+			return <ArrowUpDown className="h-4 w-4 ml-1 opacity-50" />;
+		}
+		return sortConfig.direction === "asc" ? (
+			<ChevronUp className="h-4 w-4 ml-1 text-blue-600" />
+		) : (
+			<ChevronDown className="h-4 w-4 ml-1 text-blue-600" />
+		);
+	};
+
+	// Handler for successful admin creation
+	const handleCreateSuccess = () => {
+		refetch();
+	};
+
+	// Handler for edit admin
+	const handleEditAdmin = (admin) => {
+		setEditingAdmin(admin);
+		setIsEditFormOpen(true);
+	};
+
+	// Handler for successful admin update
+	const handleUpdateSuccess = () => {
+		setEditingAdmin(null);
+		setIsEditFormOpen(false);
+		refetch();
+	};
+
+	// Filter and sort admins
+	let filteredAdmins = allAdmins;
+
+	console.log("Filter Debug:", {
+		allAdmins: allAdmins.slice(0, 2), // Show first 2 admins
+		statusFilter,
+		countryFilter,
+		searchTerm,
+	});
+
+	// Apply filters
+	if (searchTerm) {
+		filteredAdmins = filteredAdmins.filter((admin) =>
+			admin.name?.toLowerCase().includes(searchTerm.toLowerCase())
+		);
+	}
+
+	if (statusFilter && statusFilter !== "all") {
+		filteredAdmins = filteredAdmins.filter((admin) => {
+			console.log("Status filter check:", {
+				adminStatus: admin.status,
+				filterValue: statusFilter,
+				match:
+					statusFilter === "active"
+						? admin.status === "ACTIVE"
+						: admin.status === "BANNED",
+			});
+			if (statusFilter === "active") return admin.status === "ACTIVE";
+			if (statusFilter === "banned") return admin.status === "BANNED";
+			return true;
+		});
+	}
+
+	if (countryFilter && countryFilter !== "all") {
+		filteredAdmins = filteredAdmins.filter((admin) => {
+			console.log("Country filter check:", {
+				adminCountry: admin.country,
+				filterValue: countryFilter,
+				match: admin.country === countryFilter,
+			});
+			return admin.country === countryFilter;
+		});
+	}
+
+	// Apply sorting
+	if (sortConfig.key) {
+		filteredAdmins = [...filteredAdmins].sort((a, b) => {
+			let aValue = a[sortConfig.key];
+			let bValue = b[sortConfig.key];
+
+			// Handle null/undefined values
+			if (aValue == null) aValue = "";
+			if (bValue == null) bValue = "";
+
+			// Convert to string for comparison
+			aValue = aValue.toString().toLowerCase();
+			bValue = bValue.toString().toLowerCase();
+
+			if (aValue < bValue) {
+				return sortConfig.direction === "asc" ? -1 : 1;
+			}
+			if (aValue > bValue) {
+				return sortConfig.direction === "asc" ? 1 : -1;
+			}
+			return 0;
+		});
+	}
 
 	// Pagination for filtered data
 	const totalPages = Math.ceil(filteredAdmins.length / size) || 1;
@@ -183,37 +309,121 @@ const AdminManagement = () => {
 				</div>
 			</div>
 
-			{/* Controls */}
-			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-				{/* Search và Add Admin Button */}
-				<div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+			{/* Controls - No border, compact layout */}
+			<div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center mb-6">
+				{/* Left side - Search and Filters */}
+				<div className="flex flex-col sm:flex-row gap-3 flex-1">
 					{/* Search */}
-					<div className="flex gap-2 flex-1 max-w-md">
-						<Input
-							placeholder="Tìm kiếm admin..."
-							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
-							onKeyPress={(e) =>
-								e.key === "Enter" && handleSearch()
-							}
-							className="flex-1"
-						/>
-						<Button
-							onClick={handleSearch}
-							variant="outline"
-							size="icon"
-						>
-							<Search className="h-4 w-4" />
-						</Button>
+					<div className="flex flex-col gap-1">
+						<label className="text-xs text-gray-600 font-medium">
+							Tìm kiếm
+						</label>
+						<div className="flex gap-2">
+							<Input
+								placeholder="Tìm kiếm admin..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
+								onKeyPress={(e) =>
+									e.key === "Enter" && handleSearch()
+								}
+								className="w-64"
+							/>
+							<Button
+								onClick={handleSearch}
+								variant="outline"
+								size="icon"
+							>
+								<Search className="h-4 w-4" />
+							</Button>
+						</div>
 					</div>
 
-					{/* Add Admin Button */}
-					<Button className="bg-blue-600 hover:bg-blue-700">
-						<Plus className="h-4 w-4 mr-2" />
-						Thêm Admin
-					</Button>
+					{/* Status Filter */}
+					<div className="flex flex-col gap-1">
+						<label className="text-xs text-gray-600 font-medium">
+							Trạng thái
+						</label>
+						<Select
+							value={statusFilter}
+							onValueChange={setStatusFilter}
+						>
+							<SelectTrigger className="w-40">
+								<SelectValue placeholder="Trạng thái" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">Tất cả</SelectItem>
+								<SelectItem value="active">
+									Hoạt động
+								</SelectItem>
+								<SelectItem value="banned">Đã cấm</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+
+					{/* Country Filter */}
+					<div className="flex flex-col gap-1">
+						<label className="text-xs text-gray-600 font-medium">
+							Quốc gia
+						</label>
+						<Select
+							value={countryFilter}
+							onValueChange={setCountryFilter}
+						>
+							<SelectTrigger className="w-40">
+								<SelectValue placeholder="Quốc gia" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">Tất cả</SelectItem>
+								<SelectItem value="Việt Nam">
+									Việt Nam
+								</SelectItem>
+								<SelectItem value="Mỹ">Mỹ</SelectItem>
+								<SelectItem value="Trung Quốc">
+									Trung Quốc
+								</SelectItem>
+								<SelectItem value="Nhật Bản">
+									Nhật Bản
+								</SelectItem>
+								<SelectItem value="Hàn Quốc">
+									Hàn Quốc
+								</SelectItem>
+								<SelectItem value="Singapore">
+									Singapore
+								</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
+
+				{/* Right side - Add Button */}
+				<Button
+					className="bg-blue-600 hover:bg-blue-700"
+					onClick={() => setIsCreateFormOpen(true)}
+				>
+					<Plus className="h-4 w-4 mr-2" />
+					Thêm Admin
+				</Button>
 			</div>
+
+			{/* Create Admin Form Modal */}
+			<CreateAdminForm
+				isOpen={isCreateFormOpen}
+				onClose={() => setIsCreateFormOpen(false)}
+				onSuccess={handleCreateSuccess}
+			/>
+
+			{/* Edit Admin Form Modal */}
+			<CreateAdminForm
+				isOpen={isEditFormOpen}
+				onClose={() => {
+					setIsEditFormOpen(false);
+					setEditingAdmin(null);
+				}}
+				onSuccess={handleUpdateSuccess}
+				editingData={editingAdmin}
+				isEditMode={true}
+			/>
+
 			{/* Admin Table */}
 			<div className="bg-white rounded-lg shadow-sm border border-gray-200">
 				<Table className="w-full">
@@ -222,23 +432,59 @@ const AdminManagement = () => {
 							<TableHead className="text-gray-700 font-semibold text-sm bg-blue-100 rounded-tl-lg">
 								Avatar
 							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-								Tên
+							<TableHead
+								className="text-gray-700 font-semibold text-sm bg-blue-100 cursor-pointer hover:bg-blue-200 select-none"
+								onClick={() => handleSort("name")}
+							>
+								<div className="flex items-center">
+									Tên
+									<SortIcon column="name" />
+								</div>
 							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-								Email
+							<TableHead
+								className="text-gray-700 font-semibold text-sm bg-blue-100 cursor-pointer hover:bg-blue-200 select-none"
+								onClick={() => handleSort("email")}
+							>
+								<div className="flex items-center">
+									Email
+									<SortIcon column="email" />
+								</div>
 							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-								Điện thoại
+							<TableHead
+								className="text-gray-700 font-semibold text-sm bg-blue-100 cursor-pointer hover:bg-blue-200 select-none"
+								onClick={() => handleSort("phone")}
+							>
+								<div className="flex items-center">
+									Điện thoại
+									<SortIcon column="phone" />
+								</div>
 							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-								Địa chỉ
+							<TableHead
+								className="text-gray-700 font-semibold text-sm bg-blue-100 cursor-pointer hover:bg-blue-200 select-none"
+								onClick={() => handleSort("address")}
+							>
+								<div className="flex items-center">
+									Địa chỉ
+									<SortIcon column="address" />
+								</div>
 							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-								Quốc gia
+							<TableHead
+								className="text-gray-700 font-semibold text-sm bg-blue-100 cursor-pointer hover:bg-blue-200 select-none"
+								onClick={() => handleSort("country")}
+							>
+								<div className="flex items-center">
+									Quốc gia
+									<SortIcon column="country" />
+								</div>
 							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-								Trạng thái
+							<TableHead
+								className="text-gray-700 font-semibold text-sm bg-blue-100 cursor-pointer hover:bg-blue-200 select-none"
+								onClick={() => handleSort("status")}
+							>
+								<div className="flex items-center">
+									Trạng thái
+									<SortIcon column="status" />
+								</div>
 							</TableHead>
 							<TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100 rounded-tr-lg">
 								Thao tác
@@ -253,12 +499,12 @@ const AdminManagement = () => {
 							>
 								<TableCell className="py-3">
 									<img
-										src={
-											admin.avatar ||
-											"/src/assets/defaultAvt.jpg"
-										}
+										src={admin.avatar || defaultAvt}
 										alt="Avatar"
 										className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+										onError={(e) => {
+											e.target.src = defaultAvt;
+										}}
 									/>
 								</TableCell>
 								<TableCell className="font-medium py-3">
@@ -296,6 +542,9 @@ const AdminManagement = () => {
 											size="sm"
 											className="h-8 w-8 p-0"
 											title="Chỉnh sửa"
+											onClick={() =>
+												handleEditAdmin(admin)
+											}
 										>
 											<Edit className="h-4 w-4" />
 										</Button>
