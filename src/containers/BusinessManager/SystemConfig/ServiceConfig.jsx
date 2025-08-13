@@ -1,15 +1,6 @@
 import React, { useState } from "react";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
 	DollarSign,
@@ -115,78 +106,69 @@ export default function ServiceConfig() {
 		);
 	};
 
-	const renderFeeCard = (fee) => (
-		<Card key={fee.id} className="hover:shadow-md transition-shadow">
-			<CardHeader className="pb-3">
-				<div className="flex items-center justify-between">
-					<CardTitle className="text-lg">{fee.name}</CardTitle>
+	const renderFeeRow = (fee) => (
+		<div
+			key={fee.id}
+			className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+		>
+			{/* Left side - Fee info */}
+			<div className="flex-1">
+				<div className="flex items-center gap-3 mb-2">
+					<h4 className="font-medium text-gray-900">{fee.name}</h4>
 					{getStatusBadge(fee.status)}
 				</div>
-			</CardHeader>
-			<CardContent>
-				<div className="space-y-3">
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-						{fee.percentage && (
-							<div>
-								<Label className="text-gray-600">
-									Phần trăm
-								</Label>
-								<p className="font-medium">{fee.percentage}%</p>
-							</div>
-						)}
-						{fee.fixedAmount && (
-							<div>
-								<Label className="text-gray-600">
-									Phí cố định
-								</Label>
-								<p className="font-medium">
-									{formatCurrency(fee.fixedAmount)}
-								</p>
-							</div>
-						)}
-						{fee.minFee && (
-							<div>
-								<Label className="text-gray-600">
-									Phí tối thiểu
-								</Label>
-								<p className="font-medium">
-									{formatCurrency(fee.minFee)}
-								</p>
-							</div>
-						)}
-						{fee.maxFee && (
-							<div>
-								<Label className="text-gray-600">
-									Phí tối đa
-								</Label>
-								<p className="font-medium">
-									{formatCurrency(fee.maxFee)}
-								</p>
-							</div>
-						)}
-					</div>
-
-					<div className="flex gap-2 pt-2">
-						<Button
-							variant="outline"
-							size="sm"
-							className="flex items-center gap-1"
-						>
-							<Edit className="h-4 w-4" />
-							Chỉnh sửa
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							className="flex items-center gap-1 text-red-600 hover:text-red-700"
-						>
-							<Trash2 className="h-4 w-4" />
-							Xóa
-						</Button>
-					</div>
+				<div className="flex items-center gap-6 text-sm text-gray-600">
+					{fee.percentage && (
+						<span className="flex items-center gap-1">
+							<span className="text-xs text-gray-500">%:</span>
+							<span className="font-medium">
+								{fee.percentage}%
+							</span>
+						</span>
+					)}
+					{fee.fixedAmount && (
+						<span className="flex items-center gap-1">
+							<span className="text-xs text-gray-500">
+								Cố định:
+							</span>
+							<span className="font-medium">
+								{formatCurrency(fee.fixedAmount)}
+							</span>
+						</span>
+					)}
+					{fee.minFee && (
+						<span className="flex items-center gap-1">
+							<span className="text-xs text-gray-500">Min:</span>
+							<span className="font-medium">
+								{formatCurrency(fee.minFee)}
+							</span>
+						</span>
+					)}
+					{fee.maxFee && (
+						<span className="flex items-center gap-1">
+							<span className="text-xs text-gray-500">Max:</span>
+							<span className="font-medium">
+								{formatCurrency(fee.maxFee)}
+							</span>
+						</span>
+					)}
 				</div>
-			</CardContent>
-		</Card>
+			</div>
+
+			{/* Right side - Actions */}
+			<div className="flex items-center gap-2">
+				<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+					<Edit className="h-4 w-4" />
+				</Button>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+				>
+					<Trash2 className="h-4 w-4" />
+				</Button>
+			</div>
+		</div>
 	);
 
 	return (
@@ -251,8 +233,8 @@ export default function ServiceConfig() {
 							</Button>
 						</div>
 
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-							{serviceFees.map((fee) => renderFeeCard(fee))}
+						<div className="space-y-3">
+							{serviceFees.map((fee) => renderFeeRow(fee))}
 						</div>
 					</TabsContent>
 
@@ -288,8 +270,8 @@ export default function ServiceConfig() {
 							</p>
 						</div>
 
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-							{cancelFees.map((fee) => renderFeeCard(fee))}
+						<div className="space-y-3">
+							{cancelFees.map((fee) => renderFeeRow(fee))}
 						</div>
 					</TabsContent>
 
@@ -310,8 +292,8 @@ export default function ServiceConfig() {
 							</Button>
 						</div>
 
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-							{refundFees.map((fee) => renderFeeCard(fee))}
+						<div className="space-y-3">
+							{refundFees.map((fee) => renderFeeRow(fee))}
 						</div>
 					</TabsContent>
 				</Tabs>
