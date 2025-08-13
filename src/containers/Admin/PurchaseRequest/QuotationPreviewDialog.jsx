@@ -20,6 +20,7 @@ import { useCalculateQuotationMutation } from "@/services/gshopApi";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatCurrency, getLocaleCurrencyFormat } from "@/utils/formatCurrency";
+import { PACKAGE_TYPE } from "@/const/packageType";
 
 export default function QuotationPreviewDialog({ subRequest, values, quotationDetails, handleSubmit }) {
   const [open, setOpen] = useState(false);
@@ -34,16 +35,6 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
     }
   }, [quotation?.details]);
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     await onSubmit(quotation);
-  //     toast.success("Gửi báo giá thành công!");
-  //     onClose();
-  //   } catch (err) {
-  //     toast.error("Gửi báo giá thất bại!" + (err?.data?.message ? `: ${err.data.message}` : ""));
-  //   }
-  // };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Button
@@ -51,13 +42,28 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
         variant="outline"
         disabled={calculateQuotationLoading}
         onClick={async () => {
-          await calculateQuotation({
+          const expiredDate = Date.now() + 3 * 24 * 60 * 60 * 1000; // default 3 days
+          const details = quotationDetails.map((d) => ({
+            requestItemId: d.requestItemId,
+            hsCodeId: d.hsCodeId,
+            region: d.region,
+            basePrice: Number(d.basePrice ?? 0),
+            serviceFee: Number(d.serviceFee ?? 0),
+            note: d.note,
+            currency: d.currency,
+          }));
+          const payload = {
             subRequestId: subRequest.id,
             note: values.note,
             shippingEstimate: Number(values.shippingEstimate),
-            details: quotationDetails,
-            expiredDate: 1
-          }).unwrap().then(() => {
+            details,
+            expiredDate,
+            totalWeightEstimate: Number(values.totalWeightEstimate || 0),
+            packageType: values.packageType,
+            shipper: { ...values.shipper },
+            recipient: { ...values.recipient },
+          };
+          await calculateQuotation(payload).unwrap().then(() => {
             setOpen(true);
           }).catch((err) => {
             setOpen(false);
@@ -79,6 +85,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
           <TabsList className="mb-4 overflow-x-auto whitespace-nowrap">
             {console.log(quotation)}
             <TabsTrigger value="summary" className="capitalize">Tổng quan</TabsTrigger>
+            <TabsTrigger value="shipment" className="capitalize">Vận chuyển</TabsTrigger>
             {quotation?.details?.map((detail, idx) => (
               <TabsTrigger
                 key={detail.requestItemId}
@@ -114,7 +121,6 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                     </TableRow>
                   ))}
                   <TableRow>
-                    <TableCell>Phí vận chuyển</TableCell>
                     <TableCell className="break-all">
                       {formatCurrency(quotation?.shippingEstimate, "VND", getLocaleCurrencyFormat("VND"))}
                     </TableCell>
@@ -127,6 +133,97 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                   </TableRow>
                 </TableBody>
               </Table>
+            </div>
+          </TabsContent>
+          {/* Shipment Tab */}
+          <TabsContent value="shipment" className="space-y-6">
+            {/* Shipping summary */}
+            <div className="overflow-x-auto">
+              <div className="font-semibold mb-2">Tóm tắt vận chuyển</div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Thông tin</TableHead>
+                    <TableHead>Giá trị</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Tổng trọng lượng ước tính</TableCell>
+                    <TableCell className="break-all">{quotation?.totalWeightEstimate ?? "-"}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Loại kiện hàng</TableCell>
+                    <TableCell className="break-all">{PACKAGE_TYPE.find((p) => p.type === quotation?.packageType)?.value ?? quotation?.packageType ?? "-"}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Addresses */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="overflow-x-auto">
+                <div className="font-semibold mb-2">Người gửi</div>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">Họ tên</TableCell>
+                      <TableCell className="break-words">{quotation?.shipper?.shipmentName || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Số điện thoại</TableCell>
+                      <TableCell className="break-words">{quotation?.shipper?.shipmentPhone || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Địa chỉ</TableCell>
+                      <TableCell className="break-words">{quotation?.shipper?.shipmentStreetLine || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Thành phố</TableCell>
+                      <TableCell className="break-words">{quotation?.shipper?.shipmentCity || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Mã bưu chính</TableCell>
+                      <TableCell className="break-words">{quotation?.shipper?.shipmentPostalCode || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Quốc gia</TableCell>
+                      <TableCell className="break-words">{quotation?.shipper?.shipmentCountryCode || "-"}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="overflow-x-auto">
+                <div className="font-semibold mb-2">Người nhận</div>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">Họ tên</TableCell>
+                      <TableCell className="break-words">{quotation?.recipient?.recipientName || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Số điện thoại</TableCell>
+                      <TableCell className="break-words">{quotation?.recipient?.recipientPhone || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Địa chỉ</TableCell>
+                      <TableCell className="break-words">{quotation?.recipient?.recipientStreetLine || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Thành phố</TableCell>
+                      <TableCell className="break-words">{quotation?.recipient?.recipientCity || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Mã bưu chính</TableCell>
+                      <TableCell className="break-words">{quotation?.recipient?.recipientPostalCode || "-"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Quốc gia</TableCell>
+                      <TableCell className="break-words">{quotation?.recipient?.recipientCountryCode || "-"}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </TabsContent>
           {quotation?.details?.map((detail, idx) => (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -6,8 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { formatCurrency, getLocaleCurrencyFormat } from "@/utils/formatCurrency";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 import productDefaultImage from "@/assets/productDefault.png";
-import { useCheckoutMutation } from '@/services/gshopApi';
-import { toast } from 'sonner';
 import PaymentDialog from './PaymentDialog';
 
 function StatusBadge({ status }) {
@@ -23,6 +21,7 @@ function StatusBadge({ status }) {
 function SubRequestItemCard({ item }) {
   const [open, setOpen] = useState(false);
   const q = item.quotationDetail;
+
 
   return (
     <div>
@@ -148,7 +147,8 @@ function SubRequestItemCard({ item }) {
   );
 }
 
-function SubRequestCard({ subRequest, expired }) {
+function SubRequestCard({ subRequest, expired, requestType }) {
+  console.log(requestType)
   return (
     <div className="relative mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
       <div className="flex items-center gap-4 mb-2">
@@ -195,7 +195,7 @@ function SubRequestCard({ subRequest, expired }) {
           {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate + subRequest.quotationForPurchase.shippingEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
         </button>
       )} */}
-        <PaymentDialog subRequest={subRequest} expired={expired} />
+        <PaymentDialog subRequest={subRequest} expired={expired} requestType={requestType} />
       </div>
     </div>
   );

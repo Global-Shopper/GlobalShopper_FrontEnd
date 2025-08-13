@@ -6,7 +6,6 @@ import { CheckCircle, Copy, ExternalLink, Home } from "lucide-react"
 
 export default function RequestSuccess({onClose, purchaseData}) {
   const copyRequestId = () => {
-    console.log(purchaseData)
     navigator.clipboard.writeText(purchaseData?.id || "")
     // You could add a toast notification here
   }

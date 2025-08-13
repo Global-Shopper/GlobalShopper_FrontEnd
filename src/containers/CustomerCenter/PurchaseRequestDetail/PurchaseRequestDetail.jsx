@@ -96,6 +96,7 @@ const PurchaseRequestDetail = () => {
 
       <div className="mt-6">
         <RequestItemList
+          requestType={purchaseRequestData?.requestType}
           groupedItems={groupedItems}
           ungroupedItems={ungroupedItems}
           expired={expired}

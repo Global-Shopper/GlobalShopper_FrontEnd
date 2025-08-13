@@ -192,8 +192,9 @@ export function ProductList({
               Xem sản phẩm
             </a>
           </div>
+          {console.log(subStatus)}
           {/* Quote button and inline form */}
-          {(subStatus === "PENDING" && (status === "CHECKING" || status === "QUOTED")) && (
+          {((subStatus === "PENDING" || !subStatus) && (status === "CHECKING" || status === "QUOTED")) && (
             <>
               <div className="flex justify-end mt-3">
                 <Button
@@ -217,6 +218,7 @@ export function ProductList({
                 <div className="mt-3">
                   {console.log(itemIndexNumber)}
                   <QuotationForm
+                    requestType={requestType}
                     product={quotationDetails}
                     errors={productErrors}
                     onChange={(field, value) => {
