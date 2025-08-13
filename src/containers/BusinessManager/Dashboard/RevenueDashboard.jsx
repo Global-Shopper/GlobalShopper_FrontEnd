@@ -5,13 +5,27 @@ import {
 	TrendingDown,
 	Calendar,
 	BarChart3,
-	PieChart,
+	PieChart as PieChartIcon,
 	ArrowUpRight,
 	ArrowDownRight,
 	Download,
 	Filter,
 	RefreshCcw,
 } from "lucide-react";
+import {
+	BarChart,
+	Bar,
+	XAxis,
+	YAxis,
+	CartesianGrid,
+	Tooltip,
+	ResponsiveContainer,
+	LineChart,
+	Line,
+	PieChart,
+	Pie,
+	Cell,
+} from "recharts";
 import {
 	Card,
 	CardContent,
@@ -336,47 +350,29 @@ const RevenueDashboard = () => {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="space-y-4">
-							{monthlyData.map((item, index) => (
-								<div
-									key={index}
-									className="flex items-center justify-between"
-								>
-									<div className="flex items-center gap-3">
-										<div className="w-10 text-sm font-medium text-gray-600">
-											{item.month}
-										</div>
-										<div className="flex-1">
-											<div
-												className="bg-blue-500 h-6 rounded-md flex items-center justify-end pr-2"
-												style={{
-													width: `${
-														(item.revenue /
-															Math.max(
-																...monthlyData.map(
-																	(d) =>
-																		d.revenue
-																)
-															)) *
-														100
-													}%`,
-													minWidth: "60px",
-												}}
-											>
-												<span className="text-white text-xs font-medium">
-													{formatCurrency(
-														item.revenue
-													)}
-												</span>
-											</div>
-										</div>
-									</div>
-									<div className="text-sm text-gray-500 w-20 text-right">
-										{formatNumber(item.orders)} đơn
-									</div>
-								</div>
-							))}
-						</div>
+						<ResponsiveContainer width="100%" height={300}>
+							<BarChart data={monthlyData}>
+								<CartesianGrid strokeDasharray="3 3" />
+								<XAxis dataKey="month" />
+								<YAxis
+									tickFormatter={(value) =>
+										formatCurrency(value)
+									}
+								/>
+								<Tooltip
+									formatter={(value) => [
+										formatCurrency(value),
+										"Doanh thu",
+									]}
+									labelFormatter={(label) => `Tháng ${label}`}
+								/>
+								<Bar
+									dataKey="revenue"
+									fill="#3b82f6"
+									radius={[4, 4, 0, 0]}
+								/>
+							</BarChart>
+						</ResponsiveContainer>
 					</CardContent>
 				</Card>
 
@@ -384,7 +380,7 @@ const RevenueDashboard = () => {
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
-							<PieChart className="h-5 w-5" />
+							<PieChartIcon className="h-5 w-5" />
 							Doanh thu theo danh mục
 						</CardTitle>
 						<CardDescription>
@@ -393,12 +389,63 @@ const RevenueDashboard = () => {
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
-							{categoryRevenue.map((item, index) => (
-								<div key={index} className="space-y-2">
-									<div className="flex items-center justify-between">
+							<ResponsiveContainer width="100%" height={250}>
+								<PieChart>
+									<Pie
+										data={categoryRevenue.map((item) => ({
+											name: item.category,
+											value: item.revenue,
+											percentage: item.percentage,
+										}))}
+										cx="50%"
+										cy="50%"
+										innerRadius={60}
+										outerRadius={100}
+										paddingAngle={5}
+										dataKey="value"
+									>
+										{categoryRevenue.map((entry, index) => (
+											<Cell
+												key={`cell-${index}`}
+												fill={
+													[
+														"#3b82f6",
+														"#10b981",
+														"#8b5cf6",
+														"#f59e0b",
+														"#6b7280",
+													][index]
+												}
+											/>
+										))}
+									</Pie>
+									<Tooltip
+										formatter={(value) =>
+											formatCurrency(value)
+										}
+									/>
+								</PieChart>
+							</ResponsiveContainer>
+
+							{/* Legend */}
+							<div className="space-y-2">
+								{categoryRevenue.map((item, index) => (
+									<div
+										key={index}
+										className="flex items-center justify-between"
+									>
 										<div className="flex items-center gap-3">
 											<div
-												className={`w-3 h-3 rounded-full ${item.color}`}
+												className="w-3 h-3 rounded-full"
+												style={{
+													backgroundColor: [
+														"#3b82f6",
+														"#10b981",
+														"#8b5cf6",
+														"#f59e0b",
+														"#6b7280",
+													][index],
+												}}
 											></div>
 											<span className="text-sm font-medium">
 												{item.category}
@@ -408,26 +455,88 @@ const RevenueDashboard = () => {
 											{item.percentage}%
 										</div>
 									</div>
-									<div className="w-full bg-gray-200 rounded-full h-2">
-										<div
-											className={`h-2 rounded-full ${item.color}`}
-											style={{
-												width: `${item.percentage}%`,
-											}}
-										></div>
-									</div>
-									<div className="text-sm font-medium text-gray-900">
-										{formatCurrency(item.revenue)}
-									</div>
-								</div>
-							))}
+								))}
+							</div>
 						</div>
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Revenue Trend Line Chart */}
+			<div className="grid grid-cols-1 gap-6">
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<TrendingUp className="h-5 w-5" />
+							Xu hướng doanh thu và đơn hàng
+						</CardTitle>
+						<CardDescription>
+							Biểu đồ so sánh doanh thu và số lượng đơn hàng theo
+							tháng
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={350}>
+							<LineChart data={monthlyData}>
+								<CartesianGrid
+									strokeDasharray="3 3"
+									stroke="#f0f0f0"
+								/>
+								<XAxis dataKey="month" />
+								<YAxis
+									yAxisId="revenue"
+									orientation="left"
+									tickFormatter={(value) =>
+										formatCurrency(value)
+									}
+								/>
+								<YAxis yAxisId="orders" orientation="right" />
+								<Tooltip
+									formatter={(value, name) => [
+										name === "revenue"
+											? formatCurrency(value)
+											: formatNumber(value),
+										name === "revenue"
+											? "Doanh thu"
+											: "Đơn hàng",
+									]}
+									labelFormatter={(label) => `Tháng ${label}`}
+								/>
+								<Line
+									yAxisId="revenue"
+									type="monotone"
+									dataKey="revenue"
+									stroke="#3b82f6"
+									strokeWidth={3}
+									dot={{
+										fill: "#3b82f6",
+										strokeWidth: 2,
+										r: 5,
+									}}
+									activeDot={{ r: 7 }}
+								/>
+								<Line
+									yAxisId="orders"
+									type="monotone"
+									dataKey="orders"
+									stroke="#10b981"
+									strokeWidth={3}
+									dot={{
+										fill: "#10b981",
+										strokeWidth: 2,
+										r: 5,
+									}}
+									activeDot={{ r: 7 }}
+								/>
+							</LineChart>
+						</ResponsiveContainer>
 					</CardContent>
 				</Card>
 			</div>
 
 			{/* Top Request Categories & Service Revenue */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				{/* Top Request Categories */}
 				{/* Top Request Categories */}
 				<Card>
 					<CardHeader>

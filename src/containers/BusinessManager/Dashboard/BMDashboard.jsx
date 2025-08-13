@@ -14,7 +14,27 @@ import {
 	FileText,
 	Target,
 	Star,
+	CreditCard,
+	RefreshCw,
+	MessageSquare,
+	ThumbsUp,
+	Wallet,
+	ArrowDownLeft,
+	ArrowUpLeft,
 } from "lucide-react";
+import {
+	BarChart,
+	Bar,
+	XAxis,
+	YAxis,
+	CartesianGrid,
+	Tooltip,
+	ResponsiveContainer,
+	LineChart,
+	Line,
+	Area,
+	AreaChart,
+} from "recharts";
 import {
 	Card,
 	CardContent,
@@ -73,14 +93,104 @@ const BMDashboard = () => {
 		},
 	];
 
-	// Data cho biểu đồ cột doanh thu theo tháng
-	const monthlyRevenue = [
-		{ month: "T1", revenue: 180, requests: 520 },
-		{ month: "T2", revenue: 195, requests: 580 },
-		{ month: "T3", revenue: 220, requests: 620 },
-		{ month: "T4", revenue: 210, requests: 590 },
-		{ month: "T5", revenue: 235, requests: 680 },
-		{ month: "T6", revenue: 245, requests: 710 },
+	// Data cho các metrics theo tháng (12 tháng)
+	const monthlyMetrics = [
+		{
+			month: "T1",
+			requests: 520,
+			withdrawals: 45,
+			refunds: 12,
+			reviews: 380,
+			deposits: 234,
+		},
+		{
+			month: "T2",
+			requests: 580,
+			withdrawals: 52,
+			refunds: 8,
+			reviews: 420,
+			deposits: 267,
+		},
+		{
+			month: "T3",
+			requests: 620,
+			withdrawals: 58,
+			refunds: 15,
+			reviews: 465,
+			deposits: 298,
+		},
+		{
+			month: "T4",
+			requests: 590,
+			withdrawals: 48,
+			refunds: 10,
+			reviews: 440,
+			deposits: 275,
+		},
+		{
+			month: "T5",
+			requests: 680,
+			withdrawals: 65,
+			refunds: 18,
+			reviews: 520,
+			deposits: 340,
+		},
+		{
+			month: "T6",
+			requests: 710,
+			withdrawals: 70,
+			refunds: 14,
+			reviews: 575,
+			deposits: 365,
+		},
+		{
+			month: "T7",
+			requests: 740,
+			withdrawals: 75,
+			refunds: 16,
+			reviews: 620,
+			deposits: 385,
+		},
+		{
+			month: "T8",
+			requests: 695,
+			withdrawals: 68,
+			refunds: 12,
+			reviews: 590,
+			deposits: 358,
+		},
+		{
+			month: "T9",
+			requests: 780,
+			withdrawals: 82,
+			refunds: 20,
+			reviews: 685,
+			deposits: 412,
+		},
+		{
+			month: "T10",
+			requests: 825,
+			withdrawals: 88,
+			refunds: 18,
+			reviews: 720,
+			deposits: 445,
+		},
+		{
+			month: "T11",
+			requests: 870,
+			withdrawals: 95,
+			refunds: 22,
+			reviews: 780,
+			deposits: 485,
+		},
+		{
+			month: "T12",
+			requests: 920,
+			withdrawals: 102,
+			refunds: 25,
+			reviews: 845,
+			deposits: 520,
+		},
 	];
 
 	// Data cho biểu đồ tròn theo danh mục
@@ -134,8 +244,6 @@ const BMDashboard = () => {
 				return "bg-gray-100 text-gray-800";
 		}
 	};
-
-	const maxRevenue = Math.max(...monthlyRevenue.map((item) => item.revenue));
 
 	return (
 		<div className="p-6 space-y-6">
@@ -347,52 +455,140 @@ const BMDashboard = () => {
 					</CardContent>
 				</Card>
 
-				{/* Monthly Revenue Chart */}
+				{/* Monthly Business Metrics */}
 				<Card className="lg:col-span-2">
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<BarChart3 className="h-5 w-5" />
-							Doanh thu 6 tháng gần nhất
+							Yêu cầu mua hàng - 12 tháng gần nhất
 						</CardTitle>
 						<CardDescription>
-							Xu hướng doanh thu và số lượng yêu cầu
+							Biểu đồ xu hướng yêu cầu mua hàng theo tháng
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
-							{monthlyRevenue.map((item, index) => (
-								<div
-									key={index}
-									className="flex items-center gap-4"
-								>
-									<div className="w-8 text-sm font-medium text-gray-600">
-										{item.month}
-									</div>
-									<div className="flex-1 flex items-center gap-2">
-										<div className="flex-1">
-											<div
-												className="bg-gradient-to-r from-blue-500 to-purple-600 h-8 rounded-lg flex items-center justify-end pr-3 transition-all duration-500 hover:shadow-lg"
-												style={{
-													width: `${
-														(item.revenue /
-															maxRevenue) *
-														100
-													}%`,
-													minWidth: "80px",
-												}}
-											>
-												<span className="text-white text-xs font-medium">
-													{item.revenue}M
-												</span>
-											</div>
-										</div>
-										<div className="text-sm text-gray-500 w-16 text-right">
-											{formatNumber(item.requests)} YC
-										</div>
-									</div>
-								</div>
-							))}
+							<div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+								<FileText className="h-4 w-4 text-blue-500" />
+								Tổng số yêu cầu mua hàng
+							</div>
+							<ResponsiveContainer width="100%" height={300}>
+								<AreaChart data={monthlyMetrics}>
+									<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+									<XAxis dataKey="month" fontSize={12} />
+									<YAxis fontSize={12} />
+									<Tooltip
+										formatter={(value) => [value, "Yêu cầu"]}
+										labelFormatter={(label) => `Tháng ${label}`}
+									/>
+									<Area
+										type="monotone"
+										dataKey="requests"
+										stroke="#3b82f6"
+										fill="#3b82f6"
+										fillOpacity={0.1}
+										strokeWidth={2}
+									/>
+								</AreaChart>
+							</ResponsiveContainer>
 						</div>
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Additional Metrics Section */}
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				{/* Withdrawals Chart */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<ArrowUpLeft className="h-4 w-4 text-orange-500" />
+							Yêu cầu rút tiền
+						</CardTitle>
+						<CardDescription>
+							Thống kê yêu cầu rút tiền 12 tháng
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={200}>
+							<LineChart data={monthlyMetrics}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+								<XAxis dataKey="month" fontSize={10} />
+								<YAxis fontSize={10} />
+								<Tooltip
+									formatter={(value) => [value, "Rút tiền"]}
+									labelFormatter={(label) => `Tháng ${label}`}
+								/>
+								<Line
+									type="monotone"
+									dataKey="withdrawals"
+									stroke="#f97316"
+									strokeWidth={2}
+									dot={{ fill: "#f97316", strokeWidth: 2, r: 4 }}
+								/>
+							</LineChart>
+						</ResponsiveContainer>
+					</CardContent>
+				</Card>
+
+				{/* Refunds Chart */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<RefreshCw className="h-4 w-4 text-red-500" />
+							Yêu cầu hoàn tiền
+						</CardTitle>
+						<CardDescription>
+							Thống kê yêu cầu hoàn tiền 12 tháng
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={200}>
+							<BarChart data={monthlyMetrics}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+								<XAxis dataKey="month" fontSize={10} />
+								<YAxis fontSize={10} />
+								<Tooltip
+									formatter={(value) => [value, "Hoàn tiền"]}
+									labelFormatter={(label) => `Tháng ${label}`}
+								/>
+								<Bar dataKey="refunds" fill="#ef4444" radius={[4, 4, 0, 0]} />
+							</BarChart>
+						</ResponsiveContainer>
+					</CardContent>
+				</Card>
+
+				{/* Reviews Chart */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<MessageSquare className="h-4 w-4 text-green-500" />
+							Số lượt đánh giá
+						</CardTitle>
+						<CardDescription>
+							Thống kê đánh giá khách hàng 12 tháng
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={200}>
+							<AreaChart data={monthlyMetrics}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+								<XAxis dataKey="month" fontSize={10} />
+								<YAxis fontSize={10} />
+								<Tooltip
+									formatter={(value) => [value, "Đánh giá"]}
+									labelFormatter={(label) => `Tháng ${label}`}
+								/>
+								<Area
+									type="monotone"
+									dataKey="reviews"
+									stroke="#22c55e"
+									fill="#22c55e"
+									fillOpacity={0.2}
+									strokeWidth={2}
+								/>
+							</AreaChart>
+						</ResponsiveContainer>
 					</CardContent>
 				</Card>
 			</div>
