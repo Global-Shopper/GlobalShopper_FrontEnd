@@ -27,6 +27,7 @@ import Orders from "@/containers/CustomerCenter/OrderList/Orders";
 import PurchaseRequestEdit from "@/containers/CustomerCenter/PurchaseRequestEdit/PurchaseRequestEdit";
 import AdOrderDetail from "@/containers/Admin/Orders/AdOrderDetail";
 import OrderDetail from "@/containers/CustomerCenter/OrderDetail/OrderDetail";
+import RefundList from "@/containers/CustomerCenter/Refund/RefundList";
 
 const AppRoutes = () => {
   return (
@@ -68,6 +69,7 @@ const AppRoutes = () => {
             <div className="p-6">
               <h1>Yêu cầu hoàn tiền</h1>
               <p>Trang quản lý yêu cầu hoàn tiền</p>
+              <RefundList/>
             </div>
           }
         />

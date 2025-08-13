@@ -360,6 +360,13 @@ const gshopApi = createApi({
         method: "POST",
       }),
     }),
+    getRefundList: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.REFUND,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -411,6 +418,7 @@ export const {
   useGetHsCodesQuery,
   useCreateFeedbackMutation,
   useCreateRefundMutation,
+  useGetRefundListQuery,
 } = gshopApi;
 
 export default gshopApi;
