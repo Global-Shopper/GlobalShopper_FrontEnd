@@ -26,7 +26,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
   const [open, setOpen] = useState(false);
   const [calculateQuotation, { isLoading: calculateQuotationLoading, data: quotation }] = useCalculateQuotationMutation();
   const [activeTab, setActiveTab] = useState("summary");
-  console.log(quotation);
+  console.log(quotationDetails);
 
   // Sync the active tab to the first item when quotation data arrives
   useEffect(() => {
@@ -45,6 +45,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
           const expiredDate = Date.now() + 3 * 24 * 60 * 60 * 1000; // default 3 days
           const details = quotationDetails.map((d) => ({
             requestItemId: d.requestItemId,
+            quantity: d.quantity,
             hsCodeId: d.hsCodeId,
             region: d.region,
             basePrice: Number(d.basePrice ?? 0),
@@ -112,9 +113,10 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {console.log(quotation)}
                   {quotation?.details?.map((detail, idx) => (
                     <TableRow key={idx}>
-                      <TableCell>{detail.productName ? `${detail.productName.slice(0, 100)}...` : `Sản phẩm ${idx + 1}`}</TableCell>
+                      <TableCell className="break-all">{detail.productName}</TableCell>
                       <TableCell className="break-all">
                         {formatCurrency(detail.totalVNDPrice, "VND", getLocaleCurrencyFormat("VND"))}
                       </TableCell>

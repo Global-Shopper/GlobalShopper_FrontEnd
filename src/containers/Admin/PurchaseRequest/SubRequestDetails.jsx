@@ -25,6 +25,7 @@ import { PACKAGE_TYPE } from "@/const/packageType"
 
 export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, requestType, requestStatus, children, requestItemsGroupByPlatform }) {
   // Remove manual dialog open state; will use DialogTrigger pattern
+  console.log(subRequest)
   const dispatch = useDispatch();
   const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
   // API mutation (must be above early return)
@@ -45,6 +46,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
         subRequestId: subRequest.id,
         quotationDetails: subRequest.requestItems.map(item => ({
           requestItemId: item.id,
+          quantity: item.quantity,
           hsCodeId: "",
           region: "",
           basePrice: 0,
@@ -60,6 +62,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
   if (!quotationState) return null;
 
   const { quotationDetails, note, shippingEstimate, expanded } = quotationState;
+  console.log(quotationDetails)
   const initialValues = {
     note: note || "",
     shippingEstimate: shippingEstimate || "",
@@ -176,6 +179,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                       if (requestType === "ONLINE") {
                         const details = quotationDetails.map((d) => ({
                           requestItemId: d.requestItemId,
+                          quantity: d.quantity || 1,
                           currency: d.currency,
                           basePrice: Number(d.basePrice ?? 0),
                           serviceFee: Number(d.serviceFee ?? 0),
@@ -196,6 +200,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                       } else {
                         const details = quotationDetails.map((d) => ({
                           requestItemId: d.requestItemId,
+                          quantity: d.quantity || 1,
                           hsCodeId: d.hsCodeId,
                           region: d.region,
                           basePrice: Number(d.basePrice ?? 0),
