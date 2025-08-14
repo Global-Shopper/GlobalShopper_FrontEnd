@@ -113,7 +113,7 @@ export const getFedexCreateShipPayload = (weightValue, shipper, recipient, prefe
             countryOfManufacture: "US",
             numberOfPieces: "1",
             weight: {
-              value: "23",
+              value: weightValue,
               units: "KG"
             },
             quantity: "1",

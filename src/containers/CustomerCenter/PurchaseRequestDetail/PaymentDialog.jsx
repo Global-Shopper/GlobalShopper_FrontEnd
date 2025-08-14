@@ -119,8 +119,10 @@ const PaymentDialog = ({ subRequest, expired, requestType }) => {
             <SelectValue placeholder="Chọn loại phí" >{selectedRateType || "Chọn loại vận chuyển"}</SelectValue>
           </SelectTrigger>
           <SelectContent>
+          {console.log(rateReplyDetails)}
           {rateReplyDetails?.map((rate, index) => (
-            <SelectItem key={index} value={rate?.serviceType}>{rate?.serviceName} - {formatCurrency(rate?.ratedShipmentDetails[0]?.totalNetCharge, 'GBP', getLocaleCurrencyFormat('GBP'))}</SelectItem>
+
+            <SelectItem key={index} value={rate?.serviceType}>{rate?.serviceName} - {formatCurrency(rate?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}</SelectItem>
           ))}
           </SelectContent>
         </Select>}
