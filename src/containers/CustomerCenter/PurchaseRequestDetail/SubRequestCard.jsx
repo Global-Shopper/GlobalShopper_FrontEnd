@@ -172,25 +172,28 @@ function SubRequestCard({ subRequest, expired, requestType }) {
             {subRequest.quotationForPurchase.note && (
               <div className="text-xs text-gray-500">Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}</div>
             )}
-            <div className="text-xs text-gray-700">
-              Phí vận chuyển: <span className="font-semibold">
-                {subRequest.quotationForPurchase.shippingEstimate?.toLocaleString() || '0'} VND
-              </span>
-            </div>
+            {
+              requestType === "ONLINE" &&
+                <div className="text-xs text-gray-700">
+                  Phí vận chuyển: <span className="font-semibold">
+                    {subRequest.quotationForPurchase.shippingEstimate?.toLocaleString() || '0'} VND
+                  </span>
+                </div>
+            }
           </div>
         ) : (
           <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
             Đang chờ báo giá
           </div>
         )}
-              {/* {subRequest.status === "QUOTED" && (
+        {/* {subRequest.status === "QUOTED" || subRequest.status === "PAID" && (
         <button
           className={`mt-2 px-4 py-2 rounded shadow ${expired
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
             : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
             }`}
-          onClick={() => handlePaySubRequest(subRequest)}
-          disabled={expired || isCheckoutLoading}
+          // onClick={() => handlePaySubRequest(subRequest)}
+          // disabled={expired || isCheckoutLoading}
         >
           {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate + subRequest.quotationForPurchase.shippingEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
         </button>

@@ -16,16 +16,19 @@ const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 export default function SystemConfig({ setHScode }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search] = useURLSync(searchParams, setSearchParams, "search", "string", "");
+  const [hsCode] = useURLSync(searchParams, setSearchParams, "hsCode", "string", "");
   const [page, setPage] = useURLSync(searchParams, setSearchParams, "page", "number", 1);
   const [size] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
 
   // đồng bộ ô input với query param hiện tại
   const [searchInput, setSearchInput] = useState(search || "");
+  const [hsCodeInput, setHsCodeInput] = useState(hsCode || "");
 
   const { data: hsCodesData, isLoading, isError } = useGetHsCodesQuery({
     page: page - 1,
     size,
     ...(search && { description: search }),
+    ...(hsCode && { hsCode: hsCode }),
   });
 
   const hsCodes = hsCodesData?.content || [];
@@ -36,6 +39,18 @@ export default function SystemConfig({ setHScode }) {
       debounce((e) => {
         setSearchParams((sp) => {
           sp.set("search", e.target.value);
+          sp.set("page", 1);
+          return sp;
+        });
+      }, 1000),
+    [setSearchParams]
+  );
+
+  const debounceHSCode = useMemo(
+    () =>
+      debounce((e) => {
+        setSearchParams((sp) => {
+          sp.set("hsCode", e.target.value);
           sp.set("page", 1);
           return sp;
         });
@@ -73,11 +88,21 @@ export default function SystemConfig({ setHScode }) {
         <div className="flex items-center gap-2">
           <Input
             type="text"
-            placeholder="Tìm kiếm HS code hoặc mô tả"
+            placeholder="Tìm kiếm HS code theo mô tả"
             value={searchInput}
             onChange={(e) => {
               setSearchInput(e.target.value);
               debounceSearch(e);
+            }}
+            className="w-64"
+          />
+          <Input
+            type="text"
+            placeholder="Tìm kiếm theo code"
+            value={hsCodeInput}
+            onChange={(e) => {
+              setHsCodeInput(e.target.value);
+              debounceHSCode(e);
             }}
             className="w-64"
           />

@@ -104,20 +104,6 @@ export function QuotationForm({ requestType, product, errors = {}, onChange }) {
             </div>
           </>
         )}
-
-        <div>
-          <Label>Phí dịch vụ</Label>
-          <Input
-            name="serviceFee"
-            placeholder="Phí dịch vụ"
-            type="number"
-            value={product?.serviceFee || ""}
-            onChange={(e) => onChange("serviceFee", e.target.value)}
-          />
-          {errors?.serviceFee && (
-            <div className="text-red-500 text-xs">{errors.serviceFee}</div>
-          )}
-        </div>
       </div>
 
       {requestType === "OFFLINE" && (

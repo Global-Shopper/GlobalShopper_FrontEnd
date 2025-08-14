@@ -426,7 +426,7 @@ export const {
   useUpdateShippingMutation,
   useGetHsCodesQuery,
   useGetShipmentRateQuery,
-  useGetShippingTrackingQuery,
+  useLazyGetShippingTrackingQuery,
   useCreateShipmentMutation,
 } = gshopApi;
 

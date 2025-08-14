@@ -9,6 +9,7 @@ import HistoryDialog from '@/components/HistoryDialog'
 import { useCancelOrderMutation } from '@/services/gshopApi'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { AdUpdateShipDialog } from './AdUpdateShipDialog'
 
 const AdOrderDetailHeader = ({ order }) => {
   const [cancelOrder, { isLoading: isCancelLoading }] = useCancelOrderMutation()
@@ -83,6 +84,7 @@ const AdOrderDetailHeader = ({ order }) => {
             </>
           )}
           <HistoryDialog history={order.history} />
+          {order.status === "ORDER_REQUESTED" && <AdUpdateShipDialog orderId={order.id} />}
         </div>
       </div>
     </div>

@@ -89,7 +89,9 @@ const PaymentDialog = ({ subRequest, expired, requestType }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button
+        {
+          subRequest.status === "QUOTED" || subRequest.status === "PAID" ? (
+            <button
           className={`mt-2 px-4 py-2 rounded shadow ${expired
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
             : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
@@ -99,6 +101,7 @@ const PaymentDialog = ({ subRequest, expired, requestType }) => {
         >
           {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(totalAmount, "VND", getLocaleCurrencyFormat("VND"))}`}
         </button>
+      ) : null}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
