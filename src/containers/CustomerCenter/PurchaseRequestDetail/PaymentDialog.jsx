@@ -68,6 +68,7 @@ const PaymentDialog = ({ subRequest, expired, requestType }) => {
               subRequest?.quotationForPurchase?.totalWeightEstimate,
               subRequest?.quotationForPurchase?.shipper,
               subRequest?.quotationForPurchase?.recipient,
+              "VND",
               selectedRateType,
               subRequest?.quotationForPurchase?.packageType
             )
