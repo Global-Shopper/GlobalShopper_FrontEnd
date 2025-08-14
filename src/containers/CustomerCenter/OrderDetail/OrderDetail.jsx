@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { useGetOrderByIDQuery } from '@/services/gshopApi'
+import { useGetOrderByIDQuery, useLazyGetShippingTrackingQuery } from '@/services/gshopApi'
 import PageLoading from '@/components/PageLoading'
 import PageError from '@/components/PageError'
 import { AdminInfo } from '@/components/AdminInfo'
 import ShippingInfoCard from '@/components/ShippingInfoCard'
 import HistoryTimeline from '@/components/HistoryTimeline'
+import ShippingTrackingCard from '@/components/ShippingTrackingCard'
 import OrderInfo from './OrderInfo'
 import OrderItemList from './OrderItemList'
 
@@ -16,6 +17,17 @@ const OrderDetail = () => {
     isLoading: isOrderLoading,
     isError: isOrderError,
   } = useGetOrderByIDQuery(id)
+  const [getShippingTracking, { data: shippingTrackingData }] = useLazyGetShippingTrackingQuery()
+
+  // Trigger shipping tracking fetch when tracking number becomes available
+  useEffect(() => {
+    if (orderData?.trackingNumber) {
+      getShippingTracking({
+        trackingNumber: orderData.trackingNumber,
+        deliveryCode: 'FEDEX',
+      })
+    }
+  }, [orderData?.trackingNumber, getShippingTracking])
 
   if (isOrderLoading) return <PageLoading />
   if (isOrderError) return <PageError />
@@ -57,6 +69,12 @@ const OrderDetail = () => {
           seller={orderData.seller}
         />
       </div>
+
+      {shippingTrackingData && (
+        <div className="mt-6">
+          <ShippingTrackingCard data={shippingTrackingData} />
+        </div>
+      )}
 
       <div className="mt-6">
         <HistoryTimeline history={orderData.history || []} />
