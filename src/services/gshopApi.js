@@ -324,7 +324,7 @@ const gshopApi = createApi({
       providesTags: ["Orders"],
     }),
     updateShipping: builder.mutation({
-      query: ({orderId, payload}) => ({
+      query: ({ orderId, payload }) => ({
         data: payload,
         url: `${endpoints.UPDATE_SHIPPING}/${orderId}`,
         method: "PUT",
@@ -332,21 +332,13 @@ const gshopApi = createApi({
       invalidatesTags: ["Orders", "OrderDetail"],
     }),
     cancelOrder: builder.mutation({
-      query: ({orderId, payload}) => ({
+      query: ({ orderId, payload }) => ({
         data: payload,
         url: `${endpoints.CANCEL_ORDER}/${orderId}`,
         method: "PUT",
       }),
       invalidatesTags: ["Orders", "OrderDetail"],
     }),
-
-    // checkPayment: builder.query({
-    //   query: (data) => ({
-    //     params: data,
-    //     url: endpoints.CHECKPAYMENT,
-    //     method: 'GET',
-    //   }),
-    // }),
     getHsCodes: builder.query({
       query: (data) => ({
         params: data,
@@ -396,6 +388,61 @@ const gshopApi = createApi({
         method: "GET",
       }),
     }),
+    getAllAdmins: builder.query({
+      query: (params) => ({
+        params: params,
+        url: endpoints.GET_ALL_ADMINS,
+        method: "GET",
+      }),
+      providesTags: ["AdminList"],
+    }),
+    createAdmin: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.CREATE_ADMIN,
+        method: "POST",
+      }),
+      invalidatesTags: ["AdminList"],
+    }),
+    updateAdmin: builder.mutation({
+      query: ({ id, data }) => ({
+        data: data,
+        url: `${endpoints.UPDATE_ADMIN}/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["AdminList"],
+    }),
+    banAdmin: builder.mutation({
+      query: (id) => ({
+        url: `${endpoints.BAN_ADMIN}/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["AdminList"],
+    }),
+
+    getAllCustomers: builder.query({
+      query: (params) => ({
+        params: params,
+        url: endpoints.GET_ALL_CUSTOMERS,
+        method: "GET",
+      }),
+      providesTags: ["CustomerList"],
+    }),
+    updateCustomer: builder.mutation({
+      query: ({ id, data }) => ({
+        data: data,
+        url: `${endpoints.UPDATE_CUSTOMER}/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["CustomerList"],
+    }),
+    banCustomer: builder.mutation({
+      query: (id) => ({
+        url: `${endpoints.BAN_CUSTOMER}/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["CustomerList"],
+    }),
   }),
 });
 
@@ -429,7 +476,6 @@ export const {
   useRejectQuotationMutation,
   useGetEditInfoPurchaseRequestQuery,
   useUpdatePurchaseRequestMutation,
-  // useLazyCheckPaymentQuery,
   useCheckingPurchaseRequestMutation,
   useGetPurchaseRequestDetailQuery,
   useTransactionHistoryQuery,
@@ -452,6 +498,13 @@ export const {
   useCreateFeedbackMutation,
   useCreateRefundMutation,
   useGetRefundListQuery,
+  useBanCustomerMutation,
+  useUpdateCustomerMutation,
+  useGetAllCustomersQuery,
+  useBanAdminMutation,
+  useUpdateAdminMutation,
+  useCreateAdminMutation,
+  useGetAllAdminsQuery,
 } = gshopApi;
 
 export default gshopApi;

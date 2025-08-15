@@ -37,5 +37,13 @@ const endpoints = {
   FEEDBACK: "/feedback",
   REFUND: "/refund-ticket",
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
+	GET_ALL_ADMINS: "/admin",
+	CREATE_ADMIN: "/admin",
+	UPDATE_ADMIN: "/admin",
+	BAN_ADMIN: "/admin/ban",
+	GET_ALL_CUSTOMERS: "/customer",
+	CREATE_CUSTOMER: "/customer",
+	UPDATE_CUSTOMER: "/customer",
+	BAN_CUSTOMER: "/customer/ban",
 };
 export default endpoints;
