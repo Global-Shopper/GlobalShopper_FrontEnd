@@ -27,10 +27,12 @@ import Orders from "@/containers/CustomerCenter/OrderList/Orders";
 import PurchaseRequestEdit from "@/containers/CustomerCenter/PurchaseRequestEdit/PurchaseRequestEdit";
 import AdOrderDetail from "@/containers/Admin/Orders/AdOrderDetail";
 import OrderDetail from "@/containers/CustomerCenter/OrderDetail/OrderDetail";
+import ScrollToTop from "./ScrollToTop";
 import RefundList from "@/containers/CustomerCenter/Refund/RefundList";
 
 const AppRoutes = () => {
   return (
+    <ScrollToTop>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
@@ -100,6 +102,7 @@ const AppRoutes = () => {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </ScrollToTop>
   );
 };
 

@@ -217,10 +217,18 @@ const gshopApi = createApi({
       }),
       invalidatesTags: ["PurchaseRequest", "PurchaseRequestDetail"],
     }),
-    createQuotation: builder.mutation({
+    createQuotationOnline: builder.mutation({
       query: (data) => ({
         data: data,
-        url: endpoints.QUOTATION,
+        url: `${endpoints.QUOTATION}/online`,
+        method: "POST",
+      }),
+      invalidatesTags: ["PurchaseRequestDetail"],
+    }),
+    createQuotationOffline: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: `${endpoints.QUOTATION}/offline`,
         method: "POST",
       }),
       invalidatesTags: ["PurchaseRequestDetail"],
@@ -346,6 +354,27 @@ const gshopApi = createApi({
         method: "GET",
       }),
     }),
+    getShipmentRate: builder.query({
+      query: (data) => ({
+        data: data,
+        url: endpoints.SHIPMENT_RATE,
+        method: "POST",
+      }),
+    }),
+    createShipment: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.CREATE_SHIPMENT,
+        method: "POST",
+      }),
+    }),
+    getShippingTracking: builder.query({
+      query: (data) => ({
+        params: data,
+        url: `${endpoints.SHIPMENT_TRACKING}`,
+        method: "GET",
+      }),
+    }),
     createFeedback: builder.mutation({
       query: (data) => ({
         data: data,
@@ -394,7 +423,8 @@ export const {
   useCreateWithoutLinkPurchaseRequestMutation,
   useGetWalletQuery,
   useDepositWalletMutation,
-  useCreateQuotationMutation,
+  useCreateQuotationOnlineMutation,
+  useCreateQuotationOfflineMutation,
   useRequestUpdatePurchaseRequestMutation,
   useRejectQuotationMutation,
   useGetEditInfoPurchaseRequestQuery,
@@ -416,6 +446,9 @@ export const {
   useCancelOrderMutation,
   useUpdateShippingMutation,
   useGetHsCodesQuery,
+  useGetShipmentRateQuery,
+  useLazyGetShippingTrackingQuery,
+  useCreateShipmentMutation,
   useCreateFeedbackMutation,
   useCreateRefundMutation,
   useGetRefundListQuery,

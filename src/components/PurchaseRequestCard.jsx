@@ -36,7 +36,14 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 		...(request?.requestItems || []),
 		...((request?.subRequests || []).flatMap((sub) => sub.requestItems || []))
 	];
-
+	const allImagesFromRequestItems = (request?.requestItems || [])
+		.flatMap((item) => item?.images || [])
+		.filter(Boolean);
+	const allImages = allImagesFromRequestItems;
+	const maxThumbs = 2;
+	const displayedImages = (allImages || []).slice(0, maxThumbs);
+	const remainingImages = Math.max(0, (allImages?.length || 0) - maxThumbs);
+	console.log(allImages);
 	const handleCancelRequest = () => {
 		// TODO: Implement cancel request functionality
 		console.log("Cancel request:", request.id);
@@ -123,6 +130,26 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 
 					{/* Content Row */}
 					<div className="flex items-start justify-between gap-6">
+						{/* Images - Left */}
+						{displayedImages.length > 0 && (
+							<div className="flex-shrink-0 flex flex-col items-center gap-2">
+								{displayedImages.map((img, idx) => {
+									const src = typeof img === 'string' ? img : img?.url || img?.src || '';
+									const alt = typeof img === 'string' ? `Ảnh ${idx + 1}` : img?.name || `Ảnh ${idx + 1}`;
+									const key = typeof img === 'string' ? `${img}-${idx}` : (img?.id ?? idx);
+									return (
+										<div key={key} className="relative h-12 w-12 overflow-hidden rounded-md border">
+											<img src={src} alt={alt} className="h-full w-full object-contain" />
+											{idx === 1 && remainingImages > 0 && (
+												<div className="absolute inset-0 bg-black/50 text-white text-xs font-semibold flex items-center justify-center">
+													+{remainingImages}
+												</div>
+											)}
+										</div>
+									);
+								})}
+							</div>
+						)}
 						{/* Left side - Main info */}
 						<div className="flex-1 min-w-0">
 							<div className="flex items-center gap-4 mb-2">

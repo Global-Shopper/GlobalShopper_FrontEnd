@@ -1,7 +1,7 @@
 import RequestItemCard from "@/components/RequestItemCard";
 import SubRequestCard from "./SubRequestCard";
 
-export default function RequestItemList({ groupedItems, ungroupedItems, expired }) {
+export default function RequestItemList({ groupedItems, ungroupedItems, expired, requestType }) {
   const hasGroupedItems = groupedItems.length > 0;
   const hasUngroupedItems = ungroupedItems.length > 0;
 
@@ -18,12 +18,13 @@ export default function RequestItemList({ groupedItems, ungroupedItems, expired 
       {/* Grouped Items Section */}
       {hasGroupedItems && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Danh sách đơn hàng</h2>
+          <h2 className="text-lg font-semibold">Danh sách các nhóm sản phẩm</h2>
           {groupedItems.map((subRequest) => (
             <SubRequestCard
               key={`subreq-${subRequest.id}`}
               subRequest={subRequest}
               expired={expired}
+              requestType={requestType}
             />
           ))}
         </div>

@@ -187,6 +187,17 @@ const OrderInfo = ({ order }) => {
               rows={5}
             />
           </div>
+          <div>
+            <div className="text-gray-500">Phí vận chuyển</div>
+            <div className="font-medium">{formatVND(order.shippingFee)}</div>
+          </div>
+          <div>
+            <div className="text-gray-500">Tổng tiền</div>
+            <div className="font-semibold">{formatVND(order.totalPrice)}</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setRfOpen(false)}>Đóng</Button>

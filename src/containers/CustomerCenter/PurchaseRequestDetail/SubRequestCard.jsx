@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -6,8 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { formatCurrency, getLocaleCurrencyFormat } from "@/utils/formatCurrency";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 import productDefaultImage from "@/assets/productDefault.png";
-import { useCheckoutMutation } from '@/services/gshopApi';
-import { toast } from 'sonner';
 import PaymentDialog from './PaymentDialog';
 
 function StatusBadge({ status }) {
@@ -23,6 +21,7 @@ function StatusBadge({ status }) {
 function SubRequestItemCard({ item }) {
   const [open, setOpen] = useState(false);
   const q = item.quotationDetail;
+
 
   return (
     <div>
@@ -148,7 +147,8 @@ function SubRequestItemCard({ item }) {
   );
 }
 
-function SubRequestCard({ subRequest, expired }) {
+function SubRequestCard({ subRequest, expired, requestType }) {
+  console.log(requestType)
   return (
     <div className="relative mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
       <div className="flex items-center gap-4 mb-2">
@@ -172,30 +172,21 @@ function SubRequestCard({ subRequest, expired }) {
             {subRequest.quotationForPurchase.note && (
               <div className="text-xs text-gray-500">Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}</div>
             )}
-            <div className="text-xs text-gray-700">
-              Phí vận chuyển: <span className="font-semibold">
-                {subRequest.quotationForPurchase.shippingEstimate?.toLocaleString() || '0'} VND
-              </span>
-            </div>
+            {
+              requestType === "ONLINE" &&
+                <div className="text-xs text-gray-700">
+                  Phí vận chuyển: <span className="font-semibold">
+                    {subRequest.quotationForPurchase.shippingEstimate?.toLocaleString() || '0'} VND
+                  </span>
+                </div>
+            }
           </div>
         ) : (
           <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
             Đang chờ báo giá
           </div>
         )}
-              {/* {subRequest.status === "QUOTED" && (
-        <button
-          className={`mt-2 px-4 py-2 rounded shadow ${expired
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-            }`}
-          onClick={() => handlePaySubRequest(subRequest)}
-          disabled={expired || isCheckoutLoading}
-        >
-          {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate + subRequest.quotationForPurchase.shippingEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
-        </button>
-      )} */}
-        <PaymentDialog subRequest={subRequest} expired={expired} />
+        <PaymentDialog subRequest={subRequest} expired={expired} requestType={requestType} />
       </div>
     </div>
   );

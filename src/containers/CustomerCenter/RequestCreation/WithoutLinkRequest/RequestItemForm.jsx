@@ -38,7 +38,6 @@ import {
   addItem,
   addDraftLocalImage,
   removeDraftLocalImage,
-  resetDraftLocalImages,
   removeItem,
 } from "@/features/offlineReq";
 
@@ -261,7 +260,6 @@ export default function RequestItemForm({
               Hình ảnh sản phẩm (có thể chọn nhiều)
             </Label>
             <div className="flex flex-wrap gap-4">
-              {console.log(localImages)}
               {/* Show previews for images not yet uploaded (local only, from Redux) */}
               {localImages.map((url, idx) => (
                 <div key={url} className="relative">
