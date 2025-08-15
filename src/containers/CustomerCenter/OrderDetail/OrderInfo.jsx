@@ -195,9 +195,6 @@ const OrderInfo = ({ order }) => {
             <div className="text-gray-500">Tổng tiền</div>
             <div className="font-semibold">{formatVND(order.totalPrice)}</div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setRfOpen(false)}>Đóng</Button>
