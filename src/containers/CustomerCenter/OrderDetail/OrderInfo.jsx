@@ -49,7 +49,7 @@ const OrderInfo = ({ order }) => {
           </div>
           <div>
             <div className="text-gray-500">Tổng tiền</div>
-            <div className="font-semibold">{formatVND(order.totalPrice)}</div>
+            <div className="font-semibold">{formatVND(order.totalPrice + order.shippingFee)}</div>
           </div>
         </div>
       </CardContent>

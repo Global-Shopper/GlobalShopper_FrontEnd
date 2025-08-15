@@ -62,7 +62,7 @@ const OrderItemList = ({ orderItems = [], ecommercePlatform, seller }) => {
 
               <div className="mt-2 text-sm text-gray-700">
                 <span>Giá: </span>
-                <span className="font-medium">{formatCurrency(item.basePrice, 'VND', getLocaleCurrencyFormat('VND'))}</span>
+                <span className="font-medium">{formatCurrency(item.totalVNDPrice, 'VND', getLocaleCurrencyFormat('VND'))}</span>
               </div>
             </div>
           </div>
