@@ -95,9 +95,6 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
     ...(requestType === "ONLINE"
       ? {shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm.")}
       : {}),
-    ...(requestType === "ONLINE"
-      ? { totalPriceBeforeExchange: Yup.number().typeError("Tổng trước quy đổi phải là số.").required("Vui lòng nhập tổng trước quy đổi.") }
-      : {}),
     ...(requestType === "OFFLINE"
       ? { packageType: Yup.string().required("Vui lòng chọn loại gói hàng.") }
       : {}),
@@ -269,31 +266,6 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                             {touched.shippingEstimate && errors.shippingEstimate && (
                               <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
                             )}
-                          </div>
-                          <div>
-                            <label className="block font-medium mb-1">Tổng trước quy đổi</label>
-                            <Input
-                              name="totalPriceBeforeExchange"
-                              type="number"
-                              placeholder="Nhập tổng trước quy đổi"
-                              value={values.totalPriceBeforeExchange}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                            />
-                            {touched.totalPriceBeforeExchange && errors.totalPriceBeforeExchange && (
-                              <div className="text-red-500 text-xs">{errors.totalPriceBeforeExchange}</div>
-                            )}
-                          </div>
-                          <div>
-                            <label className="block font-medium mb-1">Phí (nhập văn bản, nhiều mục cách nhau bằng dấu phẩy)</label>
-                            <Input
-                              name="feesText"
-                              type="text"
-                              placeholder="Ví dụ: phí nền tảng, phụ thu"
-                              value={values.feesText}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                            />
                           </div>
                         </>
                       )}

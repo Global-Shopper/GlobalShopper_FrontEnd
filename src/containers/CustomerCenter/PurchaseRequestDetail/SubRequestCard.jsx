@@ -186,18 +186,6 @@ function SubRequestCard({ subRequest, expired, requestType }) {
             Đang chờ báo giá
           </div>
         )}
-        {/* {subRequest.status === "QUOTED" || subRequest.status === "PAID" && (
-        <button
-          className={`mt-2 px-4 py-2 rounded shadow ${expired
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-            }`}
-          // onClick={() => handlePaySubRequest(subRequest)}
-          // disabled={expired || isCheckoutLoading}
-        >
-          {expired ? 'Đã hết hạn thanh toán' : `Thanh toán ${formatCurrency(subRequest.quotationForPurchase.totalPriceEstimate + subRequest.quotationForPurchase.shippingEstimate, "VND", getLocaleCurrencyFormat("VND"))}`}
-        </button>
-      )} */}
         <PaymentDialog subRequest={subRequest} expired={expired} requestType={requestType} />
       </div>
     </div>
