@@ -34,6 +34,8 @@ const endpoints = {
   SHIPMENT_RATE: "/shipping/rate",
   CREATE_SHIPMENT: "/shipping/ship",
   SHIPMENT_TRACKING: "/shipping/tracking",
+  FEEDBACK: "/feedback",
+  REFUND: "/refund-ticket",
   // CHECKPAYMENT: '/wallet/check-payment-vnpay',
 };
 export default endpoints;

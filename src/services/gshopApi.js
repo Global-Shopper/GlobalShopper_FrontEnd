@@ -375,6 +375,27 @@ const gshopApi = createApi({
         method: "GET",
       }),
     }),
+    createFeedback: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.FEEDBACK,
+        method: "POST",
+      }),
+    }),
+    createRefund: builder.mutation({
+      query: (data) => ({
+        data: data,
+        url: endpoints.REFUND,
+        method: "POST",
+      }),
+    }),
+    getRefundList: builder.query({
+      query: (data) => ({
+        params: data,
+        url: endpoints.REFUND,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -428,6 +449,9 @@ export const {
   useGetShipmentRateQuery,
   useLazyGetShippingTrackingQuery,
   useCreateShipmentMutation,
+  useCreateFeedbackMutation,
+  useCreateRefundMutation,
+  useGetRefundListQuery,
 } = gshopApi;
 
 export default gshopApi;
