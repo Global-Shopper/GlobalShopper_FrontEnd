@@ -103,6 +103,7 @@ const PurchaseRequestEdit = () => {
   const navigate = useNavigate()
 
   const { data, isLoading, isError, error } = useGetEditInfoPurchaseRequestQuery(id)
+  console.log(data)
   const { data: addresses } = useGetShippingAddressQuery()
   const [updatePurchaseRequest, { isLoading: isSubmitting }] = useUpdatePurchaseRequestMutation()
   const [uploadingIndex, setUploadingIndex] = useState(null)

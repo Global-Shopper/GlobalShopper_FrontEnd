@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Plus, ShoppingCart } from "lucide-react";
 import PurchaseRequestCard from "@/components/PurchaseRequestCard";
@@ -10,13 +9,12 @@ import { useURLSync } from "@/hooks/useURLSync";
 import { PaginationBar } from "@/utils/Pagination";
 import PageError from "@/components/PageError";
 import PageLoading from "@/components/PageLoading";
-import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 
 export default function PurchaseRequest() {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState("row");
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [status, setStatus] = useURLSync(
     searchParams,
     setSearchParams,
@@ -39,7 +37,7 @@ export default function PurchaseRequest() {
     1
   );
 
-  const [size, setSize] = useURLSync(
+  const [size] = useURLSync(
     searchParams,
     setSearchParams,
     "size",
@@ -47,13 +45,6 @@ export default function PurchaseRequest() {
     10
   );
 
-  // Update size when viewMode changes
-  useEffect(() => {
-    const newSize = viewMode === "column" ? 3 : 10;
-    if (size !== newSize) {
-      setSize(newSize);
-    }
-  }, [viewMode, setSize, size]);
   const {
     data: purchaseRequestsData,
     isLoading: isRequestLoading,
@@ -107,69 +98,40 @@ export default function PurchaseRequest() {
         />
 
         <div className="space-y-4">
-          {/* Switch for view mode */}
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-sm font-medium text-gray-700">
-              Chế độ danh sách
-            </span>
-            <Switch
-              checked={viewMode === "column"}
-              onCheckedChange={(checked) =>
-                setViewMode(checked ? "column" : "row")
-              }
-              id="view-mode-switch"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              Chế độ cột
-            </span>
-          </div>
           {allRequests.length === 0 ? (
             <>
               <Card className="shadow-sm">
                 <CardContent className="p-12 text-center">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <ShoppingCart className="h-10 w-10 text-gray-400" />
-                  </div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-3">
-                    Không có yêu cầu nào
-                  </h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    Bạn chưa có yêu cầu mua hàng nào. Hãy tạo yêu cầu đầu tiên
-                    để bắt đầu!
-                  </p>
-                </CardContent>
-              </Card>
-              <PaginationBar
-                totalPages={purchaseRequestsData?.totalPages}
-                page={page}
-                setPage={setPage}
-              />
-            </>
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <ShoppingCart className="h-10 w-10 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-medium text-gray-900 mb-3">
+                  Không có yêu cầu nào
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Bạn chưa có yêu cầu mua hàng nào. Hãy tạo yêu cầu đầu tiên
+                  để bắt đầu!
+                </p>
+              </CardContent>
+            </Card>
+            <PaginationBar
+              totalPages={purchaseRequestsData?.totalPages}
+              page={page}
+              setPage={setPage}
+            />
+          </>
           ) : (
             <>
-              {viewMode === "row" ? (
-                <div className="flex flex-col gap-4">
-                  {allRequests.map((request) => (
-                    <Link
-                      to={`/account-center/purchase-request/${request.id}`}
-                      key={request.id}
-                    >
-                      <PurchaseRequestCard request={request} listView={true} />
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {allRequests.map((request) => (
-                    <Link
-                      to={`/account-center/purchase-request/${request.id}`}
-                      key={request.id}
-                    >
-                      <RequestCard request={request} />
-                    </Link>
-                  ))}
-                </div>
-              )}
+              <div className="flex flex-col gap-4">
+                {allRequests.map((request) => (
+                  <Link
+                    to={`/account-center/purchase-request/${request.id}`}
+                    key={request.id}
+                  >
+                    <PurchaseRequestCard request={request} listView={true} />
+                  </Link>
+                ))}
+              </div>
               <PaginationBar
                 totalPages={purchaseRequestsData?.totalPages}
                 page={page}

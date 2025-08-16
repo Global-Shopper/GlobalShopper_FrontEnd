@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Copy, ExternalLink, Home } from "lucide-react"
+import { Link } from "react-router-dom"
 
 export default function RequestSuccess({onClose, purchaseData}) {
   const copyRequestId = () => {
@@ -86,7 +87,8 @@ export default function RequestSuccess({onClose, purchaseData}) {
           </Button>
           <Button variant="outline" className="flex-1 h-12 bg-transparent hover:bg-gray-50">
             <ExternalLink className="h-4 w-4 mr-2" />
-            Theo dõi yêu cầu
+            {console.log(purchaseData)}
+            <Link to={`/account-center/purchase-request/${purchaseData?.id}`}>Theo dõi yêu cầu</Link>
           </Button>
         </div>
       </CardContent>

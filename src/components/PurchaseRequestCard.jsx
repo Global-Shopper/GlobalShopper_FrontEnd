@@ -169,7 +169,7 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 								{/* Product Count */}
 								<div className="flex items-center gap-2">
 									<span className="text-sm text-gray-500 font-medium">
-										Số loại sản phẩm đã báo giá:
+										Mặt hàng đã báo giá:
 									</span>
 									<div className="flex items-center gap-1 bg-orange-50 px-2 py-2 rounded">
 										<Package className="h-4 w-4 text-orange-700" />
