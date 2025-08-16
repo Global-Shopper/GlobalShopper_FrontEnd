@@ -47,11 +47,9 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
             requestItemId: d.requestItemId,
             quantity: d.quantity,
             hsCodeId: d.hsCodeId,
-            region: d.region,
             basePrice: Number(d.basePrice ?? 0),
             serviceFee: Number(d.serviceFee ?? 0),
             note: d.note,
-            currency: d.currency,
           }));
           const payload = {
             subRequestId: subRequest.id,
@@ -63,6 +61,8 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
             packageType: values.packageType,
             shipper: { ...values.shipper },
             recipient: { ...values.recipient },
+            region: values.region,
+            currency: values.currency,
           };
           await calculateQuotation(payload).unwrap().then(() => {
             setOpen(true);
@@ -237,7 +237,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                       <TableHead>Tên sản phẩm</TableHead>
                       <TableHead>Giá gốc</TableHead>
                       <TableHead>Phí dịch vụ</TableHead>
-                      <TableHead>Tỷ giá ({detail.currency}/VND)</TableHead>
+                      <TableHead>Tỷ giá ({(detail.currency || values.currency)}/VND)</TableHead>
                       <TableHead>Ghi chú</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -245,8 +245,8 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                     {console.log(detail)}
                     <TableRow>
                       <TableCell className="break-words">{detail.productName ? `${detail.productName.slice(0, 40)}...` : `Sản phẩm ${idx + 1}`}</TableCell>
-                      <TableCell>{formatCurrency(detail.basePrice, detail.currency, getLocaleCurrencyFormat(detail.currency))}</TableCell>
-                      <TableCell>{formatCurrency(detail.serviceFee, detail.currency, getLocaleCurrencyFormat(detail.currency))}</TableCell>
+                      <TableCell>{formatCurrency(detail.basePrice, (detail.currency || values.currency), getLocaleCurrencyFormat((detail.currency || values.currency)))}</TableCell>
+                      <TableCell>{formatCurrency(detail.serviceFee, (detail.currency || values.currency), getLocaleCurrencyFormat((detail.currency || values.currency)))}</TableCell>
                       <TableCell>{parseInt(detail.exchangeRate)}</TableCell>
                       <TableCell className="break-words">{detail.note}</TableCell>
                     </TableRow>
@@ -274,7 +274,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                         <TableCell>{tax.taxType}</TableCell>
                         <TableCell className="break-words max-w-[320px]">{tax.taxName || "-"}</TableCell>
                         <TableCell>{tax.rate}</TableCell>
-                        <TableCell>{formatCurrency(detail.taxAmounts?.[tax.taxType] || "0", detail.currency, getLocaleCurrencyFormat(detail.currency))}</TableCell>
+                        <TableCell>{formatCurrency(detail.taxAmounts?.[tax.taxType] || "0", (detail.currency || values.currency), getLocaleCurrencyFormat((detail.currency || values.currency)))}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -294,8 +294,8 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="break-all">{formatCurrency(detail.totalTaxAmount.toFixed(2), detail.currency, getLocaleCurrencyFormat(detail.currency))}</TableCell>
-                      <TableCell className="break-all">{formatCurrency(detail.totalPriceBeforeExchange.toFixed(2), detail.currency, getLocaleCurrencyFormat(detail.currency))}</TableCell>
+                      <TableCell className="break-all">{formatCurrency(detail.totalTaxAmount.toFixed(2), (detail.currency || values.currency), getLocaleCurrencyFormat((detail.currency || values.currency)))}</TableCell>
+                      <TableCell className="break-all">{formatCurrency(detail.totalPriceBeforeExchange.toFixed(2), (detail.currency || values.currency), getLocaleCurrencyFormat((detail.currency || values.currency)))}</TableCell>
                       <TableCell className="break-all">{formatCurrency(parseInt(detail.totalVNDPrice), "VND", getLocaleCurrencyFormat("VND"))}</TableCell>
                     </TableRow>
                   </TableBody>

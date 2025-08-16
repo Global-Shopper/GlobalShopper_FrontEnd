@@ -3,9 +3,13 @@ import { createSlice } from '@reduxjs/toolkit';
 /**
  subRequests: {
   [subRequestId]: {
+    // item-level editable fields (per request item)
     quotationDetails: [],
+    // group-level fields
     note: '',
     shippingEstimate: '',
+    currency: 'VND', // moved from item-level to group-level
+    region: '',      // moved from item-level to group-level (OFFLINE only)
     expanded: false,
     expandedProductForms: {
       [requestItemId]: true | false
@@ -37,6 +41,16 @@ const quotationSlice = createSlice({
       if (!state.subRequests[subRequestId]) return;
       state.subRequests[subRequestId].shippingEstimate = shippingEstimate;
     },
+    setGroupCurrency(state, action) {
+      const { subRequestId, currency } = action.payload;
+      if (!state.subRequests[subRequestId]) return;
+      state.subRequests[subRequestId].currency = currency;
+    },
+    setGroupRegion(state, action) {
+      const { subRequestId, region } = action.payload;
+      if (!state.subRequests[subRequestId]) return;
+      state.subRequests[subRequestId].region = region;
+    },
     toggleExpandQuotation(state, action) {
       const { subRequestId } = action.payload;
       if (!state.subRequests[subRequestId]) return;
@@ -49,6 +63,8 @@ const quotationSlice = createSlice({
         quotationDetails: quotationDetails || [],
         note: '',
         shippingEstimate: '',
+        currency: 'VND',
+        region: '',
         expanded: false,
         expandedProductForms: {},
       };
@@ -81,6 +97,8 @@ export const {
   setItemDetail,
   setGroupNote,
   setShippingEstimate,
+  setGroupCurrency,
+  setGroupRegion,
   toggleExpandQuotation,
   initializeSubRequest,
   resetQuotationById,

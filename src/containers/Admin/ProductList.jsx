@@ -59,16 +59,13 @@ const GroupCreationControls = ({
 };
 
 export function ProductList({
-  subRequests,
+  purchaseRequest,
   expandedSubRequest,
-  status,
   onToggleSubRequestExpansion,
-  requestType,
   onProductClick,
   isGroupingMode,
   onCreateGroup,
-  onExitGroupingMode,
-  requestItemsGroupByPlatform
+  onExitGroupingMode
 }) {
   // Redux hooks for expanded state
   const dispatch = useDispatch();
@@ -114,8 +111,8 @@ export function ProductList({
 
   // Flatten ungrouped items and compute a stable order index
   const flatUngroupedItems = React.useMemo(
-    () => (requestItemsGroupByPlatform || []).flatMap((g) => g.items || []),
-    [requestItemsGroupByPlatform]
+    () => (purchaseRequest.requestItems || []).flatMap((g) => g.items || []),
+    [purchaseRequest.requestItems]
   );
 
   // Render a single product card, always with explicit subRequestId
@@ -151,6 +148,7 @@ export function ProductList({
     const productErrors = {};
     return (
       <Card
+        isItemCard={true}
         key={requestItemId}
         className={`transition-all hover:shadow-md ${isProductFormOpen ? "shadow-lg ring-2 ring-blue-200 bg-blue-50" : ""
           }`}
@@ -215,14 +213,12 @@ export function ProductList({
                 </Button>
               </div>
               {isProductFormOpen && (
-                <div className="mt-3">
-                  {console.log(itemIndexNumber)}
-                  <QuotationForm
-                    requestType={requestType}
-                    product={quotationDetails}
-                    errors={productErrors}
-                    onChange={(field, value) => {
-                      dispatch(
+                <QuotationForm
+                  purchaseRequest={purchaseRequest}
+                  product={quotationDetails}
+                  errors={productErrors}
+                  onChange={(field, value) => {
+                    dispatch(
                         setItemDetail({
                           subRequestId,
                           itemIndex: itemIndexNumber,
@@ -232,7 +228,6 @@ export function ProductList({
                       );
                     }}
                   />
-                </div>
               )}
             </>
           )}
@@ -275,8 +270,8 @@ export function ProductList({
         )}
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Render main requestItems if any */}
-        {requestItemsGroupByPlatform?.length > 0 && (
+        {/* Render main requestItemsGroupByPlatform if any */}
+        {purchaseRequest?.requestItemsGroupByPlatform?.length > 0 && (
           <div>
             <h3 className="font-semibold mb-3 text-md">
               Sản phẩm chưa được tạo nhóm
@@ -294,7 +289,7 @@ export function ProductList({
 
             {/* Product items */}
             <div className="space-y-4 mb-4">
-              {requestItemsGroupByPlatform.map((group, gIdx) => (
+              {purchaseRequest?.requestItemsGroupByPlatform?.map((group, gIdx) => (
                 <div key={gIdx} className="space-y-2">
                   <div className="space-y-2">
                     {group.items.map((item) => (
@@ -317,21 +312,19 @@ export function ProductList({
         )}
 
         {/* Consolidated SubRequests */}
-        {subRequests?.length > 0 &&
+        {purchaseRequest?.subRequests?.length > 0 &&
           <>
             <p className="font-semibold mb-3 text-md">Các nhóm sản phẩm</p>
-            {subRequests.map((sub) => (
+            {purchaseRequest?.subRequests?.map((sub) => (
               <SubRequestDetails
                 key={sub.id}
                 subRequest={sub}
-                requestItemsGroupByPlatform={requestItemsGroupByPlatform}
+                purchaseRequest={purchaseRequest}
                 isExpanded={expandedSubRequest === sub.id}
                 onToggleExpansion={onToggleSubRequestExpansion}
-                requestType={requestType}
-                requestStatus={status}
               >
                 {sub.requestItems.map((item) =>
-                  renderProductCard(item, sub.id, status, sub.requestItems, sub.status)
+                  renderProductCard(item, sub.id, purchaseRequest?.status, sub.requestItems, sub.status)
                 )}
               </SubRequestDetails>
             ))}
