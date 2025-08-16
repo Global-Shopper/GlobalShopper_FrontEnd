@@ -18,7 +18,6 @@ function RequestItemCard({
   className = '',
   showProductLink = true
 }) {
-  console.log(item)
   return (
     <div className={`bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${className}`}>
       <div className="p-4">

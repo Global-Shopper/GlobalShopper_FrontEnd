@@ -25,7 +25,6 @@ export default function WithoutLinkWorkflowPage() {
   const currentStep = useSelector((state) => state?.rootReducer?.offlineReq?.currentStep);
   const items = useSelector((state) => state?.rootReducer?.offlineReq?.items);
   const shippingAddressId = useSelector((state) => state?.rootReducer?.offlineReq?.shippingAddressId);
-console.log("shippingAddressId", shippingAddressId);
   // Compose contactInfo from Redux shopInfo
   const contactInfo = [
     `Tên cửa hàng: ${shopInfo?.name}`,
@@ -33,7 +32,6 @@ console.log("shippingAddressId", shippingAddressId);
     `Địa chỉ: ${shopInfo?.address}`,
     shopInfo?.website ? `Website: ${shopInfo?.website}` : null,
   ].filter(Boolean);
-  console.log("items", items);
   const handleSuccess = () => {
     if (!shippingAddressId) {
       toast.error("Vui lòng chọn địa chỉ giao hàng trước khi gửi yêu cầu.");

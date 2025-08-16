@@ -148,7 +148,6 @@ function SubRequestItemCard({ item }) {
 }
 
 function SubRequestCard({ subRequest, expired, requestType }) {
-  console.log(requestType)
   return (
     <div className="relative mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
       <div className="flex items-center gap-4 mb-2">

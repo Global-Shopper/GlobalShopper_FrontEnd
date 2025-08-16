@@ -46,7 +46,6 @@ export default function PurchaseRequest() {
     "number",
     10
   );
-  console.log(sort);
 
   // Update size when viewMode changes
   useEffect(() => {

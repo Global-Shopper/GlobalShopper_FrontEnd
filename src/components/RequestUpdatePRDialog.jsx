@@ -11,7 +11,6 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useState } from "react";
 
 const RequestUpdatePRDialog = ({ purchaseRequest }) => {
-  console.log(purchaseRequest);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [requestUpdate, { isLoading: isRequestUpdateLoading }] = useRequestUpdatePurchaseRequestMutation();
   const validateSchema = Yup.object({

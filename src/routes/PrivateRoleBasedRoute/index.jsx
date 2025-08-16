@@ -7,7 +7,6 @@ const PrivateRoleBasedRoute  = (props) => {
 	const userRole = useSelector((state) => state.rootReducer.user.role);
 	// Check user role with route's required roles
 	const canAccessWithRoles = requiredRoles.includes(userRole);
-	console.log(userRole)
 	// Send navigate state, included last path
 	const routingState = {
 		requestedPath: path,

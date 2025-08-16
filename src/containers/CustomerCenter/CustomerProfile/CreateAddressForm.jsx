@@ -54,7 +54,6 @@ const CreateAddressForm = ({ onClose, onSuccess }) => {
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [selectedWard, setSelectedWard] = useState(null);
-  console.log(selectedProvince);
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       const finalTag = values.tag === "Khác" ? customTag : values.tag;

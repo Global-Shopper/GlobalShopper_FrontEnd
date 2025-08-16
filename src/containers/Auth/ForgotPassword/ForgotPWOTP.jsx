@@ -79,7 +79,6 @@ export default function ForgotPwOTP() {
 			await verifyOTP({ email, otp: value })
 				.unwrap()
 				.then((res) => {
-					console.log(res);
 					dispatch(setForgotPasswordToken(res?.resetPasswordToken)); // Update OTP in state
 					toast("Xác thực OTP thành công");
 					dispatch(setForgotPasswordStep("newpassword")); // Navigate to new password step

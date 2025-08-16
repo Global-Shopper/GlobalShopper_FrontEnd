@@ -8,7 +8,6 @@ import {
 import productDefault from "@/assets/productDefault.png";
 
 export function ProductDetail({ product, status }) {
-  console.log(product);
   return (
     <Card>
       <CardContent className="space-y-4">

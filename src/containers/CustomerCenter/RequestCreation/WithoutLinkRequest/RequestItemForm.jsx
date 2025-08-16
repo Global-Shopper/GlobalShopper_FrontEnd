@@ -94,7 +94,6 @@ export default function RequestItemForm({
     for (const file of files) {
       const previewUrl = URL.createObjectURL(file);
       dispatch(addDraftLocalImage(previewUrl));
-      console.log(previewUrl);
     }
     setIsUploading(true);
     try {

@@ -87,7 +87,6 @@ const EditAddressForm = ({
 			setWards([]);
 		}
 	}, [selectedDistrict]);
- console.log(address);
 	const initialValues = {
 		id: address?.id || "",
 		name: address?.name || "",

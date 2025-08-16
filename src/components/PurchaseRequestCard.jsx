@@ -43,10 +43,8 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 	const maxThumbs = 2;
 	const displayedImages = (allImages || []).slice(0, maxThumbs);
 	const remainingImages = Math.max(0, (allImages?.length || 0) - maxThumbs);
-	console.log(allImages);
 	const handleCancelRequest = () => {
 		// TODO: Implement cancel request functionality
-		console.log("Cancel request:", request.id);
 		setIsDialogOpen(false);
 	};
 
@@ -290,7 +288,6 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 							Sản phẩm ({allItems.length})
 						</span>
 					</div>
-					{console.log(allItems)}
 					{allItems.map((item) => (
 						<div key={item.id} className="pl-6 space-y-1">
 							<div className="flex items-center justify-between">

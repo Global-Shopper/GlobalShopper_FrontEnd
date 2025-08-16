@@ -25,15 +25,10 @@ function AdPurchaseReqDetail() {
       const selectItem = req.requestItems.find(
         (item) => item.id === selectedProductId
       );
-      console.log(selectItem);
       if (selectItem) return selectItem;
     }
 
     if (req?.subRequests?.length > 0) {
-      console.log(
-        "Checking subrequests for selected product ID:",
-        selectedProductId
-      );
       for (const subReq of req.subRequests) {
         const selectItem = subReq.requestItems.find(
           (item) => item.id === selectedProductId

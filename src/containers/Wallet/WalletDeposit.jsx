@@ -49,7 +49,6 @@ const WalletDeposit = () => {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      console.log(values)
       await depositWallet({
         balance: values.amount,
         redirectUri: `${REDIRECT_URI}/account-center/wallet`

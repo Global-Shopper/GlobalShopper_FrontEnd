@@ -129,7 +129,6 @@ const PurchaseRequestEdit = () => {
       })),
     }
   }, [data, addresses])
-  console.log("data", initialValues);
 
   const onSubmit = async (values) => {
     try {

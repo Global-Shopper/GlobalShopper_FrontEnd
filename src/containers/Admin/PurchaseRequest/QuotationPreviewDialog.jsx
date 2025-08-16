@@ -26,7 +26,6 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
   const [open, setOpen] = useState(false);
   const [calculateQuotation, { isLoading: calculateQuotationLoading, data: quotation }] = useCalculateQuotationMutation();
   const [activeTab, setActiveTab] = useState("summary");
-  console.log(quotationDetails);
 
   // Sync the active tab to the first item when quotation data arrives
   useEffect(() => {
@@ -84,7 +83,6 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
           className="mt-4"
         >
           <TabsList className="mb-4 overflow-x-auto whitespace-nowrap">
-            {console.log(quotation)}
             <TabsTrigger value="summary" className="capitalize">Tổng quan</TabsTrigger>
             <TabsTrigger value="shipment" className="capitalize">Vận chuyển</TabsTrigger>
             {quotation?.details?.map((detail, idx) => (
@@ -113,7 +111,6 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {console.log(quotation)}
                   {quotation?.details?.map((detail, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="break-all">{detail.productName}</TableCell>
@@ -242,7 +239,6 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {console.log(detail)}
                     <TableRow>
                       <TableCell className="break-words">{detail.productName ? `${detail.productName.slice(0, 40)}...` : `Sản phẩm ${idx + 1}`}</TableCell>
                       <TableCell>{formatCurrency(detail.basePrice, (detail.currency || values.currency), getLocaleCurrencyFormat((detail.currency || values.currency)))}</TableCell>

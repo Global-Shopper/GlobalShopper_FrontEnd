@@ -12,7 +12,6 @@ import AdOrderDetailHeader from './AdOrderDetailHeader'
 const AdOrderDetail = () => {
   const { id } = useParams()
   const { data: order, isLoading: isOrderLoading, isError: isOrderError } = useGetOrderByIDQuery(id)
-  console.log(order)
   const [selectedItemId, setSelectedItemId] = useState(null)
 
   // Initialize selected item when order loads

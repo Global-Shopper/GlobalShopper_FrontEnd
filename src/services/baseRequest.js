@@ -106,7 +106,6 @@ const setUpInterceptor = (store) => {
       return response;
     },
     async error => {
-      console.log(error);
       if (error?.status === 401 || error.response?.data?.statusCode === 401) {
         try {
           store.dispatch(signout());
