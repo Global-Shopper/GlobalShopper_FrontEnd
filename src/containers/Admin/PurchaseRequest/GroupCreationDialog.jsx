@@ -33,10 +33,8 @@ export function GroupCreationDialog({
   handleClearSelection,
 }) {
   const [createGroup, { isLoading }] = useCreateGroupMutation();
-  // Common options for dropdowns
   const commonPlatforms = ["Amazon", "eBay", "Taobao", "Khác"];
 
-  // Formik + Yup validation
   const formik = useFormik({
     initialValues: {
       ecommercePlatform: "",
@@ -47,9 +45,9 @@ export function GroupCreationDialog({
       ecommercePlatform: Yup.string().required("Platform is required"),
 
       customPlatform: Yup.string().when("ecommercePlatform", {
-        is: (val) => val === "Khác", // ✅ safer way
-        then: () => Yup.string().required("Custom platform is required"), // ✅ wrapped in a function
-        otherwise: () => Yup.string().notRequired(), // ✅ must be a function that returns schema
+        is: (val) => val === "Khác",
+        then: () => Yup.string().required("Custom platform is required"),
+        otherwise: () => Yup.string().notRequired(),
       }),
       seller: Yup.string().required("Seller is required"),
     }),
@@ -68,9 +66,6 @@ export function GroupCreationDialog({
           seller: seller,
           itemIds: selectedItemsArray.map((item) => item.id),
         };
-        console.log("Creating group with data:", groupData);
-        // TODO: Replace with actual API call
-        // const response = await createSubRequest(groupData);
         if (selectedItemsArray.length > 0 && createGroup) {
           createGroup(groupData)
             .unwrap()
@@ -90,7 +85,6 @@ export function GroupCreationDialog({
     },
   });
 
-  // Handle dialog close
   const handleClose = () => {
     formik.resetForm();
     onClose();

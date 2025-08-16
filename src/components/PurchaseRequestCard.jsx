@@ -43,10 +43,8 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 	const maxThumbs = 2;
 	const displayedImages = (allImages || []).slice(0, maxThumbs);
 	const remainingImages = Math.max(0, (allImages?.length || 0) - maxThumbs);
-	console.log(allImages);
 	const handleCancelRequest = () => {
 		// TODO: Implement cancel request functionality
-		console.log("Cancel request:", request.id);
 		setIsDialogOpen(false);
 	};
 
@@ -171,7 +169,7 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 								{/* Product Count */}
 								<div className="flex items-center gap-2">
 									<span className="text-sm text-gray-500 font-medium">
-										Số loại sản phẩm đã báo giá:
+										Mặt hàng đã báo giá:
 									</span>
 									<div className="flex items-center gap-1 bg-orange-50 px-2 py-2 rounded">
 										<Package className="h-4 w-4 text-orange-700" />
@@ -290,7 +288,6 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 							Sản phẩm ({allItems.length})
 						</span>
 					</div>
-					{console.log(allItems)}
 					{allItems.map((item) => (
 						<div key={item.id} className="pl-6 space-y-1">
 							<div className="flex items-center justify-between">

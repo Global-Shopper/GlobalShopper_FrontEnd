@@ -89,7 +89,6 @@ export function ProductList({
   // Clear all selections
   const handleClearSelection = () => {
     setSelectedItems([]);
-    console.log("Selected items cleared");
   };
 
   // Handle opening dialog
@@ -99,37 +98,27 @@ export function ProductList({
     }
   };
 
-  // Handle group creation from dialog
-
-  console.log(selectedItems);
-  // Reset selection when exiting selection mode
   React.useEffect(() => {
     if (!isGroupingMode) {
       setSelectedItems([]);
     }
   }, [isGroupingMode]);
 
-  // Flatten ungrouped items and compute a stable order index
   const flatUngroupedItems = React.useMemo(
     () => (purchaseRequest.requestItems || []).flatMap((g) => g.items || []),
     [purchaseRequest.requestItems]
   );
 
-  // Render a single product card, always with explicit subRequestId
   const renderProductCard = (item, subRequestId, status, requestItems, subStatus) => {
-    // Compute order number based on position in parentArray
     const itemIndexNumber = requestItems
       ? requestItems.findIndex((i) => i.id === item.id)
       : 0;
     const orderNumber = itemIndexNumber + 1;
-    // Use subRequestId directly for Redux selectors and actions
     const expandedProductForms = subRequestId
       ? quotationState?.subRequests?.[subRequestId]?.expandedProductForms || {}
       : quotationState?.expandedProductForms || {};
-    // Use item.requestItemId for subrequest items, item.id for main
     const requestItemId = item.id;
     const isProductFormOpen = expandedProductForms[requestItemId];
-    // Get product object from Redux for SUB REQUEST item
     let quotationDetails = item;
     if (
       subRequestId &&
@@ -144,7 +133,6 @@ export function ProductList({
         quotationState.subRequests[subRequestId].quotationDetails[foundIdx] ||
         item;
     }
-    // No validation for now
     const productErrors = {};
     return (
       <Card
@@ -190,8 +178,6 @@ export function ProductList({
               Xem sản phẩm
             </a>
           </div>
-          {console.log(subStatus)}
-          {/* Quote button and inline form */}
           {((subStatus === "PENDING" || !subStatus) && (status === "CHECKING" || status === "QUOTED")) && (
             <>
               <div className="flex justify-end mt-3">

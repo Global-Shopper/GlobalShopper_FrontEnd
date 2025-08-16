@@ -28,7 +28,6 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
     : setShippingAddressIdOffline;
 
   const items = useSelector(isOnline ? selectOnlineItems : selectOfflineItems);
-  console.log("items", items);
   const { data: isLoadingCreate } = useCreateWithoutLinkPurchaseRequestMutation();
   const {
 		data: addresses,
@@ -37,7 +36,6 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
 	const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const selectedAddress = addresses?.find(addr => addr.id == shippingAddressId);
-  console.log("selectedAddress", selectedAddress);
   const handleAddAddress = () => {
 		setIsPopoverOpen(true);
 	};

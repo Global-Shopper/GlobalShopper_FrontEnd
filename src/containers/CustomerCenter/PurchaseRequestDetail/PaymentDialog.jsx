@@ -208,7 +208,6 @@ const PaymentDialog = ({ subRequest, expired, requestType }) => {
               <SelectValue placeholder={isRateLoading ? "Đang tải biểu phí..." : "Chọn loại phí"} >{selectedRateType ? `${selectedRateType} - ${formatCurrency(rateReplyDetails.find((rate) => rate.serviceType === selectedRateType)?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}` : (isRateLoading ? 'Đang tải biểu phí...' : "Chọn loại vận chuyển")}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {console.log(rateReplyDetails)}
               {rateReplyDetails?.map((rate, index) => (
 
                 <SelectItem key={index} value={rate?.serviceType}>{rate?.serviceName} - {formatCurrency(rate?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}</SelectItem>

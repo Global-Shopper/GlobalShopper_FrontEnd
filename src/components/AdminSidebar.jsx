@@ -46,7 +46,6 @@ export function AdminSidebar() {
   const { avatar, name, email } = useSelector(
     (state) => state.rootReducer.user
   );
-  console.log(avatar);
   return (
     <Sidebar>
       <SidebarContent>

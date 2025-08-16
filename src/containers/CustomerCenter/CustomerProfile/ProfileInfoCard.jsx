@@ -429,7 +429,6 @@ const ProfileInfoCard = () => {
 											: customerInfo?.email || ""
 									}
 									onChange={(e) => {
-										console.log(e.target.value);
 										setEditEmail(e.target.value);
 									}}
 									disabled={!isEditingEmail}

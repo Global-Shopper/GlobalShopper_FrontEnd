@@ -48,7 +48,6 @@ const userSlice = createSlice({
 		},
 		setUserInfo(state, action) {
 			const { name, phone, role, avatar, email, accessToken } = action.payload;
-			console.log(action.payload);
 			state.name = name || state.name;
 			state.phone = phone || state.phone;
 			state.role = role || state.role;

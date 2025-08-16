@@ -17,7 +17,6 @@ export default function NonSubItems({
   onSelectionChange,
   platform,
 }) {
-  console.log(platform);
   const handleCardClick = () => {
     if (isGroupingMode) {
       onSelectionChange(item.id, !isSelected);

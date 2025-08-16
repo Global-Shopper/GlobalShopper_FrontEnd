@@ -95,7 +95,6 @@ export function PurchaseRequestHeader({
                 className={isGroupingMode ? "" : "bg-blue-600 hover:bg-blue-700"}
               >
                 <Blocks className="h-4 w-4 mr-2" />
-                {console.log(purchaseRequest.status)}
                 <div>{isGroupingMode ? "Thoát tạo nhóm" : "Tạo Nhóm"}</div>
               </Button>
 
