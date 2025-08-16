@@ -16,16 +16,25 @@ import {
   toggleExpandQuotation,
   initializeSubRequest,
   resetQuotationById,
+  setGroupCurrency,
+  setGroupRegion,
 } from "@/features/quotation"
 import QuotationPreviewDialog from "./QuotationPreviewDialog"
 import { getStatusColor, getStatusText } from "@/utils/statusHandler"
 import RejectDialog from "@/components/RejectDialog"
 import EditSubDialog from "./EditSubDialog"
 import { PACKAGE_TYPE } from "@/const/packageType"
+import { Select } from "@/components/ui/select"
+import { CURRENCY } from "@/const/currency"
+import { REGION } from "@/const/region"
 
-export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, requestType, requestStatus, children, requestItemsGroupByPlatform }) {
+export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, purchaseRequest, children }) {
   // Remove manual dialog open state; will use DialogTrigger pattern
-  console.log(subRequest)
+  const requestType = purchaseRequest?.requestType;
+  const requestStatus = purchaseRequest?.status;
+  const customer = purchaseRequest.customer;
+  const admin = purchaseRequest.admin;
+  const { addressLine, location } = purchaseRequest.shippingAddress;
   const dispatch = useDispatch();
   const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
   // API mutation (must be above early return)
@@ -41,18 +50,15 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
 
   useEffect(() => {
     if (!quotationState) {
-      console.log(subRequest)
       dispatch(initializeSubRequest({
         subRequestId: subRequest.id,
         quotationDetails: subRequest.requestItems.map(item => ({
           requestItemId: item.id,
           quantity: item.quantity,
           hsCodeId: "",
-          region: "",
           basePrice: 0,
           serviceFee: 1,
           note: "",
-          currency: "VND"
         }))
       }));
     }
@@ -61,49 +67,54 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
 
   if (!quotationState) return null;
 
-  const { quotationDetails, note, shippingEstimate, expanded } = quotationState;
-  console.log(quotationDetails)
+  const { quotationDetails, note, shippingEstimate, currency, region, expanded } = quotationState;
   const initialValues = {
     note: note || "",
     shippingEstimate: shippingEstimate || "",
+    currency: currency || "VND",
+    region: region || "",
     // ONLINE-only
     totalPriceBeforeExchange: "",
     feesText: "",
     // OFFLINE-only
     totalWeightEstimate: "",
-    packageType: PACKAGE_TYPE?.[0]?.type || "YOUR_PACKAGING",
+    packageType: PACKAGE_TYPE?.[0]?.type,
     shipper: {
       shipmentStreetLine: "",
       shipmentCity: "",
-      shipmentCountryCode: "",
       shipmentPostalCode: "",
-      shipmentPhone: "",
-      shipmentName: "",
+      shipmentPhone: admin?.phone,
+      shipmentName: admin?.name,
+      shipmentCountryCode: region,
+      shipmentStateOrProvinceCode: "",
     },
     recipient: {
-      recipientStreetLine: "",
-      recipientCity: "",
-      recipientCountryCode: "",
+      recipientStreetLine: addressLine,
+      recipientCity: location.split(",")[2],
+      recipientCountryCode: "VN",
       recipientPostalCode: "",
-      recipientPhone: "",
-      recipientName: "",
+      recipientPhone: customer?.phone,
+      recipientName: customer?.name,
     },
   };
 
   const validationSchema = Yup.object({
-    note: Yup.string().required("Vui lòng nhập ghi chú cho nhóm."),
+    currency: Yup.string().required("Vui lòng chọn tiền tệ."),
     ...(requestType === "ONLINE"
-      ? {shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm.")}
+      ? { shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm.") }
       : {}),
     ...(requestType === "OFFLINE"
-      ? { packageType: Yup.string().required("Vui lòng chọn loại gói hàng.") }
+      ? {
+        packageType: Yup.string().required("Vui lòng chọn loại gói hàng."),
+        region: Yup.string().required("Vui lòng chọn khu vực."),
+      }
       : {}),
   });
 
   return (
     <>
       <Card className={`border-l-4 ${subRequest.status === "QUOTED" || subRequest.status === "PAID" ? "border-l-blue-500" : "border-l-gray-500"}`}>
-        <CardHeader className="pb-3">
+        <CardHeader>
           <div className="flex items-center justify-between cursor-pointer" onClick={() => onToggleExpansion(subRequest.id)}>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
@@ -163,10 +174,9 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
               >
                 {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
               </Button>
-              <EditSubDialog subRequest={subRequest} requestItemsGroupByPlatform={requestItemsGroupByPlatform} />
+              <EditSubDialog subRequest={subRequest} requestItemsGroupByPlatform={purchaseRequest?.requestItemsGroupByPlatform} />
               {expanded && (
                 <Formik
-                  enableReinitialize
                   initialValues={initialValues}
                   validationSchema={validationSchema}
                   onSubmit={async (values, actions) => {
@@ -177,7 +187,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                         const details = quotationDetails.map((d) => ({
                           requestItemId: d.requestItemId,
                           quantity: d.quantity || 1,
-                          currency: d.currency,
+                          currency: values.currency,
                           basePrice: Number(d.basePrice ?? 0),
                           serviceFee: Number(d.serviceFee ?? 0),
                         }));
@@ -191,6 +201,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                           note: values.note,
                           totalPriceBeforeExchange: Number(values.totalPriceBeforeExchange),
                           fees,
+                          currency: values.currency,
                           details,
                         };
                         await createQuotationOnline(payload).unwrap();
@@ -199,11 +210,11 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                           requestItemId: d.requestItemId,
                           quantity: d.quantity || 1,
                           hsCodeId: d.hsCodeId,
-                          region: d.region,
+                          region: values.region,
                           basePrice: Number(d.basePrice ?? 0),
                           serviceFee: Number(d.serviceFee ?? 0),
                           note: d.note,
-                          currency: d.currency,
+                          currency: values.currency,
                         }));
                         const payload = {
                           subRequestId: subRequest.id,
@@ -213,8 +224,10 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                           expiredDate,
                           totalWeightEstimate: Number(values.totalWeightEstimate || 0),
                           packageType: values.packageType,
-                          shipper: { ...values.shipper },
+                          shipper: { ...values.shipper, ...(values.region ? { shipmentCountryCode: values.region } : {}) },
                           recipient: { ...values.recipient },
+                          region: values.region,
+                          currency: values.currency,
                         };
                         await createQuotationOffline(payload).unwrap();
                       }
@@ -226,23 +239,31 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                     actions.setSubmitting(false);
                   }}
                 >
-                  {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+                  {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue }) => (
                     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                      {console.log(values)}
+
+                      {/* Group-level currency */}
                       <div>
-                        <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
-                        <Textarea
-                          name="note"
-                          placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
-                          value={values.note}
-                          onChange={e => {
+                        <label className="block font-medium mb-1">Tiền tệ</label>
+                        <select
+                          name="currency"
+                          className="w-full px-3 py-2 border rounded"
+                          value={values.currency}
+                          onChange={(e) => {
                             handleChange(e);
-                            dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
+                            dispatch(setGroupCurrency({ subRequestId: subRequest.id, currency: e.target.value }));
                           }}
                           onBlur={handleBlur}
-                        />
-                        {touched.note && errors.note && (
-                          <div className="text-red-500 text-xs">{errors.note}</div>
+                        >
+                          <option value="">Chọn tiền tệ</option>
+                          {CURRENCY.map((currency) => (
+                            <option key={currency.value} value={currency.value}>
+                              {currency.label}
+                            </option>
+                          ))}
+                        </select>
+                        {touched.currency && errors.currency && (
+                          <div className="text-red-500 text-xs">{errors.currency}</div>
                         )}
                       </div>
 
@@ -269,9 +290,33 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                           </div>
                         </>
                       )}
-
                       {requestType === "OFFLINE" && (
                         <>
+                          {/* Group-level region (OFFLINE) */}
+                          <div>
+                            <label className="block font-medium mb-1">Khu vực</label>
+                            <select
+                              name="region"
+                              className="w-full px-3 py-2 border rounded"
+                              value={values.region}
+                              onChange={(e) => {
+                                handleChange(e);
+                                dispatch(setGroupRegion({ subRequestId: subRequest.id, region: e.target.value }));
+                                setFieldValue('shipper.shipmentCountryCode', e.target.value);
+                              }}
+                              onBlur={handleBlur}
+                            >
+                              <option value="">Chọn khu vực</option>
+                              {REGION.map((region) => (
+                                <option key={region.value} value={region.value}>
+                                  {region.label}
+                                </option>
+                              ))}
+                            </select>
+                            {touched.region && errors.region && (
+                              <div className="text-red-500 text-xs">{errors.region}</div>
+                            )}
+                          </div>
                           <div>
                             <label className="block font-medium mb-1">Tổng khối lượng ước tính (KG)</label>
                             <Input
@@ -313,7 +358,10 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                               <Input name="shipper.shipmentPhone" placeholder="Số điện thoại người gửi" value={values.shipper.shipmentPhone} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
                               <Input name="shipper.shipmentStreetLine" placeholder="Địa chỉ" value={values.shipper.shipmentStreetLine} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
                               <Input name="shipper.shipmentCity" placeholder="Thành phố" value={values.shipper.shipmentCity} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
-                              <Input name="shipper.shipmentCountryCode" placeholder="Mã quốc gia (VD: US)" value={values.shipper.shipmentCountryCode} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
+                              <Input name="shipper.shipmentCountryCode" placeholder="Mã quốc gia (VD: VN)" value={values.shipper.shipmentCountryCode} readOnly className="mb-2" />
+                              {values?.region === "US" && (
+                                <Input name="shipper.shipmentStateOrProvinceCode" placeholder="Tiểu bang" value={values.shipper.shipmentStateOrProvinceCode} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
+                              )}
                               <Input name="shipper.shipmentPostalCode" placeholder="Mã bưu điện" value={values.shipper.shipmentPostalCode} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
                             </div>
                             <div>
@@ -325,6 +373,19 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, r
                               <Input name="recipient.recipientCountryCode" placeholder="Mã quốc gia (VD: VN)" value={values.recipient.recipientCountryCode} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
                               <Input name="recipient.recipientPostalCode" placeholder="Mã bưu điện" value={values.recipient.recipientPostalCode} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
                             </div>
+                          </div>
+                          <div>
+                            <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
+                            <Textarea
+                              name="note"
+                              placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
+                              value={values.note}
+                              onChange={e => {
+                                handleChange(e);
+                                dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
+                              }}
+                              onBlur={handleBlur}
+                            />
                           </div>
                         </>
                       )}

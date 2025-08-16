@@ -12,9 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import SystemConfig from "@/containers/BusinessManager/SystemConfig/SystemConfig";
 
-export function QuotationForm({ requestType, product, errors = {}, onChange }) {
+export function QuotationForm({ purchaseRequest, product, errors = {}, onChange }) {
   const [hsOpen, setHsOpen] = useState(false);
-
   // Hàm nhận HS code từ bảng
   const handleTakeHsCode = (code) => {
     onChange("hsCodeId", code);
@@ -26,27 +25,6 @@ export function QuotationForm({ requestType, product, errors = {}, onChange }) {
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <Label>{product?.productName || "Sản phẩm"}</Label>
-        </div>
-
-        <div>
-          <Label>Tiền tệ</Label>
-          <select
-            name="currency"
-            value={product?.currency || ""}
-            onChange={(e) => onChange("currency", e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded"
-          >
-            <option value="">Chọn tiền tệ</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="CNY">CNY</option>
-            <option value="JPY">JPY</option>
-            <option value="KRW">KRW</option>
-            <option value="GBP">GBP</option>
-          </select>
-          {errors?.currency && (
-            <div className="text-red-500 text-xs">{errors.currency}</div>
-          )}
         </div>
 
         <div>
@@ -63,7 +41,7 @@ export function QuotationForm({ requestType, product, errors = {}, onChange }) {
           )}
         </div>
 
-        {requestType === "OFFLINE" && (
+        {purchaseRequest?.requestType === "OFFLINE" && (
           <>
             <div>
               <Label>HS Code</Label>
@@ -82,31 +60,11 @@ export function QuotationForm({ requestType, product, errors = {}, onChange }) {
                 <div className="text-red-500 text-xs">{errors.hsCodeId}</div>
               )}
             </div>
-
-            <div>
-              <Label>Khu vực</Label>
-              <select
-                name="region"
-                value={product?.region || ""}
-                onChange={(e) => onChange("region", e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded"
-              >
-                <option value="">Chọn khu vực</option>
-                <option value="US">Mỹ</option>
-                <option value="UK">Anh</option>
-                <option value="JP">Nhật bản</option>
-                <option value="KR">Hàn Quốc</option>
-                <option value="CHN">Trung Quốc</option>
-              </select>
-              {errors?.region && (
-                <div className="text-red-500 text-xs">{errors.region}</div>
-              )}
-            </div>
           </>
         )}
       </div>
 
-      {requestType === "OFFLINE" && (
+      {purchaseRequest?.requestType === "OFFLINE" && (
         <div>
           <Label>Ghi chú sản phẩm</Label>
           <Textarea

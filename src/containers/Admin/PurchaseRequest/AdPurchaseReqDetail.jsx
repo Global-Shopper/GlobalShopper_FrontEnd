@@ -103,17 +103,14 @@ function AdPurchaseReqDetail() {
             {/* Product List */}
             <div className="h-[calc(100vh-100px)] overflow-y-auto">
               <ProductList
-                subRequests={req.subRequests || []}
+                purchaseRequest={req}
                 selectedProductId={selectedProductId}
                 expandedSubRequest={expandedSubRequest}
-                status={req.status}
                 onProductClick={handleProductClick}
                 onToggleSubRequestExpansion={toggleSubRequestExpansion}
-                requestType={req.requestType}
                 isGroupingMode={isGroupingMode}
                 onCreateGroup={handleCreateGroup}
                 onExitGroupingMode={handleExitGroupingMode}
-                requestItemsGroupByPlatform={req.requestItemsGroupByPlatform}
               />
             </div>
           </div>

@@ -71,10 +71,10 @@ export const getFedexCreateShipPayload = (weightValue, shipper, recipient, prefe
     requestedShipment: {
       shipper: {
         address: {
-          postalCode: "30301",
-          streetLines: ["22/12/3 Louis"],
-          city: "Atlanta",
-          countryCode: "US",
+          postalCode: shipper?.shipmentPostalCode,
+          streetLines: [shipper?.shipmentStreetLine],
+          city: shipper?.shipmentCity,
+          countryCode: shipper?.shipmentCountryCode,
           stateOrProvinceCode: "GA"
         },
         contact: {
