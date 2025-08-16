@@ -64,7 +64,6 @@ export function QuotationForm({ purchaseRequest, product, errors = {}, onChange 
         )}
       </div>
 
-      {purchaseRequest?.requestType === "OFFLINE" && (
         <div>
           <Label>Ghi chú sản phẩm</Label>
           <Textarea
@@ -77,7 +76,6 @@ export function QuotationForm({ purchaseRequest, product, errors = {}, onChange 
             <div className="text-red-500 text-xs">{errors.note}</div>
           )}
         </div>
-      )}
       <Dialog open={hsOpen} onOpenChange={setHsOpen}>
         <DialogContent
           className="

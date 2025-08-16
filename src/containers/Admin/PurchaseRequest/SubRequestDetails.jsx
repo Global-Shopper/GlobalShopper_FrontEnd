@@ -27,6 +27,7 @@ import { PACKAGE_TYPE } from "@/const/packageType"
 import { Select } from "@/components/ui/select"
 import { CURRENCY } from "@/const/currency"
 import { REGION } from "@/const/region"
+import { ONLINE_FEE } from "@/const/onlineFee"
 
 export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, purchaseRequest, children }) {
   // Remove manual dialog open state; will use DialogTrigger pattern
@@ -57,7 +58,6 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
           quantity: item.quantity,
           hsCodeId: "",
           basePrice: 0,
-          serviceFee: 1,
           note: "",
         }))
       }));
@@ -74,8 +74,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
     currency: currency || "VND",
     region: region || "",
     // ONLINE-only
-    totalPriceBeforeExchange: "",
-    feesText: "",
+    fees: [],
     // OFFLINE-only
     totalWeightEstimate: "",
     packageType: PACKAGE_TYPE?.[0]?.type,
@@ -191,9 +190,12 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                           basePrice: Number(d.basePrice ?? 0),
                           serviceFee: Number(d.serviceFee ?? 0),
                         }));
-                        const fees = values.feesText
-                          ? values.feesText.split(',').map((s) => s.trim()).filter(Boolean)
-                          : [];
+                        const fees = (values.fees || [])
+                          .map((f) => ({
+                            feeName: (f.feeName === "__OTHER__" ? (f.customName || "") : (f.feeName || "")).trim(),
+                            amount: Number(f.amount ?? 0),
+                          }))
+                          .filter((f) => f.feeName && !Number.isNaN(f.amount));
                         const payload = {
                           subRequestId: subRequest.id,
                           shippingEstimate: Number(values.shippingEstimate),
@@ -288,6 +290,85 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                               <div className="text-red-500 text-xs">{errors.shippingEstimate}</div>
                             )}
                           </div>
+                          {/* Dynamic fees list */}
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="block font-medium">Các loại phí (tuỳ chọn)</label>
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setFieldValue('fees', [...(values.fees || []), { feeName: '', customName: '', amount: '' }])}
+                              >
+                                Thêm phí
+                              </Button>
+                            </div>
+                            <div className="space-y-2">
+                              {(values.fees || []).map((fee, idx) => (
+                                <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
+                                  <div className="md:col-span-6">
+                                    <label className="text-xs text-muted-foreground">Tên phí</label>
+                                    <select
+                                      name={`fees[${idx}].feeName`}
+                                      className="w-full px-3 py-2 border rounded"
+                                      value={fee.feeName || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFieldValue(`fees[${idx}].feeName`, val);
+                                        if (val !== '__OTHER__') {
+                                          setFieldValue(`fees[${idx}].customName`, '');
+                                        }
+                                      }}
+                                    >
+                                      <option value="">Chọn loại phí</option>
+                                      {ONLINE_FEE.map((name) => (
+                                        <option key={name} value={name}>{name}</option>
+                                      ))}
+                                      <option value="__OTHER__">Khác...</option>
+                                    </select>
+                                  </div>
+                                  {fee.feeName === '__OTHER__' && (
+                                    <div className="md:col-span-4">
+                                      <label className="text-xs text-muted-foreground">Tên phí tuỳ chỉnh</label>
+                                      <Input
+                                        name={`fees[${idx}].customName`}
+                                        placeholder="Nhập tên phí"
+                                        value={fee.customName || ''}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                    </div>
+                                  )}
+                                  <div className={fee.feeName === '__OTHER__' ? 'md:col-span-2' : 'md:col-span-4'}>
+                                    <label className="text-xs text-muted-foreground">Số tiền</label>
+                                    <Input
+                                      name={`fees[${idx}].amount`}
+                                      type="number"
+                                      step="0.01"
+                                      placeholder={`Số tiền (${values.currency})`}
+                                      value={fee.amount}
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                    />
+                                  </div>
+                                  <div className="col-span-2 md:col-span-2 flex justify-end self-end mb-1">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="text-red-600"
+                                      onClick={() => {
+                                        const next = [...(values.fees || [])];
+                                        next.splice(idx, 1);
+                                        setFieldValue('fees', next);
+                                      }}
+                                    >
+                                      Xoá
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </>
                       )}
                       {requestType === "OFFLINE" && (
@@ -374,21 +455,21 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                               <Input name="recipient.recipientPostalCode" placeholder="Mã bưu điện" value={values.recipient.recipientPostalCode} onChange={handleChange} onBlur={handleBlur} className="mb-2" />
                             </div>
                           </div>
-                          <div>
-                            <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
-                            <Textarea
-                              name="note"
-                              placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
-                              value={values.note}
-                              onChange={e => {
-                                handleChange(e);
-                                dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
-                              }}
-                              onBlur={handleBlur}
-                            />
-                          </div>
                         </>
                       )}
+                      <div>
+                        <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
+                        <Textarea
+                          name="note"
+                          placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
+                          value={values.note}
+                          onChange={e => {
+                            handleChange(e);
+                            dispatch(setGroupNote({ subRequestId: subRequest.id, note: e.target.value }));
+                          }}
+                          onBlur={handleBlur}
+                        />
+                      </div>
 
                       <div className="flex gap-2 mt-4">
                         {subRequest.status !== "REJECTED" && (
