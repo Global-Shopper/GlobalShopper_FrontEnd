@@ -57,7 +57,7 @@ const WalletOverview = () => {
   }
   
 const getTransactionIcon = (type, status) => {
-  if (type === 'DEPOSIT') {
+  if (type === 'DEPOSIT' || type === 'REFUND') {
     return {
       icon: BanknoteArrowUp,
       color:
@@ -77,7 +77,7 @@ const getTransactionIcon = (type, status) => {
           ? 'bg-yellow-100'
           : 'bg-red-100',
     }
-  } else if (type === 'WITHDRAW') {
+  } else if (type === 'WITHDRAW' || type === 'CHECKOUT') {
     return {
       icon: BanknoteArrowDown,
       color:
@@ -110,7 +110,7 @@ const getCreditUpdateText = (type, amount, status) => {
   const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   if (status === 'FAIL') {
     return (
-      <span className="flex flex-col items-start text-gray-500">
+      <span className="flex space-x-1 items-start text-gray-500">
         <span>Thất bại</span>
         <span>{formattedAmount}</span>
       </span>
@@ -118,19 +118,19 @@ const getCreditUpdateText = (type, amount, status) => {
   }
   if (status === 'PENDING') {
     return (
-      <span className="flex flex-col items-start text-yellow-600">
+      <span className="flex space-x-1 items-start text-yellow-600">
         <span>Đang xử lý</span>
         <span>{formattedAmount}</span>
       </span>
     );
   }
-  if (type === 'DEPOSIT') {
+  if (type === 'DEPOSIT' || type === 'REFUND') {
     if (status === 'SUCCESS') {
       return <span className="text-green-600">+{formattedAmount}</span>;
     } else {
       return <span className="text-red-600">+{formattedAmount}</span>;
     }
-  } else if (type === 'WITHDRAW') {
+  } else if (type === 'WITHDRAW' || type === 'CHECKOUT') {
     if (status === 'SUCCESS') {
       return <span className="text-red-600">-{formattedAmount}</span>;
     } else {
@@ -240,19 +240,24 @@ const getCreditUpdateText = (type, amount, status) => {
                     return (
                       <div
                         key={transaction.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0">
                           <div className={`p-2 rounded-lg ${bg}`}>
                             <Icon className={`h-4 w-4 ${color}`} />
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{transaction.description}</p>
-                            <p className="text-sm text-gray-600">{formatDate(transaction.updatedAt)}</p>
-                          </div>
                         </div>
-                        <div>
-                          {getCreditUpdateText(transaction.type,transaction.amount, transaction.status)}
+                        <div className="flex-1 min-w-0 ml-4">
+                          <p className="font-medium text-gray-900">{transaction.description}</p>
+                          <p className="text-sm text-gray-600">{formatDate(transaction.updatedAt)}</p>
+                        </div>
+                        <div className="flex flex-col items-end space-y-2">
+                          <div className="text-sm text-gray-600">
+                            {getCreditUpdateText(transaction.type,transaction.amount, transaction.status)}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            Số dư: {formatCurrency(transaction.balanceAfter)}
+                          </div>
                         </div>
                       </div>
                     )

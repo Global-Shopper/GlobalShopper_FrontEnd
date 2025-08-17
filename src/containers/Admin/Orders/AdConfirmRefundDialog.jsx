@@ -16,8 +16,9 @@ import { Formik, Form } from "formik"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
+import { formatCurrency } from "@/utils/formatCurrency"
 
-export function AdConfirmRefundDialog({ type, refundId }) {
+export function AdConfirmRefundDialog({ type, refundId, totalPrice = 0, initialPercentage = 100 }) {
   const [approveRefund, { isLoading: isApproveLoading }] = useApproveRefundMutation()
   const [rejectRefund, { isLoading: isRejectLoading }] = useRejectRefundMutation()
   const handleApproveRefund = async (values, { setSubmitting }) => {
@@ -49,7 +50,14 @@ export function AdConfirmRefundDialog({ type, refundId }) {
       </AlertDialogTrigger>
       <AlertDialogContent>
         {type === "approve" ? (
-          <Formik initialValues={{ percentage: 100 }} onSubmit={handleApproveRefund}>
+          <Formik
+            initialValues={{
+              percentage: initialPercentage,
+              amount: Math.round((Number(totalPrice) || 0) * (initialPercentage / 100)),
+            }}
+            enableReinitialize
+            onSubmit={handleApproveRefund}
+          >
             {({ values, setFieldValue, handleSubmit, isSubmitting }) => (
               <Form onSubmit={handleSubmit} className="space-y-4">
                 <AlertDialogHeader>
@@ -58,6 +66,27 @@ export function AdConfirmRefundDialog({ type, refundId }) {
                     Chọn phần trăm số tiền hoàn lại cho khách hàng
                   </AlertDialogDescription>
                 </AlertDialogHeader>
+                <div className="space-y-1">
+                  <div className="text-sm font-medium text-gray-700">Số tiền xử lý</div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      name="amount"
+                      value={values.amount}
+                      min={0}
+                      max={totalPrice}
+                      onChange={(e) => {
+                        let amt = Number(e.target.value)
+                        if (Number.isNaN(amt)) amt = 0
+                        amt = Math.max(0, Math.min(amt, Number(totalPrice) || 0))
+                        const pct = (Number(totalPrice) || 0) > 0 ? Math.round((amt / Number(totalPrice)) * 100) : 0
+                        setFieldValue('amount', amt)
+                        setFieldValue('percentage', pct)
+                      }}
+                    />
+                    <span className="text-xs text-gray-600">{formatCurrency(values.amount || 0, "VND", "vn")}</span>
+                  </div>
+                </div>
                 <div className="flex items-center gap-3 w-[100px]">
                   <Input
                     type="number"
@@ -71,21 +100,28 @@ export function AdConfirmRefundDialog({ type, refundId }) {
                       if (Number.isNaN(v)) v = 0
                       v = Math.max(0, Math.min(100, v))
                       setFieldValue('percentage', v)
+                      const amt = Math.round(((Number(totalPrice) || 0) * v) / 100)
+                      setFieldValue('amount', amt)
                     }}
                   />
                   <span className="text-sm text-gray-600">%</span>
                 </div>
                 <Slider
                   value={[values.percentage]}
-                  onValueChange={(v) => setFieldValue('percentage', v[0])}
+                  onValueChange={(v) => {
+                    const v0 = v[0]
+                    setFieldValue('percentage', v0)
+                    const amt = Math.round(((Number(totalPrice) || 0) * v0) / 100)
+                    setFieldValue('amount', amt)
+                  }}
                   max={100}
                   step={1}
                 />
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={isSubmitting || isApproveLoading}>Đóng</AlertDialogCancel>
-                  <AlertDialogAction type="submit" disabled={isSubmitting || isApproveLoading}>
+                  <Button type="submit" disabled={isSubmitting || isApproveLoading}>
                     Chấp nhận
-                  </AlertDialogAction>
+                  </Button>
                 </AlertDialogFooter>
               </Form>
             )}

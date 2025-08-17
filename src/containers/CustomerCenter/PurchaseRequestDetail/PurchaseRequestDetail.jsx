@@ -70,7 +70,7 @@ const PurchaseRequestDetail = () => {
   // Main content render
   return (
     <div className="max-w-7xl mx-auto py-8 px-3">
-      <RequestInfo requestData={purchaseRequestData} />
+      <RequestInfo requestData={purchaseRequestData} expired={expired} />
 
       <div className="flex flex-col md:flex-row md:gap-6 mb-4">
         {purchaseRequestData.admin && <div className="flex-1">

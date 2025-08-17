@@ -90,7 +90,7 @@ const AdOrderDetailHeader = ({ order }) => {
           )}
           <HistoryDialog history={order.history} />
           {order.status === "ORDER_REQUESTED" && <AdUpdateShipDialog orderId={order.id} />}
-          {order.status === "DELIVERED" && <AdRefundDialog orderId={order.id} />}
+          {order.status === "DELIVERED" && <AdRefundDialog order={order} />}
         </div>
       </div>
     </div>
