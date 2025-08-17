@@ -16,7 +16,6 @@ function AdPurchaseReqDetail() {
     isError: isRequestError,
   } = useGetPurchaseRequestDetailQuery(id);
   const [selectedProductId, setSelectedProductId] = useState(undefined);
-  const [quotePrices, setQuotePrices] = useState({});
   const [expandedSubRequest, setExpandedSubRequest] = useState(null);
   const [isGroupingMode, setIsGroupingMode] = useState(false);
 
@@ -40,13 +39,16 @@ function AdPurchaseReqDetail() {
     return undefined;
   }, [req, selectedProductId]);
 
-  const handlePriceChange = (productId, price) => {
-    setQuotePrices((prev) => ({
-      ...prev,
-      [productId]: price,
-    }));
-  };
-
+  // Find the quotationForPurchase from the subRequest that contains the selected product
+  const selectedQuotationForPurchase = React.useMemo(() => {
+    if (req?.subRequests?.length > 0 && selectedProductId) {
+      const sub = req.subRequests.find((sr) =>
+        Array.isArray(sr.requestItems) && sr.requestItems.some((it) => it.id === selectedProductId)
+      );
+      return sub?.quotationForPurchase;
+    }
+    return undefined;
+  }, [req, selectedProductId]);
   const handleProductClick = (productId) => {
     setSelectedProductId(productId);
   };
@@ -115,10 +117,10 @@ function AdPurchaseReqDetail() {
             {selectedProduct && (
               <div className="sticky top-4 self-start col-span-3">
                 <ProductDetail
+                  requestType={req.requestType}
                   product={selectedProduct}
                   status={req.status}
-                  quotePrice={quotePrices[selectedProduct.id] || ""}
-                  onPriceChange={handlePriceChange}
+                  quotationForPurchase={selectedQuotationForPurchase}
                 />
               </div>
             )}

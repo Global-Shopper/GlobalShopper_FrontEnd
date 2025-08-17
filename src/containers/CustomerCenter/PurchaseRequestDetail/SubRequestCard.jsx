@@ -18,7 +18,7 @@ function StatusBadge({ status }) {
   );
 }
 
-function SubRequestItemCard({ item }) {
+function SubRequestItemCard({ item, subRequest, requestType }) {
   const [open, setOpen] = useState(false);
   const q = item.quotationDetail;
 
@@ -82,23 +82,17 @@ function SubRequestItemCard({ item }) {
                           <TableCell className="text-gray-600">Giá gốc</TableCell>
                           <TableCell>
                             <span className="font-semibold">
-                              {formatCurrency(q.basePrice, q.currency, getLocaleCurrencyFormat(q.currency))}
+                              {formatCurrency(q.basePrice, subRequest.quotationForPurchase.currency, getLocaleCurrencyFormat(subRequest.quotationForPurchase.currency))}
                             </span>
-                            <Badge variant="outline" className="ml-2">{q.currency}</Badge>
+                            <Badge variant="outline" className="ml-2">{subRequest.quotationForPurchase.currency}</Badge>
                           </TableCell>
                         </TableRow>
                         <TableRow className="border-b">
                           <TableCell className="text-gray-600">Phí dịch vụ</TableCell>
                           <TableCell>
-                            {formatCurrency(q.serviceFee, q.currency, getLocaleCurrencyFormat(q.currency))}
+                            {formatCurrency(q.serviceFee, subRequest.quotationForPurchase.currency, getLocaleCurrencyFormat(subRequest.quotationForPurchase.currency))}
                           </TableCell>
                         </TableRow>
-                        {/* <TableRow className="border-b">
-                          <TableCell className="text-gray-600">Tỉ giá</TableCell>
-                          <TableCell>
-                            {parseInt(q.exchangeRate)}{" "}{"VNĐ"} / {q.currency}
-                          </TableCell>
-                        </TableRow> */}
                         {q.taxRates?.map((tax, idx) => (
                           <TableRow key={idx} className="border-b">
                             <TableCell className="text-gray-600">
@@ -106,7 +100,7 @@ function SubRequestItemCard({ item }) {
                             </TableCell>
                             <TableCell>
                               {q.taxAmounts?.[tax.taxType] ?
-                                formatCurrency(q.taxAmounts[tax.taxType], q.currency, getLocaleCurrencyFormat(q.currency)) :
+                                formatCurrency(q.taxAmounts[tax.taxType], subRequest.quotationForPurchase.currency, getLocaleCurrencyFormat(subRequest.quotationForPurchase.currency)) :
                                 '-'}
                             </TableCell>
                           </TableRow>
@@ -114,13 +108,13 @@ function SubRequestItemCard({ item }) {
                         {q.totalTaxAmount > 0 && (
                           <TableRow className="border-b">
                             <TableCell className="text-gray-600">Tổng thuế</TableCell>
-                            <TableCell>{formatCurrency(q.totalTaxAmount, q.currency, getLocaleCurrencyFormat(q.currency))}</TableCell>
+                            <TableCell>{formatCurrency(q.totalTaxAmount, subRequest.quotationForPurchase.currency, getLocaleCurrencyFormat(subRequest.quotationForPurchase.currency))}</TableCell>
                           </TableRow>
                         )}
                         <TableRow className="border-b">
                           <TableCell className="text-gray-600">Tổng trước quy đổi</TableCell>
                           <TableCell>
-                            {formatCurrency(q.totalPriceBeforeExchange, q.currency, getLocaleCurrencyFormat(q.currency))}
+                            {formatCurrency(q.totalPriceBeforeExchange, subRequest.quotationForPurchase.currency, getLocaleCurrencyFormat(subRequest.quotationForPurchase.currency))}
                           </TableCell>
                         </TableRow>
                       </TableBody>
@@ -131,9 +125,11 @@ function SubRequestItemCard({ item }) {
                       <span>{formatCurrency(q.totalVNDPrice, "VND", getLocaleCurrencyFormat("VND"))}</span>
                     </div>
                     <div className="flex gap-2 justify-between">
+                      {console.log(subRequest)}
                       {q.note && <div className="text-md text-gray-600 mt-1">Ghi chú của sản phẩm: {q.note}</div>}
+
                       <div className="text-md text-gray-600 mt-1">
-                        Tỉ giá: {parseInt(q.exchangeRate)}{" "}{"VNĐ"} / {q.currency}
+                        Tỉ giá: {parseInt(q.exchangeRate)}{" "}{"VNĐ"} / {subRequest.quotationForPurchase.currency}
                       </div>
                     </div>
                   </CardContent>
@@ -148,6 +144,7 @@ function SubRequestItemCard({ item }) {
 }
 
 function SubRequestCard({ subRequest, expired, requestType }) {
+  console.log(subRequest);
   return (
     <div className="relative mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
       <div className="flex items-center gap-4 mb-2">
@@ -162,30 +159,37 @@ function SubRequestCard({ subRequest, expired, requestType }) {
       </div>
       <div className="mb-2">
         {subRequest.requestItems?.map((item) => (
-          <SubRequestItemCard key={item.id} item={item} />
+          <SubRequestItemCard key={item.id} item={item} subRequest={subRequest} requestType={requestType} />
         ))}
       </div>
       <div>
         {subRequest.quotationForPurchase ? (
           <div className="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
-            {subRequest.quotationForPurchase.note && (
-              <div className="text-xs text-gray-500">Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}</div>
-            )}
             {
               requestType === "ONLINE" &&
-                <div className="text-xs text-gray-700">
+              <>
+                {subRequest?.quotationForPurchase?.fees?.map((fee) =>
+                  <div className="text-sm text-gray-700">
+                    {fee.feeName}: {formatCurrency(fee.amount, fee.currency, getLocaleCurrencyFormat(fee.currency))}
+                  </div>
+                )}
+                <div className="text-sm text-gray-700">
                   Phí vận chuyển: <span className="font-semibold">
                     {subRequest.quotationForPurchase.shippingEstimate?.toLocaleString() || '0'} VND
                   </span>
                 </div>
+              </>
             }
+            {subRequest.quotationForPurchase.note && (
+              <div className="text-sm text-gray-500">Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}</div>
+            )}
           </div>
         ) : (
           <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
             Đang chờ báo giá
           </div>
         )}
-        <PaymentDialog subRequest={subRequest} expired={expired} requestType={requestType} />
+        <PaymentDialog subRequest={subRequest} expired={expired} requestType={requestType} quotationForPurchase={subRequest.quotationForPurchase} />
       </div>
     </div>
   );
