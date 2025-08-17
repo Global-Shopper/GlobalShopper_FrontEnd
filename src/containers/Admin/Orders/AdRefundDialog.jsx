@@ -7,8 +7,11 @@ import { AdConfirmRefundDialog } from './AdConfirmRefundDialog'
 import { getStatusColor, getStatusText } from '@/utils/statusHandler'
 import { formatCurrency } from '@/utils/formatCurrency'
 
-const AdRefundDialog = ({ orderId }) => {
-  const { data: refundOrder, isLoading: isRefundLoading } = useGetRefundByOrderIdQuery(orderId)
+const AdRefundDialog = ({ order }) => {
+  console.log(order)
+  const { data: refundOrder, isLoading: isRefundLoading } = useGetRefundByOrderIdQuery(order.id)
+  const totalPrice = Number(order.totalPrice || 0) + Number(order.shippingFee || 0)
+  const initialPercentage = totalPrice > 0 ? Math.round(((Number(refundOrder?.amount) || 0) / totalPrice) * 100) : 0
 
   const canProcess = !!refundOrder && refundOrder.status === 'PENDING';
   return (
@@ -45,12 +48,12 @@ const AdRefundDialog = ({ orderId }) => {
                 <p className="text-sm text-gray-800 whitespace-pre-line">{refundOrder.reason || '-'}</p>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-700 mb-1">Minh chứng</div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Hình ảnh</div>
                 {Array.isArray(refundOrder.evidence) && refundOrder.evidence.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {refundOrder.evidence.map((url, idx) => (
                       <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="block">
-                        <img src={url} alt={`evidence-${idx + 1}`} className="w-full h-24 object-cover rounded-lg border" />
+                        <img src={url} alt={`evidence-${idx + 1}`} className="w-full h-24 object-contain rounded-lg border" />
                       </a>
                     ))}
                   </div>
@@ -62,6 +65,11 @@ const AdRefundDialog = ({ orderId }) => {
                 <div className="text-sm font-medium text-gray-700">Số tiền yêu cầu hoàn:</div>
                 <div className="text-sm text-gray-900">{formatCurrency(refundOrder.amount || 0, "VND", "vn")}</div>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium text-gray-700">Tổng tiền:</div>
+                <div className="text-sm text-gray-900">{formatCurrency(totalPrice, "VND", "vn")}</div>
+              </div>
+              
             </div>
           )}
         </div>
@@ -72,8 +80,8 @@ const AdRefundDialog = ({ orderId }) => {
           {/* Approve/Reject actions - only when refundable and not loading */}
           {canProcess && !isRefundLoading && (
             <>
-              <AdConfirmRefundDialog type="approve" refundId={refundOrder?.id} />
-              <AdConfirmRefundDialog type="reject" refundId={refundOrder?.id} />
+              <AdConfirmRefundDialog type="approve" refundId={refundOrder?.id} totalPrice={totalPrice} initialPercentage={initialPercentage}/>
+              <AdConfirmRefundDialog type="reject" refundId={refundOrder?.id}/>
             </>
           )}
         </DialogFooter>

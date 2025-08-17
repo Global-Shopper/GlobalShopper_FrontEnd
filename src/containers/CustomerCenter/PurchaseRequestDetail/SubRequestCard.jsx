@@ -18,7 +18,7 @@ function StatusBadge({ status }) {
   );
 }
 
-function SubRequestItemCard({ item, subRequest, requestType }) {
+function SubRequestItemCard({ item, subRequest }) {
   const [open, setOpen] = useState(false);
   const q = item.quotationDetail;
 
@@ -185,7 +185,7 @@ function SubRequestCard({ subRequest, expired, requestType }) {
             )}
           </div>
         ) : (
-          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
+          !expired && <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
             Đang chờ báo giá
           </div>
         )}
