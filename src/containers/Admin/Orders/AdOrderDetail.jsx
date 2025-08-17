@@ -37,7 +37,7 @@ const AdOrderDetail = () => {
           </div>
           <div className="space-y-4 grid grid-cols-5 col-span-4 gap-6">
             <div className="sticky top-4 self-start col-span-3">
-              <AdOrderItemDetail item={selectedItem} />
+              <AdOrderItemDetail item={selectedItem} currency={order?.currency} />
             </div>
             <div className="sticky top-4 self-start col-span-2">
               <CustomerInfoCard customer={order.customer} shippingAddress={order.shippingAddress}/>

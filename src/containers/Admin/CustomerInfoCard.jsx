@@ -16,31 +16,31 @@ export function CustomerInfoCard({ customer, shippingAddress }) {
       <CardContent className="space-y-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={customer.avatar || "/placeholder.svg"} alt={customer.name} />
-            <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={customer?.avatar || "/placeholder.svg"} alt={customer?.name || 'Khách hàng'} />
+            <AvatarFallback>{customer?.name?.charAt(0) || '?'}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-semibold">{customer.name}</div>
+            <div className="font-semibold">{customer?.name || 'Khách hàng'}</div>
           </div>
         </div>
         <Separator />
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-muted-foreground" />
-            <span>{customer.email}</span>
+            <span>{customer?.email || '—'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Phone className="h-4 w-4 text-muted-foreground" />
-            <span>{customer.phone}</span>
+            <span>{customer?.phone || shippingAddress?.phoneNumber || '—'}</span>
           </div>
           <div className="flex items-start gap-2">
             <MapPin className="flex-shrink-0 h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
-              <div className="font-medium">{shippingAddress.name}</div>
-              <div className="text-muted-foreground">{shippingAddress.location}</div>
-              <div className="text-muted-foreground">{shippingAddress.phoneNumber}</div>
-              <Badge variant="secondary" className="mt-1 text-xs">
-                {shippingAddress.tag}
+              <div className="font-medium">{shippingAddress?.name || '—'}</div>
+              <div className="text-muted-foreground">{shippingAddress?.location || shippingAddress?.address || '—'}</div>
+              <div className="text-muted-foreground">{shippingAddress?.phoneNumber || customer?.phone || '—'}</div>
+              <Badge variant="default" className="mt-1 text-xs">
+                {shippingAddress?.tag || 'Mặc định'}
               </Badge>
             </div>
           </div>

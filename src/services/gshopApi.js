@@ -4,7 +4,7 @@ import endpoints from "../const/endpoints";
 
 const gshopApi = createApi({
   reducerPath: "gshopApi",
-  tagTypes: ["CustomerProfile", "ShippingAddress", "PurchaseRequest", "Wallet", "PurchaseRequestDetail"],
+  tagTypes: ["CustomerProfile", "ShippingAddress", "PurchaseRequest", "Wallet", "PurchaseRequestDetail", "RefundList", "WithdrawList"],
   baseQuery: axiosBaseQuery(),
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -380,6 +380,7 @@ const gshopApi = createApi({
         url: endpoints.REFUND,
         method: "POST",
       }),
+      invalidatesTags: ["RefundList"],
     }),
     getRefundList: builder.query({
       query: (data) => ({
@@ -387,6 +388,30 @@ const gshopApi = createApi({
         url: endpoints.REFUND,
         method: "GET",
       }),
+      providesTags: ["RefundList"],
+    }),
+    getRefundByOrderId: builder.query({
+      query: (orderId) => ({
+        url: `${endpoints.REFUND_ORDER}/${orderId}`,
+        method: "GET",
+      }),
+      providesTags: ["RefundList"],
+    }),
+    approveRefund: builder.mutation({
+      query: ({data, refundId}) => ({
+        data: data,
+        url: `${endpoints.REFUND_PROCESS}/${refundId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["RefundList"],
+    }),
+    rejectRefund: builder.mutation({
+      query: ({data, refundId}) => ({
+        data: data,
+        url: `${endpoints.REFUND_REJECT}/${refundId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["RefundList"],
     }),
     getAllAdmins: builder.query({
       query: (params) => ({
@@ -498,6 +523,9 @@ export const {
   useCreateFeedbackMutation,
   useCreateRefundMutation,
   useGetRefundListQuery,
+  useGetRefundByOrderIdQuery,
+  useApproveRefundMutation,
+  useRejectRefundMutation,
   useBanCustomerMutation,
   useUpdateCustomerMutation,
   useGetAllCustomersQuery,

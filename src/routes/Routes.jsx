@@ -33,6 +33,8 @@ import AdOrderDetail from "@/containers/Admin/Orders/AdOrderDetail";
 import OrderDetail from "@/containers/CustomerCenter/OrderDetail/OrderDetail";
 import ScrollToTop from "./ScrollToTop";
 import RefundList from "@/containers/CustomerCenter/Refund/RefundList";
+import AdRefundList from "@/containers/Admin/RefundRequests/AdRefundList";
+import AdWithdrawList from "@/containers/Admin/WithdrawRequests/AdWithdrawList";
 
 const AppRoutes = () => {
   return (
@@ -76,25 +78,7 @@ const AppRoutes = () => {
           <Route path="purchase-request/:id/edit" element={<PurchaseRequestEdit />} />
           <Route path="orders" element={<Orders />} />
           <Route path="orders/:id" element={<OrderDetail />} />
-          <Route
-            path="refunds"
-            element={
-              <div className="p-6">
-                <h1>Yêu cầu hoàn tiền</h1>
-                <p>Trang quản lý yêu cầu hoàn tiền</p>
-                <RefundList/>
-              </div>
-            }
-          />
-          <Route
-            path="settings"
-            element={
-              <div className="p-6">
-                <h1>Cài đặt</h1>
-                <p>Trang cài đặt tài khoản</p>
-              </div>
-            }
-          />
+          <Route path="refunds" element={<RefundList />} />
         </Route>
   
   			{/* Protected Admin Routes */}
@@ -106,6 +90,8 @@ const AppRoutes = () => {
   				/>
   				<Route path="orders" element={<AdOrderList />} />
   				<Route path="orders/:id" element={<AdOrderDetail />} />
+          <Route path="refunds" element={<AdRefundList />} />
+          <Route path="withdraw" element={<AdWithdrawList />} />
   			</Route>
   
   			{/* Protected Business Manager Routes */}

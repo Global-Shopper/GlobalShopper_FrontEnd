@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, LogOut, PackageSearch, Search, Settings } from "lucide-react";
+import { Banknote, Calendar, Home, Inbox, LogOut, Package, PackageSearch, Search, Settings, Undo2 } from "lucide-react";
 
 import {
   Sidebar,
@@ -26,12 +26,17 @@ const items = [
   {
     title: "Đơn hàng",
     url: "/admin/orders",
-    icon: Calendar,
+    icon: Package,
   },
   {
     title: "Yêu cầu hoàn tiền",
-    url: "/admin/refunds-list",
-    icon: Search,
+    url: "/admin/refunds",
+    icon: Undo2,
+  },
+  {
+    title: "Yêu cầu rút tiền",
+    url: "/admin/withdraw",
+    icon: Banknote,
   },
   {
     title: "Đăng xuất",

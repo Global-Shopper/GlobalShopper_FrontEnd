@@ -70,7 +70,7 @@ const OrderItemList = ({ order, selectedItemId, onSelect }) => {
 
               <div className="mt-2 text-sm text-gray-700">
                 <span>Giá: </span>
-                {item?.currency && <span className="font-medium">{formatCurrency(item.totalVNDPrice, 'VND', getLocaleCurrencyFormat('VND'))}</span>}
+                <span className="font-medium">{formatCurrency(item?.totalVNDPrice ?? 0, 'VND', getLocaleCurrencyFormat('VND'))}</span>
               </div>
             </div>
           </div>
