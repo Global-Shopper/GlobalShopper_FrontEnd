@@ -1,15 +1,17 @@
 import React from 'react'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExternalLink } from "lucide-react"
 import { formatCurrency, getLocaleCurrencyFormat } from '@/utils/formatCurrency'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
-const AdOrderItemDetail = ({ item }) => {
+const AdOrderItemDetail = ({ item, currency }) => {
   if (!item) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Chi tiết sản phẩm</CardTitle>
+
           <CardDescription>Chọn một sản phẩm ở danh sách bên trái để xem chi tiết.</CardDescription>
         </CardHeader>
       </Card>
@@ -59,7 +61,7 @@ const AdOrderItemDetail = ({ item }) => {
               <div className="space-y-2 text-sm">
                 <span className="font-medium">Thông số sản phẩm:</span>
                 <ul className="mt-1 space-y-1 text-xs">
-                  {item.variants.map((variant, idx) => (
+                  {Array.isArray(item.variants) && item.variants.map((variant, idx) => (
                     <li key={idx} className="bg-gray-50 px-2 py-1 rounded">
                       {variant}
                     </li>
@@ -80,11 +82,13 @@ const AdOrderItemDetail = ({ item }) => {
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Giá gốc</span>
-                  {item?.currency && (
-                    <span className="font-medium">
-                      {formatCurrency(item?.basePrice, item?.currency, getLocaleCurrencyFormat(item?.currency))}
-                    </span>
-                  )}
+                  <span className="font-medium">
+                    {currency ? (
+                      formatCurrency(item?.basePrice ?? 0, currency, getLocaleCurrencyFormat(currency))
+                    ) : (
+                      item?.basePrice ?? '-'
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Số lượng</span>
@@ -92,9 +96,16 @@ const AdOrderItemDetail = ({ item }) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Phí dịch vụ</span>
-                  <span className="font-medium">{formatCurrency(item?.serviceFee, item?.currency, getLocaleCurrencyFormat(item?.currency))}</span>
+                  <span className="font-medium">
+                    {currency ? (
+                      formatCurrency(item?.serviceFee ?? 0, currency, getLocaleCurrencyFormat(currency))
+                    ) : (
+                      item?.serviceFee ?? '-'
+                    )}
+                  </span>
                 </div>
               </div>
+
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tổng tiền</span>

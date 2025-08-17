@@ -1,15 +1,17 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, DollarSign } from 'lucide-react'
 import { formatDate } from '@/utils/parseDateTime'
 import { toast } from 'sonner'
 import { getStatusColor, getStatusText } from '@/utils/statusHandler'
-import { Calendar, Clock } from 'lucide-react'
+import { Calendar, Truck } from 'lucide-react'
 import HistoryDialog from '@/components/HistoryDialog'
 import { useCancelOrderMutation } from '@/services/gshopApi'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AdUpdateShipDialog } from './AdUpdateShipDialog'
+import AdRefundDialog from './AdRefundDialog'
+import { formatCurrency } from '@/utils/formatCurrency'
 
 const AdOrderDetailHeader = ({ order }) => {
   const [cancelOrder, { isLoading: isCancelLoading }] = useCancelOrderMutation()
@@ -65,8 +67,11 @@ const AdOrderDetailHeader = ({ order }) => {
               <span>Tạo: {formatDate(order.createdAt)}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span>Hết hạn: {formatDate(order.expiredAt)}</span>
+              <Truck className="h-4 w-4" />
+              <span>Mã vận đơn: {order?.trackingNumber || 'Chưa có'}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span>Phí giao hàng: {formatCurrency(order?.shippingFee || 0, 'VND', 'vn')}</span>
             </div>
           </div>
         </div>
@@ -85,6 +90,7 @@ const AdOrderDetailHeader = ({ order }) => {
           )}
           <HistoryDialog history={order.history} />
           {order.status === "ORDER_REQUESTED" && <AdUpdateShipDialog orderId={order.id} />}
+          {order.status === "DELIVERED" && <AdRefundDialog orderId={order.id} />}
         </div>
       </div>
     </div>

@@ -25,6 +25,14 @@ export const getStatusColor = (status) => {
       return "bg-green-100 text-green-800";
     case "DELIVERED":
       return "bg-green-100 text-green-800";
+    case "APPROVED":
+      return "bg-green-100 text-green-800";
+    case "REJECTED":
+      return "bg-red-100 text-red-800";
+    case "FAILED":
+      return "bg-red-100 text-red-800";
+    case "COMPLETED":
+      return "bg-green-100 text-green-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
@@ -58,6 +66,12 @@ export const getStatusText = (status) => {
       return "Đã giao hàng";
     case "REJECTED":
       return "Đã từ chối";
+    case "APPROVED":
+      return "Đã chấp nhận";
+    case "FAILED":
+      return "Đã thất bại";
+    case "COMPLETED":
+      return "Đã hoàn thành";
     default:
       return "Đã gửi";
   }
@@ -88,7 +102,9 @@ export const getStatusBadgeVariant = (status) => {
       return "default";
     case "REJECTED":
       return "destructive";
-		default:
+    case "APPROVED":
+      return "default";
+			default:
 			return "outline";
 	}
 };
