@@ -11,12 +11,12 @@ import { getFedexCreateShipPayload, getFedexRatePayload } from '@/utils/fedexPay
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 
-const PaymentDialog = ({ subRequest, expired, requestType }) => {
+const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase }) => {
   const navigate = useNavigate()
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
   const [directCheckout, { isLoading: isDirectCheckoutLoading }] = useDirectCheckoutMutation();
-  const shouldFetchRate = requestType === 'OFFLINE' && !!subRequest?.quotationForPurchase;
+  const shouldFetchRate = requestType === 'OFFLINE' && !!quotationForPurchase;
   const { data: rate, isLoading: isRateLoading } = useGetShipmentRateQuery(
     shouldFetchRate
       ? {
@@ -196,6 +196,12 @@ const PaymentDialog = ({ subRequest, expired, requestType }) => {
             </ul>
           </div>
         )}
+        {quotationForPurchase?.fees?.map((fee) => (
+          <div className="mb-3 text-sm flex justify-between">
+            <span>{fee.feeName}</span>
+            <span className="font-medium">{formatCurrency(fee.amount, fee.currency, getLocaleCurrencyFormat(fee.currency))}</span>
+          </div>
+        ))}
         {(requestType === 'OFFLINE' ? selectedShipCost != null : onlineShipCost != null) && (
           <div className="mb-3 text-sm flex justify-between">
             <span>Phí vận chuyển{requestType === 'OFFLINE' && selectedService?.serviceName ? ` (${selectedService.serviceName})` : ''}</span>

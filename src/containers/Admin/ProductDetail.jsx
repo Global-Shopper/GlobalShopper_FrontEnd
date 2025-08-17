@@ -7,7 +7,8 @@ import {
 } from "@/utils/formatCurrency";
 import productDefault from "@/assets/productDefault.png";
 
-export function ProductDetail({ product, status }) {
+export function ProductDetail({ product, status, requestType, quotationForPurchase }) {
+  const currency = quotationForPurchase?.currency || product?.quotationDetail?.currency;
   return (
     <Card>
       <CardContent className="space-y-4">
@@ -89,27 +90,22 @@ export function ProductDetail({ product, status }) {
                 <div className="grid grid-cols-1 gap-4 text-sm mb-3">
                   <div>
                     <span className="font-medium">Tiền tệ:</span>{" "}
-                    {product.quotationDetail.currency}
+                    {quotationForPurchase?.currency}
                   </div>
                   <div>
-                    <span className="font-medium">Tỉ giá:</span> 1{" "}
-                    {product.quotationDetail.currency} ={" "}
-                    {Math.floor(product.quotationDetail.exchangeRate)} VND
-                  </div>
-                  <div>
-                    <span className="font-medium">Giá sản phẩm:</span>{" "}
+                    <span className="font-medium">Giá gốc:</span>{" "}
                     {formatCurrency(
                       product.quotationDetail.basePrice,
-                      product.quotationDetail.currency,
-                      getLocaleCurrencyFormat(product.quotationDetail.currency)
+                      quotationForPurchase?.currency || currency,
+                      getLocaleCurrencyFormat(quotationForPurchase?.currency || currency)
                     )}
                   </div>
                   <div>
                     <span className="font-medium">Phí dịch vụ:</span>{" "}
                     {formatCurrency(
                       product.quotationDetail.serviceFee,
-                      product.quotationDetail.currency,
-                      getLocaleCurrencyFormat(product.quotationDetail.currency)
+                      currency,
+                      getLocaleCurrencyFormat(currency)
                     )}
                   </div>
                   <div>
@@ -122,8 +118,7 @@ export function ProductDetail({ product, status }) {
                   </div>
                 </div>
                 {/* Tax Rates Table */}
-                {product.quotationDetail.taxRates &&
-                  product.quotationDetail.taxRates.length > 0 && (
+                {requestType === "OFFLINE" && (
                     <div className="mb-3">
                       <span className="font-medium block mb-1">
                         Thuế áp dụng:
@@ -151,7 +146,7 @@ export function ProductDetail({ product, status }) {
                     </div>
                   )}
                 {/* Tax Amounts */}
-                {product.quotationDetail.taxAmounts && (
+                {requestType === "OFFLINE" && product.quotationDetail.taxAmounts && (
                   <div className="mb-3">
                     <span className="font-medium block mb-1">Tiền thuế:</span>
                     <ul className="list-disc list-inside text-xs">
@@ -161,10 +156,8 @@ export function ProductDetail({ product, status }) {
                             {taxType}:{" "}
                             {formatCurrency(
                               amount,
-                              product.quotationDetail.currency,
-                              getLocaleCurrencyFormat(
-                                product.quotationDetail.currency
-                              )
+                              currency,
+                              getLocaleCurrencyFormat(currency)
                             )}
                           </li>
                         )
@@ -173,20 +166,21 @@ export function ProductDetail({ product, status }) {
                   </div>
                 )}
                 <div className="grid grid-cols-1 gap-4 text-sm">
-                  <div>
+                  { requestType === "OFFLINE" &&
+                    <div>
                     <span className="font-medium">Tổng tiền thuế:</span>{" "}
                     {formatCurrency(
                       product.quotationDetail.totalTaxAmount,
-                      product.quotationDetail.currency,
-                      getLocaleCurrencyFormat(product.quotationDetail.currency)
+                      currency,
+                      getLocaleCurrencyFormat(currency)
                     )}
-                  </div>
+                  </div>}
                   <div>
                     <span className="font-medium">Tổng giá trước quy đổi:</span>{" "}
                     {formatCurrency(
                       product.quotationDetail.totalPriceBeforeExchange,
-                      product.quotationDetail.currency,
-                      getLocaleCurrencyFormat(product.quotationDetail.currency)
+                      currency,
+                      getLocaleCurrencyFormat(currency)
                     )}
                   </div>
                   <div>
