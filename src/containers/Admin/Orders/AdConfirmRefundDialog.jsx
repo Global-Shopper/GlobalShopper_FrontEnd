@@ -24,7 +24,7 @@ export function AdConfirmRefundDialog({ type, refundId, totalPrice = 0, initialP
   const handleApproveRefund = async (values, { setSubmitting }) => {
     try {
       const percentage = Number(values.percentage ?? 0)
-      await approveRefund({ refundId, data: { percentage } }).unwrap()
+      await approveRefund({ refundId, data: { refundRate: percentage / 100 } }).unwrap()
       toast.success("Yêu cầu hoàn tiền đã được chấp nhận.")
     } catch (error) {
       toast.error(`Lỗi khi chấp nhận yêu cầu hoàn tiền: ${error?.data?.message || error.message}`)
