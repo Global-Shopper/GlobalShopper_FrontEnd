@@ -117,7 +117,7 @@ const AdRefundList = () => {
             Lý do
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Minh chứng
+            Hình ảnh
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
             Số tiền
@@ -140,8 +140,27 @@ const AdRefundList = () => {
             <TableCell className="font-medium text-xs w-24 py-3 group-hover:text-blue-700">{refund.id}</TableCell>
             <TableCell className="font-medium py-3">{refund.orderId || '-'}</TableCell>
             <TableCell className="py-3 truncate max-w-[320px]" title={refund.reason}>{refund.reason || '-'}</TableCell>
-            <TableCell className="py-3">
-              {Array.isArray(refund.evidence) ? `${refund.evidence.length} tệp` : '0 tệp'}
+            <TableCell className="flex items-center gap-2 py-3">
+              {console.log(refund.evidence)}
+              {Array.isArray(refund.evidence) ? refund.evidence.map((e, index) => (
+                <>
+                  {index < 2 ? (
+                    <div key={e.id} className="flex items-center gap-2">
+                      <img
+                        src={e}
+                        alt={e}
+                        width={50}
+                        height={50}
+                        className="rounded-lg"
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative h-12 w-12 overflow-hidden rounded-md border">
+                      <span className="absolute inset-0 bg-black/50 text-white text-xs font-semibold flex items-center justify-center">+{refund.evidence.length - 2}</span>
+                    </div>
+                  )}
+                </>
+              )) : '-'}
             </TableCell>
             <TableCell className="py-3">{formatVNDWithoutSymbol(Number(refund.amount || 0).toFixed(0))}</TableCell>
             <TableCell className="py-3">

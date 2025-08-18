@@ -35,6 +35,7 @@ import ScrollToTop from "./ScrollToTop";
 import RefundList from "@/containers/CustomerCenter/Refund/RefundList";
 import AdRefundList from "@/containers/Admin/RefundRequests/AdRefundList";
 import AdWithdrawList from "@/containers/Admin/WithdrawRequests/AdWithdrawList";
+import WalletWithdraw from "@/containers/Wallet/WalletWithdraw";
 
 const AppRoutes = () => {
   return (
@@ -69,6 +70,7 @@ const AppRoutes = () => {
         <Route path="/account-center" element={<AccountCenterLayout />}>
           <Route path="wallet" element={<WalletOverview />} />
           <Route path="wallet/deposit" element={<WalletDeposit />} />
+          <Route path="wallet/withdraw" element={<WalletWithdraw />} />
           <Route index element={<CustomerProfile />} />
           <Route path="purchase-request-list" element={<PurchaseRequest />} />
           <Route

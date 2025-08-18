@@ -4,25 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Wallet,
   Plus,
-  ArrowUpRight,
-  ArrowDownLeft,
   DollarSign,
   BanknoteArrowUp,
   BanknoteArrowDown,
   Clock,
+  Minus,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useGetWalletQuery, useTransactionHistoryQuery } from '@/services/gshopApi'
+import { useAddBankAccountMutation, useGetBankAccountQuery, useGetWalletQuery, useTransactionHistoryQuery } from '@/services/gshopApi'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import PageLoading from '@/components/PageLoading'
 import { getPaginationInfo, PaginationBar } from '@/utils/Pagination'
+import AddBankAccountDialog from './AddBankAccountDialog'
 
 const WalletOverview = () => {
   const [currentPage, setCurrentPage] = useState(0)
+  const [showFullAcc, setShowFullAcc] = useState({})
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
   const { data: transactionsRes, isLoading: isTransactionLoading, isError: isTransactionError } =
     useTransactionHistoryQuery({ page: currentPage, size: 10, direction: 'DESC' })
+  const { data: bankAccount, isLoading: isBankAccountLoading } = useGetBankAccountQuery()
+  const [addBankAccount, { isLoading: isAddBankAccountLoading }] = useAddBankAccountMutation()
 
   const query = new URLSearchParams(location.search)
   const vnpResponseCode = query.get("vnp_ResponseCode")
@@ -55,90 +60,90 @@ const WalletOverview = () => {
       minute: '2-digit'
     })
   }
-  
-const getTransactionIcon = (type, status) => {
-  if (type === 'DEPOSIT' || type === 'REFUND') {
-    return {
-      icon: BanknoteArrowUp,
-      color:
-        status === 'SUCCESS'
-          ? 'text-green-600'
-          : status === 'FAIL'
-          ? 'text-gray-500'
-          : status === 'PENDING'
-          ? 'text-yellow-600'
-          : 'text-red-600',
-      bg:
-        status === 'SUCCESS'
-          ? 'bg-green-100'
-          : status === 'FAIL'
-          ? 'bg-gray-100'
-          : status === 'PENDING'
-          ? 'bg-yellow-100'
-          : 'bg-red-100',
-    }
-  } else if (type === 'WITHDRAW' || type === 'CHECKOUT') {
-    return {
-      icon: BanknoteArrowDown,
-      color:
-        status === 'SUCCESS'
-          ? 'text-red-600'
-          : status === 'FAIL'
-          ? 'text-gray-500'
-          : status === 'PENDING'
-          ? 'text-yellow-600'
-          : 'text-green-600',
-      bg:
-        status === 'SUCCESS'
-          ? 'bg-red-100'
-          : status === 'FAIL'
-          ? 'bg-gray-100'
-          : status === 'PENDING'
-          ? 'bg-yellow-100'
-          : 'bg-green-100',
-    }
-  }
-  return {
-    icon: Clock,
-    color: 'text-gray-600',
-    bg: 'bg-gray-100',
-  }
-}
 
-// Refactored getCreditUpdateText for new color logic and clarity
-const getCreditUpdateText = (type, amount, status) => {
-  const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-  if (status === 'FAIL') {
-    return (
-      <span className="flex space-x-1 items-start text-gray-500">
-        <span>Thất bại</span>
-        <span>{formattedAmount}</span>
-      </span>
-    );
-  }
-  if (status === 'PENDING') {
-    return (
-      <span className="flex space-x-1 items-start text-yellow-600">
-        <span>Đang xử lý</span>
-        <span>{formattedAmount}</span>
-      </span>
-    );
-  }
-  if (type === 'DEPOSIT' || type === 'REFUND') {
-    if (status === 'SUCCESS') {
-      return <span className="text-green-600">+{formattedAmount}</span>;
-    } else {
-      return <span className="text-red-600">+{formattedAmount}</span>;
+  const getTransactionIcon = (type, status) => {
+    if (type === 'DEPOSIT' || type === 'REFUND') {
+      return {
+        icon: BanknoteArrowUp,
+        color:
+          status === 'SUCCESS'
+            ? 'text-green-600'
+            : status === 'FAIL'
+              ? 'text-gray-500'
+              : status === 'PENDING'
+                ? 'text-yellow-600'
+                : 'text-red-600',
+        bg:
+          status === 'SUCCESS'
+            ? 'bg-green-100'
+            : status === 'FAIL'
+              ? 'bg-gray-100'
+              : status === 'PENDING'
+                ? 'bg-yellow-100'
+                : 'bg-red-100',
+      }
+    } else if (type === 'WITHDRAW' || type === 'CHECKOUT') {
+      return {
+        icon: BanknoteArrowDown,
+        color:
+          status === 'SUCCESS'
+            ? 'text-red-600'
+            : status === 'FAIL'
+              ? 'text-gray-500'
+              : status === 'PENDING'
+                ? 'text-yellow-600'
+                : 'text-green-600',
+        bg:
+          status === 'SUCCESS'
+            ? 'bg-red-100'
+            : status === 'FAIL'
+              ? 'bg-gray-100'
+              : status === 'PENDING'
+                ? 'bg-yellow-100'
+                : 'bg-green-100',
+      }
     }
-  } else if (type === 'WITHDRAW' || type === 'CHECKOUT') {
-    if (status === 'SUCCESS') {
-      return <span className="text-red-600">-{formattedAmount}</span>;
-    } else {
-      return <span className="text-green-600">-{formattedAmount}</span>;
+    return {
+      icon: Clock,
+      color: 'text-gray-600',
+      bg: 'bg-gray-100',
     }
   }
-  return <span className="text-gray-500">{formattedAmount}</span>;
-}
+
+  // Refactored getCreditUpdateText for new color logic and clarity
+  const getCreditUpdateText = (type, amount, status) => {
+    const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    if (status === 'FAIL') {
+      return (
+        <span className="flex space-x-1 items-start text-gray-500">
+          <span>Thất bại</span>
+          <span>{formattedAmount}</span>
+        </span>
+      );
+    }
+    if (status === 'PENDING') {
+      return (
+        <span className="flex space-x-1 items-start text-yellow-600">
+          <span>Đang xử lý</span>
+          <span>{formattedAmount}</span>
+        </span>
+      );
+    }
+    if (type === 'DEPOSIT' || type === 'REFUND') {
+      if (status === 'SUCCESS') {
+        return <span className="text-green-600">+{formattedAmount}</span>;
+      } else {
+        return <span className="text-red-600">+{formattedAmount}</span>;
+      }
+    } else if (type === 'WITHDRAW' || type === 'CHECKOUT') {
+      if (status === 'SUCCESS') {
+        return <span className="text-red-600">-{formattedAmount}</span>;
+      } else {
+        return <span className="text-green-600">-{formattedAmount}</span>;
+      }
+    }
+    return <span className="text-gray-500">{formattedAmount}</span>;
+  }
 
   if (isTransactionLoading) return <PageLoading />
   if (isTransactionError || !transactionsRes?.content) {
@@ -163,12 +168,20 @@ const getCreditUpdateText = (type, amount, status) => {
                 <p className="text-gray-600">Theo dõi số dư và lịch sử giao dịch</p>
               </div>
             </div>
-            <Button asChild>
-              <Link to="/account-center/wallet/deposit">
-                <Plus className="mr-2 h-4 w-4" />
-                Nạp tiền
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button>
+                <Link className="flex items-center gap-2" to="/account-center/wallet/withdraw">
+                  <Minus className="mr-2 h-4 w-4" />
+                  Rút tiền
+                </Link>
+              </Button>
+              <Button>
+                <Link className="flex items-center gap-2" to="/account-center/wallet/deposit">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nạp tiền
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -198,30 +211,82 @@ const getCreditUpdateText = (type, amount, status) => {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {/* Linked Bank Accounts */}
             <Card className="mt-6">
               <CardHeader>
-                <CardTitle>Thao tác nhanh</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Tài khoản ngân hàng liên kết</CardTitle>
+                  <AddBankAccountDialog />
+                </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <Button asChild className="w-full justify-start" variant="outline">
-                  <Link to="/account-center/wallet/deposit">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nạp tiền vào ví
-                  </Link>
-                </Button>
-                <Button asChild className="w-full justify-start" variant="outline">
-                  <Link to="/account-center/purchase-request-list?page=1&size=10">
-                    <ArrowUpRight className="mr-2 h-4 w-4" />
-                    Tạo yêu cầu mua hàng
-                  </Link>
-                </Button>
-                <Button asChild className="w-full justify-start" variant="outline">
-                  <Link to="/account-center/orders">
-                    <ArrowDownLeft className="mr-2 h-4 w-4" />
-                    Xem đơn hàng
-                  </Link>
-                </Button>
+              <CardContent>
+                {isBankAccountLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                ) : Array.isArray(bankAccount) && bankAccount.length > 0 ? (
+                  <div className="space-y-3">
+                    {bankAccount.map((acc) => {
+                      const last4 = acc.bankAccountNumber
+                        ? acc.bankAccountNumber.slice(-4)
+                        : ''
+                      const isShown = !!showFullAcc[acc.id]
+                      const displayNumber = isShown
+                        ? acc.bankAccountNumber
+                        : `****${last4}`
+                      return (
+                        <div
+                          key={acc.id}
+                          className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium text-gray-900">
+                                  {acc.accountHolderName}
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  className="h-8 px-2"
+                                  onClick={() =>
+                                    setShowFullAcc((prev) => ({ ...prev, [acc.id]: !prev[acc.id] }))
+                                  }
+                                >
+                                  {isShown ? (
+                                    <>
+                                      <EyeOff className="h-4 w-4 mr-1" />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Eye className="h-4 w-4 mr-1" />
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {acc.providerName} • {displayNumber} • Hết hạn {acc.expirationDate}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {acc.default && (
+                              <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                Mặc định
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-600">
+                    Chưa có tài khoản ngân hàng liên kết.
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -253,7 +318,7 @@ const getCreditUpdateText = (type, amount, status) => {
                         </div>
                         <div className="flex flex-col items-end space-y-2">
                           <div className="text-sm text-gray-600">
-                            {getCreditUpdateText(transaction.type,transaction.amount, transaction.status)}
+                            {getCreditUpdateText(transaction.type, transaction.amount, transaction.status)}
                           </div>
                           <div className="text-xs text-gray-600">
                             Số dư: {formatCurrency(transaction.balanceAfter)}
