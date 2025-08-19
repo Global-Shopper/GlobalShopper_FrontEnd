@@ -31,6 +31,36 @@ const initialState = {
 // Helper function to generate a unique ID
 const generateId = () => `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
+// Helper to extract the ecommerce platform/provider from a URL (hostname)
+const extractHost = (url) => {
+  try {
+    const u = new URL(url);
+    return u.hostname || '';
+  } catch {
+    return '';
+  }
+};
+
+// Map extension products to internal item structure
+const mapExtensionProductsToItems = (products = []) => {
+  return products.map((p) => ({
+    id: generateId(),
+    link: p?.url || '',
+    status: 'idle',
+    product: {
+      localImages: [],
+      name: p?.name || '',
+      description: '',
+      quantity: 1,
+      variants: [],
+      variantRows: [],
+      images: p?.mainImage ? [p.mainImage] : [],
+      link: p?.url || '',
+      ecommercePlatform: extractHost(p?.url || ''),
+    },
+  }));
+};
+
 
 const onlineReqSlice = createSlice({
   name: 'onlineReq',
@@ -160,6 +190,14 @@ const onlineReqSlice = createSlice({
       state.currentStep = action.payload;
     },
     
+    // Merge items using payload from the browser extension
+    setItemsFromExtension: (state, action) => {
+      const products = Array.isArray(action.payload) ? action.payload : [];
+      if (products.length === 0) return; // do nothing if empty
+      const mapped = mapExtensionProductsToItems(products);
+      state.items = [...mapped];
+    },
+
     // Reset the state
     resetOnlRequest: () => initialState,
   },
@@ -180,6 +218,7 @@ export const {
   removeImageUrl,
   setShippingAddressId,
   setCurrentStep,
+  setItemsFromExtension,
   resetOnlRequest,
 } = onlineReqSlice.actions;
 

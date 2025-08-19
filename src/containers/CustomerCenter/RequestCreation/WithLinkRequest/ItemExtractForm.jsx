@@ -124,7 +124,7 @@ export default function ItemExtractForm({ index }) {
           </Label>
           <div className="flex flex-wrap gap-3">
             {/* Show previews for images not yet uploaded (local only) */}
-            {item.localImages.map((url, idx) => (
+            {item.localImages.concat(item.images.filter((url) => !url.startsWith("http://res.cloudinary.com"))).map((url, idx) => (
               <div key={url} className="relative">
                 <img
                   src={url}

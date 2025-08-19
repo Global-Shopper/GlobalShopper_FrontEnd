@@ -4,12 +4,21 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Copy, ExternalLink, Home } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useEffect } from "react"
+import { useDispatch } from "react-redux"
+import { resetAllPurchaseReq } from "@/features/purchaseReq.action"
 
 export default function RequestSuccess({onClose, purchaseData}) {
+  const dispatch = useDispatch();
   const copyRequestId = () => {
     navigator.clipboard.writeText(purchaseData?.id || "")
     // You could add a toast notification here
   }
+  useEffect(() => {
+    return () => {
+      dispatch(resetAllPurchaseReq());
+    }
+  }, [dispatch]);
 
   return (
     <Card className="shadow-lg">

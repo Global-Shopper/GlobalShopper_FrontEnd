@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   onLineStatus: true,
+  grabberExtensionDialogOpen: false,
 };
 
 const appSlice = createSlice({
@@ -11,10 +12,14 @@ const appSlice = createSlice({
     setOnLineStatus: (state, action) => {
       state.onLineStatus = action.payload;
     },
+    setGrabberExtensionDialogOpen: (state, action) => {
+      state.grabberExtensionDialogOpen = action.payload;
+    },
   },
 });
 
 export const {
-  setOnLineStatus
+  setOnLineStatus,
+  setGrabberExtensionDialogOpen,
 } = appSlice.actions;
 export default appSlice.reducer;
