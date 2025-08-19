@@ -16,6 +16,16 @@ function App() {
       //
     }
   }, [isOnline])
+
+  useEffect(() => {
+    const listener = (event) => {
+      if (event.data.type === "FROM_EXTENSION") {
+        console.log("Data From Extension: " , event.data.products)
+      }
+    };
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
+  }, []);
   
   return (
     <>
