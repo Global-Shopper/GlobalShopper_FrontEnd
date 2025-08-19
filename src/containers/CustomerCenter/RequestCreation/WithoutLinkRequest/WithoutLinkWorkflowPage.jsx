@@ -12,8 +12,6 @@ import RequestSuccess from "../RequestSuccess";
 import { useCreateWithoutLinkPurchaseRequestMutation } from "@/services/gshopApi";
 import { toast } from "sonner";
 import { setCurrentStep, setShopInfoField } from "@/features/offlineReq";
-import { useEffect } from "react";
-import { resetAllPurchaseReq } from "@/features/purchaseReq.action";
 
 export default function WithoutLinkWorkflowPage() {
   const navigate = useNavigate();
@@ -69,9 +67,6 @@ export default function WithoutLinkWorkflowPage() {
   const handleBackToHome = () => {
     navigate("/");
   };
-  useEffect(() => {
-    dispatch(resetAllPurchaseReq());
-  }, [dispatch]);
 
   const renderBreadcrumb = () => (
     <div className="flex items-center gap-2 text-sm text-gray-500">

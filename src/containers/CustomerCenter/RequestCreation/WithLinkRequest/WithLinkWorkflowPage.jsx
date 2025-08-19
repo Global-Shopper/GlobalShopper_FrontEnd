@@ -33,9 +33,8 @@ import {
 } from "@/services/gshopApi";
 import { toast } from "sonner";
 import ItemExtractForm from "./ItemExtractForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ExtractPreviewModal from "@/components/ExtractPreviewModal";
-import { resetAllPurchaseReq } from "@/features/purchaseReq.action";
 
 // ----- Constants & helpers -----
 const STEPS = ["linkInput", "confirmation", "success"];
@@ -182,10 +181,6 @@ export default function WithLinkWorkflowPage() {
         dispatch(setCurrentStep("success"));
       });
   };
-
-  useEffect(() => {
-    dispatch(resetAllPurchaseReq());
-  }, [dispatch]);
 
   // Step navigation
   const handleBackToSelection = () => navigate("/create-request");
