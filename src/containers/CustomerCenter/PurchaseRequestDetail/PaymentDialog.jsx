@@ -187,7 +187,7 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
             <ul className="space-y-1">
               {subRequest.requestItems.map((item) => (
                 <li key={item.id} className="flex justify-between text-sm">
-                  <span className="truncate">{item.productName}</span>
+                  <span className="break-words">{item.productName}</span>
                   <span className="font-medium">
                     {formatCurrency(item?.quotationDetail?.totalVNDPrice || 0, 'VND', getLocaleCurrencyFormat('VND'))}
                   </span>

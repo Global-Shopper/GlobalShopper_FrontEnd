@@ -105,10 +105,10 @@ export function ProductList({
   }, [isGroupingMode]);
 
   const flatUngroupedItems = React.useMemo(
-    () => (purchaseRequest.requestItems || []).flatMap((g) => g.items || []),
-    [purchaseRequest.requestItems]
+    () => (purchaseRequest.requestItemsGroupByPlatform || []).flatMap((g) => g.items || []),
+    [purchaseRequest.requestItemsGroupByPlatform]
   );
-
+ console.log("flatUngroupedItems", flatUngroupedItems);
   const renderProductCard = (item, subRequestId, status, requestItems, subStatus) => {
     const itemIndexNumber = requestItems
       ? requestItems.findIndex((i) => i.id === item.id)

@@ -34,7 +34,8 @@ export function GroupCreationDialog({
 }) {
   const [createGroup, { isLoading }] = useCreateGroupMutation();
   const commonPlatforms = ["Amazon", "eBay", "Taobao", "Khác"];
-
+  console.log("selectedItems", selectedItems);
+  console.log("requestItems", requestItems);
   const formik = useFormik({
     initialValues: {
       ecommercePlatform: "",
@@ -58,6 +59,7 @@ export function GroupCreationDialog({
             ? values.customPlatform
             : values.ecommercePlatform;
         const seller = values.seller;
+        console.log("requestItems", requestItems);
         const selectedItemsArray = requestItems.filter((item) =>
           selectedItems.includes(item.id)
         );

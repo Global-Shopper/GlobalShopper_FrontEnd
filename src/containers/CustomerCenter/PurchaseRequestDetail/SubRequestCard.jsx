@@ -125,7 +125,6 @@ function SubRequestItemCard({ item, subRequest }) {
                       <span>{formatCurrency(q.totalVNDPrice, "VND", getLocaleCurrencyFormat("VND"))}</span>
                     </div>
                     <div className="flex gap-2 justify-between">
-                      {console.log(subRequest)}
                       {q.note && <div className="text-md text-gray-600 mt-1">Ghi chú của sản phẩm: {q.note}</div>}
 
                       <div className="text-md text-gray-600 mt-1">
@@ -144,7 +143,6 @@ function SubRequestItemCard({ item, subRequest }) {
 }
 
 function SubRequestCard({ subRequest, expired, requestType }) {
-  console.log(subRequest);
   return (
     <div className="relative mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
       <div className="flex items-center gap-4 mb-2">
@@ -175,7 +173,7 @@ function SubRequestCard({ subRequest, expired, requestType }) {
                 )}
                 <div className="text-sm text-gray-700">
                   Phí vận chuyển: <span className="font-semibold">
-                    {subRequest.quotationForPurchase.shippingEstimate?.toLocaleString() || '0'} VND
+                    {formatCurrency(subRequest.quotationForPurchase.shippingEstimate, "VND", "vn")}
                   </span>
                 </div>
               </>
