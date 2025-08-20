@@ -36,6 +36,7 @@ import RefundList from "@/containers/CustomerCenter/Refund/RefundList";
 import AdRefundList from "@/containers/Admin/RefundRequests/AdRefundList";
 import AdWithdrawList from "@/containers/Admin/WithdrawRequests/AdWithdrawList";
 import WalletWithdraw from "@/containers/Wallet/WalletWithdraw";
+import WithdrawRequestList from "@/containers/CustomerCenter/WithdrawRequest/WithdrawRequestList";
 
 const AppRoutes = () => {
   return (
@@ -71,6 +72,7 @@ const AppRoutes = () => {
           <Route path="wallet" element={<WalletOverview />} />
           <Route path="wallet/deposit" element={<WalletDeposit />} />
           <Route path="wallet/withdraw" element={<WalletWithdraw />} />
+          <Route path="withdraw" element={<WithdrawRequestList />} />
           <Route index element={<CustomerProfile />} />
           <Route path="purchase-request-list" element={<PurchaseRequest />} />
           <Route

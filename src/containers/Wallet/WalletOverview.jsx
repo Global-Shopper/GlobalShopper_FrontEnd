@@ -13,7 +13,7 @@ import {
   EyeOff,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useAddBankAccountMutation, useGetBankAccountQuery, useGetWalletQuery, useTransactionHistoryQuery } from '@/services/gshopApi'
+import { useGetBankAccountQuery, useGetWalletQuery, useTransactionHistoryQuery } from '@/services/gshopApi'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import PageLoading from '@/components/PageLoading'
@@ -27,7 +27,6 @@ const WalletOverview = () => {
   const { data: transactionsRes, isLoading: isTransactionLoading, isError: isTransactionError } =
     useTransactionHistoryQuery({ page: currentPage, size: 10, direction: 'DESC' })
   const { data: bankAccount, isLoading: isBankAccountLoading } = useGetBankAccountQuery()
-  const [addBankAccount, { isLoading: isAddBankAccountLoading }] = useAddBankAccountMutation()
 
   const query = new URLSearchParams(location.search)
   const vnpResponseCode = query.get("vnp_ResponseCode")

@@ -1,16 +1,12 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 
-export default function RefundCard({ refund }) {
-  const { id, reason, amount, status, rejectionReason, orderId, evidence = [] } = refund || {};
+const maskAccount = (num) => (num ? `****${String(num).slice(-4)}` : "-");
 
-  const imageUrls = (Array.isArray(evidence) ? evidence : [])
-    .filter((e) => typeof e === "string" && e.trim().length > 0);
-  const thumbs = imageUrls.slice(0, 2);
-  const extraCount = imageUrls.length > 2 ? imageUrls.length - 2 : 0;
+export default function WithdrawCard({ withdraw }) {
+  const { id, reason, denyReason, amount, status, bankingBill, bankAccount = {} } = withdraw || {};
 
   return (
     <Card className="shadow-sm transition border-l-2 border-l-blue-500 bg-white">
@@ -18,6 +14,9 @@ export default function RefundCard({ refund }) {
         <div className="flex items-center justify-between mb-4">
           <div className="text-sm font-semibold text-blue-600 truncate">#{id}</div>
           <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 font-medium">
+              Trạng thái:
+            </span>
             <span
               className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                 status
@@ -25,49 +24,43 @@ export default function RefundCard({ refund }) {
             >
               {getStatusText(status)}
             </span>
-            <Link to={`/account-center/orders/${orderId}`} className="text-xs text-blue-600 hover:underline">
-              Xem đơn hàng
-            </Link>
           </div>
         </div>
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0 flex flex-col gap-2">
             <div className="text-sm text-gray-700 truncate">
-              <span className="font-medium">Lý do:</span> {reason || "—"}
+              <span className="font-medium">Ghi chú:</span> {reason || "—"}
+            </div>
+
+            <div className="text-xs text-gray-600">
+              <span className="font-medium">Tài khoản nhận:</span> {bankAccount.providerName || "-"} • {maskAccount(bankAccount.bankAccountNumber)} • {bankAccount.accountHolderName || "-"}
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 font-medium">Số tiền:</span>
               <span className="text-[11px] font-semibold text-orange-800 bg-orange-50 px-1.5 py-0.5 rounded">
-                {formatCurrency(amount, "VND", "vn")}
+                {formatCurrency(amount, "VND", "vi-VN")}
               </span>
             </div>
 
             {status === "REJECTED" && (
               <div className="text-xs text-red-600">
-                <span className="font-medium">Lý do từ chối:</span> {rejectionReason || "—"}
+                <span className="font-medium">Lý do từ chối:</span> {denyReason || "—"}
               </div>
             )}
           </div>
 
-          {thumbs.length > 0 && (
+          {bankingBill && (
             <div className="flex items-center gap-1.5 shrink-0">
-              {thumbs.map((src, idx) => (
-                <div key={idx} className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 border">
-                  <img
-                    src={src}
-                    alt={`evidence-${idx}`}
-                    className="w-full h-full object-contain"
-                    loading="lazy"
-                  />
-                  {idx === 1 && extraCount > 0 && (
-                    <div className="absolute inset-0 bg-black/40 text-white flex items-center justify-center text-xs font-semibold">
-                      +{extraCount}
-                    </div>
-                  )}
-                </div>
-              ))}
+              <a
+                href={bankingBill}
+                target="_blank"
+                rel="noreferrer"
+                className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-100 border"
+              >
+                <img src={bankingBill} alt="bank-bill" className="w-full h-full object-contain" loading="lazy" />
+              </a>
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { Home, Inbox, Package, RefreshCw, User, Wallet } from "lucide-react";
+import { BanknoteArrowDown, Home, Inbox, Package, RefreshCw, User, Wallet } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 // Menu items with proper routing
@@ -28,6 +28,11 @@ const items = [
 		url: "/account-center/wallet",
 		icon: Wallet,
 	},
+	{
+		title: "Yêu cầu rút tiền",
+		url: "/account-center/withdraw",
+		icon: BanknoteArrowDown,
+	}
 ];
 
 export function CustomerSidebar() {
