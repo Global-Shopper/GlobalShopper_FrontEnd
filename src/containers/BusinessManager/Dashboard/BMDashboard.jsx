@@ -145,6 +145,10 @@ const BMDashboard = () => {
 			activeRequests: 234,
 			pendingRequests: 189,
 			completedRequests: 4956,
+			totalRefund: 156,
+			completedRefund: 89,
+			totalWithdraw: 78,
+			completedWithdraw: 67,
 			monthlyGrowth: 12.5,
 			userGrowth: 8.3,
 			requestGrowth: 18.7,
@@ -154,6 +158,12 @@ const BMDashboard = () => {
 			// Map API data to expected format
 			const purchaseRequest = dashboardData.dashBoardList.find(
 				(item) => item.dashBoardName === "PurchaseRequest"
+			);
+			const refundTicket = dashboardData.dashBoardList.find(
+				(item) => item.dashBoardName === "RefundTicket"
+			);
+			const withdrawTicket = dashboardData.dashBoardList.find(
+				(item) => item.dashBoardName === "WithdrawTicket"
 			);
 
 			// Extract status counts for purchase requests
@@ -169,6 +179,24 @@ const BMDashboard = () => {
 				purchaseRequest?.statusList?.find((s) => s.status === "SENT")
 					?.count || 0;
 
+			// Extract refund data
+			const totalRefund = refundTicket?.total || 0;
+			const completedRefund =
+				(refundTicket?.statusList?.find((s) => s.status === "COMPLETED")
+					?.count || 0) +
+				(refundTicket?.statusList?.find((s) => s.status === "APPROVED")
+					?.count || 0);
+
+			// Extract withdraw data
+			const totalWithdraw = withdrawTicket?.total || 0;
+			const completedWithdraw =
+				(withdrawTicket?.statusList?.find(
+					(s) => s.status === "COMPLETED"
+				)?.count || 0) +
+				(withdrawTicket?.statusList?.find(
+					(s) => s.status === "APPROVED"
+				)?.count || 0);
+
 			return {
 				totalUsers: customerData?.totalElements || mockStats.totalUsers,
 				totalRequests: totalRequests,
@@ -177,6 +205,10 @@ const BMDashboard = () => {
 				activeRequests: activeRequests,
 				pendingRequests: pendingRequests,
 				completedRequests: completedRequests,
+				totalRefund: totalRefund,
+				completedRefund: completedRefund,
+				totalWithdraw: totalWithdraw,
+				completedWithdraw: completedWithdraw,
 			};
 		}
 		return {
@@ -187,6 +219,10 @@ const BMDashboard = () => {
 			activeRequests: 234,
 			pendingRequests: 189,
 			completedRequests: 4956,
+			totalRefund: 156,
+			completedRefund: 89,
+			totalWithdraw: 78,
+			completedWithdraw: 67,
 			monthlyGrowth: 12.5,
 			userGrowth: 8.3,
 			requestGrowth: 18.7,
@@ -393,7 +429,7 @@ const BMDashboard = () => {
 			)}
 
 			{/* Stats Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 				{/* Total Users */}
 				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-blue-500">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -438,6 +474,42 @@ const BMDashboard = () => {
 					<CardContent className="pb-4">
 						<div className="text-3xl font-bold text-gray-900 leading-none">
 							{formatNumber(stats.totalOrders)}
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Total Refund */}
+				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-orange-500">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+						<CardTitle className="text-sm font-medium text-gray-600">
+							Tổng hoàn tiền
+						</CardTitle>
+						<RefreshCw className="h-5 w-5 text-orange-600" />
+					</CardHeader>
+					<CardContent className="pb-4">
+						<div className="text-3xl font-bold text-gray-900 leading-none">
+							{formatNumber(stats.totalRefund)}
+						</div>
+						<div className="mt-1 text-xs text-gray-500">
+							{formatNumber(stats.completedRefund)} đã xử lý
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Total Withdraw */}
+				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-red-500">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+						<CardTitle className="text-sm font-medium text-gray-600">
+							Tổng rút tiền
+						</CardTitle>
+						<CreditCard className="h-5 w-5 text-red-600" />
+					</CardHeader>
+					<CardContent className="pb-4">
+						<div className="text-3xl font-bold text-gray-900 leading-none">
+							{formatNumber(stats.totalWithdraw)}
+						</div>
+						<div className="mt-1 text-xs text-gray-500">
+							{formatNumber(stats.completedWithdraw)} đã xử lý
 						</div>
 					</CardContent>
 				</Card>
