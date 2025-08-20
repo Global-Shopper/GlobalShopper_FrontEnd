@@ -73,26 +73,6 @@ const AdminManagement = () => {
 		size,
 	});
 
-	// Debug logs
-	console.log("AdminManagement Debug:", {
-		apiEndpoint: "/admin",
-		queryParams: {
-			page: page - 1,
-			size,
-		},
-		searchTerm,
-		adminsData,
-		dataType: typeof adminsData,
-		isArray: Array.isArray(adminsData),
-		hasContent: !!adminsData?.content,
-		contentLength: adminsData?.content?.length,
-		firstItem: adminsData?.content?.[0],
-		allKeys: adminsData ? Object.keys(adminsData) : null,
-		isLoading,
-		isError,
-		error,
-	});
-
 	const [toggleAdminActive, { isLoading: isToggling }] =
 		useToggleAdminActiveMutation();
 
@@ -147,13 +127,6 @@ const AdminManagement = () => {
 	// Filter and sort admins
 	let filteredAdmins = allAdmins;
 
-	console.log("Filter Debug:", {
-		allAdmins: allAdmins.slice(0, 2), // Show first 2 admins
-		statusFilter,
-		countryFilter,
-		searchTerm,
-	});
-
 	// Apply filters
 	if (searchTerm) {
 		filteredAdmins = filteredAdmins.filter((admin) =>
@@ -163,14 +136,6 @@ const AdminManagement = () => {
 
 	if (statusFilter && statusFilter !== "all") {
 		filteredAdmins = filteredAdmins.filter((admin) => {
-			console.log("Status filter check:", {
-				adminActive: admin.active,
-				filterValue: statusFilter,
-				match:
-					statusFilter === "active"
-						? admin.active !== false
-						: admin.active === false,
-			});
 			if (statusFilter === "active") return admin.active !== false;
 			if (statusFilter === "banned") return admin.active === false;
 			return true;
@@ -179,11 +144,6 @@ const AdminManagement = () => {
 
 	if (countryFilter && countryFilter !== "all") {
 		filteredAdmins = filteredAdmins.filter((admin) => {
-			console.log("Country filter check:", {
-				adminCountry: admin.country,
-				filterValue: countryFilter,
-				match: admin.country === countryFilter,
-			});
 			return admin.country === countryFilter;
 		});
 	}
@@ -251,12 +211,6 @@ const AdminManagement = () => {
 		if (!adminToBan) return;
 
 		try {
-			console.log("Toggle admin active API call:", {
-				adminId: adminToBan.id,
-				currentStatus: adminToBan.active,
-				endpoint: `${adminToBan.id}/active`,
-			});
-
 			await toggleAdminActive(adminToBan.id).unwrap();
 			toast.success(
 				adminToBan.active
