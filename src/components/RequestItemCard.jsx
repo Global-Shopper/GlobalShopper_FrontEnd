@@ -1,6 +1,6 @@
 import React from 'react';
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
-import productDefaultImage from "@/assets/productDefault.png";
+import ImageThumbDialog from './ImageThumbDialog';
 
 function StatusBadge({ status }) {
   const color = getStatusColor(status || 'PENDING');
@@ -32,12 +32,13 @@ function RequestItemCard({
         
         <div className="flex gap-4">
           <div className="flex-shrink-0">
-            {item.images?.length > 0 ? (
-              item.images.map((image, index) => (
+            {item.images?.length > 0 && (
+              item.images.slice(0, 1).map((image, index) => (
                 <img key={index} src={image} alt={item.productName} className="w-20 h-20 object-contain rounded border" />
               ))
-            ) : (
-              <img src={productDefaultImage} alt={item.productName} className="w-20 h-20 object-contain rounded border" />
+            )}
+            {item.images?.length > 1 && (
+              <ImageThumbDialog images={item.images} />
             )}
           </div>
           

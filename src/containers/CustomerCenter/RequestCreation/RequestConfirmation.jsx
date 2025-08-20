@@ -123,13 +123,14 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                   // For online requests, item.product is always present
                   // For offline, adapt as needed in the future
                   const product = item.product || {};
+                  const imagesDisplay = product.localImages.concat(product.images.filter((url) => !url.startsWith("http://res.cloudinary.com")));
                   return (
                     <div key={item.id || index} className="bg-white p-4 rounded-2xl border">
                       <div className="flex items-start gap-4">
                         {/* Image preview section */}
-                        {product.localImages && product.localImages.length > 0 && (
+                        {imagesDisplay && imagesDisplay.length > 0 && (
                           <div className="flex-shrink-0 flex-col flex-wrap space-y-2">
-                            {product.localImages.map((img, idx) => (
+                            {imagesDisplay.slice(0, 1).map((img, idx) => (
                               <img
                                 key={img}
                                 src={img}
@@ -185,7 +186,7 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                         {/* Image preview section */}
                         {item.localImages && item.localImages.length > 0 && (
                           <div className="flex-shrink-0 flex-col flex-wrap space-y-2">
-                            {item.localImages.map((img, idx) => (
+                            {item.localImages.slice(0, 1).map((img, idx) => (
                               <img
                                 key={img}
                                 src={img}

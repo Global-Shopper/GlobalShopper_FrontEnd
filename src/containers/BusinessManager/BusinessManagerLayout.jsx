@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom'
 
 const BusinessManagerLayout = () => {
   return (
-    <SidebarProvider className="flex w-full min-h-screen">
+    <SidebarProvider isBM={true} className="flex w-full min-h-screen">
     <BusinessSidebar />
     <main className="flex flex-col flex-1 w-full min-h-screen">
       <Outlet />

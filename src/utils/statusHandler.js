@@ -72,6 +72,8 @@ export const getStatusText = (status) => {
       return "Đã thất bại";
     case "COMPLETED":
       return "Đã hoàn thành";
+    case "PENDING":
+      return "Chờ xử lý";
     default:
       return "Đã gửi";
   }

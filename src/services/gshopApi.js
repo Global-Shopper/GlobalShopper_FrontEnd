@@ -291,6 +291,7 @@ const gshopApi = createApi({
         url: endpoints.TRANSACTION_HISTORY,
         method: "GET",
       }),
+      providesTags: ["TransactionHistory"],
     }),
     checkout: builder.mutation({
       query: (data) => ({
@@ -512,7 +513,7 @@ const gshopApi = createApi({
         url: endpoints.WITHDRAW_REQUEST,
         method: "POST",
       }),
-      invalidatesTags: ["WithdrawList"],
+      invalidatesTags: ["WithdrawList", "TransactionHistory"],
     }),
     getWithdrawRequestCustomer: builder.query({
       query: (params) => ({
@@ -618,6 +619,8 @@ export const {
   useUploadBillMutation,
   useProcessWithdrawRequestMutation,
   useGetWithdrawRequestAdminQuery,
+  useCreateWithdrawRequestMutation,
+  useGetWithdrawRequestCustomerQuery,
 } = gshopApi;
 
 export default gshopApi;

@@ -25,8 +25,9 @@ import {
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "18rem";
+const SIDEBAR_WIDTH = "12rem";
+const SIDEBAR_WIDTH_BM = "16rem";
+const SIDEBAR_WIDTH_MOBILE = "14rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -42,6 +43,7 @@ function useSidebar() {
 }
 
 function SidebarProvider({
+	isBM,
 	defaultOpen = true,
 	open: openProp,
 	onOpenChange: setOpenProp,
@@ -101,6 +103,7 @@ function SidebarProvider({
 
 	const contextValue = React.useMemo(
 		() => ({
+			isBM,
 			state,
 			open,
 			setOpen,
@@ -110,6 +113,7 @@ function SidebarProvider({
 			toggleSidebar,
 		}),
 		[
+			isBM,
 			state,
 			open,
 			setOpen,
@@ -126,7 +130,7 @@ function SidebarProvider({
 				<div
 					data-slot="sidebar-wrapper"
 					style={{
-						"--sidebar-width": SIDEBAR_WIDTH,
+						"--sidebar-width": isBM ? SIDEBAR_WIDTH_BM : SIDEBAR_WIDTH,
 						"--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
 						...style,
 					}}
