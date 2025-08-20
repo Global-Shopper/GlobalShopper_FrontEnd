@@ -41,8 +41,30 @@ import {
 } from "@/components/ui/card";
 
 const BMDashboard = () => {
-	// Date state for dashboard filtering
+	// Date state for dashboard filtering with localStorage persistence
 	const [dateRange, setDateRange] = useState(() => {
+		// Try to get saved date range from localStorage
+		try {
+			const savedDateRange = localStorage.getItem(
+				"bm-dashboard-daterange"
+			);
+			if (savedDateRange) {
+				const parsed = JSON.parse(savedDateRange);
+				// Validate dates
+				if (
+					parsed.startDate &&
+					parsed.endDate &&
+					new Date(parsed.startDate).getTime() &&
+					new Date(parsed.endDate).getTime()
+				) {
+					return parsed;
+				}
+			}
+		} catch (error) {
+			console.warn("Error loading saved date range:", error);
+		}
+
+		// Default to last 30 days
 		const now = new Date();
 		const oneMonthAgo = new Date();
 		oneMonthAgo.setMonth(now.getMonth() - 1);
@@ -53,10 +75,42 @@ const BMDashboard = () => {
 		};
 	});
 
+	// Save dateRange to localStorage when it changes
+	React.useEffect(() => {
+		try {
+			localStorage.setItem(
+				"bm-dashboard-daterange",
+				JSON.stringify(dateRange)
+			);
+		} catch (error) {
+			console.warn("Error saving date range:", error);
+		}
+	}, [dateRange]);
+
 	// Convert dates to timestamps for API
 	const apiParams = useMemo(() => {
-		const startTimestamp = new Date(dateRange.startDate).getTime();
-		const endTimestamp = new Date(dateRange.endDate).getTime();
+		// Handle empty or invalid dates
+		const startDate =
+			dateRange.startDate ||
+			new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+				.toISOString()
+				.split("T")[0];
+		const endDate =
+			dateRange.endDate || new Date().toISOString().split("T")[0];
+
+		const startTimestamp = new Date(startDate).getTime();
+		const endTimestamp = new Date(endDate).getTime();
+
+		// Check if timestamps are valid
+		if (isNaN(startTimestamp) || isNaN(endTimestamp)) {
+			console.warn("Invalid date range, using default values");
+			const defaultEnd = Date.now();
+			const defaultStart = defaultEnd - 30 * 24 * 60 * 60 * 1000; // 30 days ago
+			return {
+				startDate: defaultStart,
+				endDate: defaultEnd,
+			};
+		}
 
 		return {
 			startDate: startTimestamp,
@@ -123,9 +177,6 @@ const BMDashboard = () => {
 				activeRequests: activeRequests,
 				pendingRequests: pendingRequests,
 				completedRequests: completedRequests,
-				monthlyGrowth: mockStats.monthlyGrowth, // Calculate from previous period
-				userGrowth: mockStats.userGrowth, // Calculate from previous period
-				requestGrowth: mockStats.requestGrowth, // Calculate from previous period
 			};
 		}
 		return {
@@ -144,10 +195,23 @@ const BMDashboard = () => {
 
 	// Handle date range change
 	const handleDateChange = (field, value) => {
+		// Allow empty values, will be handled in apiParams
 		setDateRange((prev) => ({
 			...prev,
 			[field]: value,
 		}));
+	};
+
+	// Handle clear date ranges
+	const handleClearDates = () => {
+		const now = new Date();
+		const oneMonthAgo = new Date();
+		oneMonthAgo.setMonth(now.getMonth() - 1);
+
+		setDateRange({
+			startDate: oneMonthAgo.toISOString().split("T")[0],
+			endDate: now.toISOString().split("T")[0],
+		});
 	};
 
 	// Helper functions for status display
@@ -155,7 +219,7 @@ const BMDashboard = () => {
 		const statusLabels = {
 			SENT: "Đã gửi",
 			PAID: "Đã thanh toán",
-			INSUFFICIENT: "Thiếu tiền",
+			INSUFFICIENT: "Cập nhật",
 			CHECKING: "Đang kiểm tra",
 			CANCELLED: "Đã hủy",
 			QUOTED: "Đã báo giá",
@@ -262,20 +326,30 @@ const BMDashboard = () => {
 								className="w-40"
 							/>
 						</div>
-						<Button
-							onClick={() => refetch()}
-							variant="outline"
-							size="sm"
-							disabled={isLoading}
-							className="flex items-center gap-2"
-						>
-							<RefreshCw
-								className={`h-4 w-4 ${
-									isLoading ? "animate-spin" : ""
-								}`}
-							/>
-							{isLoading ? "Đang tải..." : "Cập nhật"}
-						</Button>
+						<div className="flex gap-2">
+							<Button
+								onClick={() => refetch()}
+								variant="outline"
+								size="sm"
+								disabled={isLoading}
+								className="flex items-center gap-2"
+							>
+								<RefreshCw
+									className={`h-4 w-4 ${
+										isLoading ? "animate-spin" : ""
+									}`}
+								/>
+								{isLoading ? "Đang tải..." : "Cập nhật"}
+							</Button>
+							<Button
+								onClick={handleClearDates}
+								variant="outline"
+								size="sm"
+								className="flex items-center gap-2"
+							>
+								Đặt lại
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -319,50 +393,50 @@ const BMDashboard = () => {
 			)}
 
 			{/* Stats Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
 				{/* Total Users */}
-				<Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-blue-500">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
 						<CardTitle className="text-sm font-medium text-gray-600">
 							Tổng người dùng
 						</CardTitle>
 						<Users className="h-5 w-5 text-blue-600" />
 					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold text-gray-900">
+					<CardContent className="pb-4">
+						<div className="text-3xl font-bold text-gray-900 leading-none">
 							{formatNumber(stats.totalUsers)}
 						</div>
 					</CardContent>
 				</Card>
 
 				{/* Total Requests */}
-				<Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-purple-500">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-purple-500">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
 						<CardTitle className="text-sm font-medium text-gray-600">
 							Tổng yêu cầu mua hộ
 						</CardTitle>
 						<FileText className="h-5 w-5 text-purple-600" />
 					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold text-gray-900">
+					<CardContent className="pb-4">
+						<div className="text-3xl font-bold text-gray-900 leading-none">
 							{formatNumber(stats.totalRequests)}
 						</div>
-						<div className="mt-2 text-xs text-gray-500">
+						<div className="mt-1 text-xs text-gray-500">
 							{formatNumber(stats.completedRequests)} hoàn thành
 						</div>
 					</CardContent>
 				</Card>
 
 				{/* Total Orders */}
-				<Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-500">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-green-500">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
 						<CardTitle className="text-sm font-medium text-gray-600">
 							Đơn hàng thành công
 						</CardTitle>
 						<ShoppingCart className="h-5 w-5 text-green-600" />
 					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold text-gray-900">
+					<CardContent className="pb-4">
+						<div className="text-3xl font-bold text-gray-900 leading-none">
 							{formatNumber(stats.totalOrders)}
 						</div>
 					</CardContent>
