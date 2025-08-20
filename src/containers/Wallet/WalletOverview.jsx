@@ -340,7 +340,7 @@ const WalletOverview = () => {
                 </div>
 
                 {/* Pagination */}
-                <PaginationBar totalPages={pagination.totalPages} currentPage={currentPage} handlePageChange={setCurrentPage} />
+                <PaginationBar totalPages={pagination.totalPages} page={currentPage} setPage={setCurrentPage} />
               </CardContent>
             </Card>
           </div>

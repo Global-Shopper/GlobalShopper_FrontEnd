@@ -141,26 +141,24 @@ const AdRefundList = () => {
             <TableCell className="font-medium py-3">{refund.orderId || '-'}</TableCell>
             <TableCell className="py-3 truncate max-w-[320px]" title={refund.reason}>{refund.reason || '-'}</TableCell>
             <TableCell className="flex items-center gap-2 py-3">
-              {console.log(refund.evidence)}
-              {Array.isArray(refund.evidence) ? refund.evidence.map((e, index) => (
+              {Array.isArray(refund.evidence) && refund.evidence.length > 0 ? (
                 <>
-                  {index < 2 ? (
-                    <div key={e.id} className="flex items-center gap-2">
+                  {refund.evidence.slice(0, 2).map((e, index) => (
+                    <div key={`${refund.id}-${index}`} className="h-12 w-12 overflow-hidden rounded-md border">
                       <img
                         src={e}
-                        alt={e}
-                        width={50}
-                        height={50}
-                        className="rounded-lg"
+                        alt={`evidence-${index}`}
+                        className="h-full w-full object-cover"
                       />
                     </div>
-                  ) : (
+                  ))}
+                  {refund.evidence.length > 2 && (
                     <div className="relative h-12 w-12 overflow-hidden rounded-md border">
                       <span className="absolute inset-0 bg-black/50 text-white text-xs font-semibold flex items-center justify-center">+{refund.evidence.length - 2}</span>
                     </div>
                   )}
                 </>
-              )) : '-'}
+              ) : ('-')}
             </TableCell>
             <TableCell className="py-3">{formatVNDWithoutSymbol(Number(refund.amount || 0).toFixed(0))}</TableCell>
             <TableCell className="py-3">

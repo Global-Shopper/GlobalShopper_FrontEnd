@@ -126,7 +126,7 @@ export function BusinessSidebar() {
 	};
 
 	return (
-		<Sidebar className="border-r border-gray-200 bg-white">
+		<Sidebar isBM={true} className="border-r border-gray-200 bg-white">
 			<SidebarContent className="bg-gradient-to-b from-gray-50 to-white">
 				<SidebarGroup>
 					<SidebarGroupLabel className="flex justify-center items-center py-6 px-2">
