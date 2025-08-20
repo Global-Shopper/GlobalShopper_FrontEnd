@@ -55,5 +55,7 @@ const endpoints = {
 	WITHDRAW_REQUEST: "/wallet/withdraw-request",
 	WITHDRAW_CUSTOMER: "/wallet/withdraw-customer",
 	WITHDRAW_ADMIN: "/wallet/admin/withdraw-tickets",
+	BM_DASHBOARD: "/business-manager/dashboard",
+	BM_CUSTOMER: "/business-manager/customer",
 };
 export default endpoints;

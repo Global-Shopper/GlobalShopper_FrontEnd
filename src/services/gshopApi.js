@@ -4,7 +4,20 @@ import endpoints from "../const/endpoints";
 
 const gshopApi = createApi({
 	reducerPath: "gshopApi",
+<<<<<<< HEAD
 	tagTypes: ["CustomerProfile", "ShippingAddress", "PurchaseRequest", "Wallet", "PurchaseRequestDetail", "RefundList", "WithdrawList", "BMDashboard", "Variants"],
+=======
+	tagTypes: [
+		"CustomerProfile",
+		"ShippingAddress",
+		"PurchaseRequest",
+		"Wallet",
+		"PurchaseRequestDetail",
+		"RefundList",
+		"WithdrawList",
+		"BMDashboard",
+	],
+>>>>>>> 28744a5 (feat: adds Business Manager dashboard)
 	baseQuery: axiosBaseQuery(),
 	endpoints: (builder) => ({
 		login: builder.mutation({
@@ -468,6 +481,7 @@ const gshopApi = createApi({
 			invalidatesTags: ["AdminList"],
 		}),
 
+<<<<<<< HEAD
     getAllCustomers: builder.query({
       query: (params) => ({
         params: params,
@@ -645,6 +659,200 @@ export const {
   useGetWithdrawRequestAdminQuery,
   useCreateWithdrawRequestMutation,
   useGetWithdrawRequestCustomerQuery,
+=======
+		getAllCustomers: builder.query({
+			query: (params) => ({
+				params: params,
+				url: endpoints.GET_ALL_CUSTOMERS,
+				method: "GET",
+			}),
+			providesTags: ["CustomerList"],
+		}),
+		updateCustomer: builder.mutation({
+			query: ({ id, data }) => ({
+				data: data,
+				url: `${endpoints.UPDATE_CUSTOMER}/${id}`,
+				method: "PUT",
+			}),
+			invalidatesTags: ["CustomerList"],
+		}),
+		banCustomer: builder.mutation({
+			query: (id) => ({
+				url: `${endpoints.BAN_CUSTOMER}/${id}`,
+				method: "PUT",
+			}),
+			invalidatesTags: ["CustomerList"],
+		}),
+		getBankAccount: builder.query({
+			query: () => ({
+				url: endpoints.BANK_ACCOUNT,
+				method: "GET",
+			}),
+			transformResponse: (response) => {
+				if (Array.isArray(response)) {
+					response = [...response].sort(
+						(a, b) => (b.default === true) - (a.default === true)
+					);
+				}
+				return response;
+			},
+			providesTags: ["BankAccount"],
+		}),
+		addBankAccount: builder.mutation({
+			query: (data) => ({
+				data: data,
+				url: endpoints.BANK_ACCOUNT,
+				method: "POST",
+			}),
+			invalidatesTags: ["BankAccount"],
+		}),
+		removeBankAccount: builder.mutation({
+			query: (id) => ({
+				url: `${endpoints.BANK_ACCOUNT}/${id}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["BankAccount"],
+		}),
+		updateBankAccount: builder.mutation({
+			query: ({ id, data }) => ({
+				data: data,
+				url: `${endpoints.BANK_ACCOUNT}/${id}`,
+				method: "PUT",
+			}),
+			invalidatesTags: ["BankAccount"],
+		}),
+		createWithdrawRequest: builder.mutation({
+			query: (data) => ({
+				data: data,
+				url: endpoints.WITHDRAW_REQUEST,
+				method: "POST",
+			}),
+			invalidatesTags: ["WithdrawList"],
+		}),
+		getWithdrawRequestCustomer: builder.query({
+			query: (params) => ({
+				params: params,
+				url: endpoints.WITHDRAW_CUSTOMER,
+				method: "GET",
+			}),
+			providesTags: ["WithdrawList"],
+		}),
+		uploadBill: builder.mutation({
+			query: ({ data, id }) => ({
+				data: data,
+				url: `${endpoints.WALLET}/${id}/upload-bill`,
+				method: "POST",
+			}),
+			invalidatesTags: ["WithdrawList"],
+		}),
+		processWithdrawRequest: builder.mutation({
+			query: ({ params, id }) => ({
+				params: params,
+				url: `${endpoints.WALLET}/${id}/process`,
+				method: "POST",
+			}),
+			invalidatesTags: ["WithdrawList"],
+		}),
+		getWithdrawRequestAdmin: builder.query({
+			query: (params) => ({
+				params: params,
+				url: endpoints.WITHDRAW_ADMIN,
+				method: "GET",
+			}),
+			providesTags: ["WithdrawList"],
+		}),
+		getBMDashboard: builder.query({
+			query: ({ startDate, endDate }) => ({
+				params: { startDate, endDate },
+				url: endpoints.BM_DASHBOARD,
+				method: "GET",
+			}),
+			providesTags: ["BMDashboard"],
+		}),
+		getBMCustomer: builder.query({
+			query: ({ page = 0, size = 20, startDate, endDate }) => ({
+				params: { page, size, startDate, endDate },
+				url: endpoints.BM_CUSTOMER,
+				method: "GET",
+			}),
+			providesTags: ["BMDashboard"],
+		}),
+	}),
+});
+
+export const {
+	useLoginMutation,
+	useVerifyOTPMutation,
+	useLazyResendOTPQuery,
+	useLazyForgotPasswordQuery,
+	useResetPasswordMutation,
+	useRegisterMutation,
+	useChangeEmailMutation,
+	useVerifyChangeEmailMutation,
+	useVerifyOTPForgotPasswordMutation,
+	useCreateShippingAddressMutation,
+	useUpdateShippingAddressMutation,
+	useGetShippingAddressQuery,
+	useDeleteShippingAddressMutation,
+	useChangePasswordMutation,
+	useGetCustomerInfoQuery,
+	useUpdateCustomerProfileMutation,
+	useDefaultShippingAddressMutation,
+	useUploadAvatarMutation,
+	useGetPurchaseRequestQuery,
+	useCreateWithLinkPurchaseRequestMutation,
+	useCreateWithoutLinkPurchaseRequestMutation,
+	useGetWalletQuery,
+	useDepositWalletMutation,
+	useCreateQuotationOnlineMutation,
+	useCreateQuotationOfflineMutation,
+	useRequestUpdatePurchaseRequestMutation,
+	useRejectQuotationMutation,
+	useGetEditInfoPurchaseRequestQuery,
+	useUpdatePurchaseRequestMutation,
+	useCheckingPurchaseRequestMutation,
+	useGetPurchaseRequestDetailQuery,
+	useTransactionHistoryQuery,
+	useCreateGroupMutation,
+	useUpdateSubRequestMutation,
+	useAddItemToSubRequestMutation,
+	useRemoveItemFromSubRequestMutation,
+	useCalculateQuotationMutation,
+	useLazyGetRawDataQuery,
+	useCheckoutMutation,
+	useGetAllOrdersQuery,
+	useDirectCheckoutMutation,
+	useGetOrderByIDQuery,
+	useCancelOrderMutation,
+	useUpdateShippingMutation,
+	useGetHsCodesQuery,
+	useGetShipmentRateQuery,
+	useLazyGetShippingTrackingQuery,
+	useCreateShipmentMutation,
+	useCreateFeedbackMutation,
+	useCreateRefundMutation,
+	useGetRefundListQuery,
+	useGetRefundByOrderIdQuery,
+	useApproveRefundMutation,
+	useRejectRefundMutation,
+	useBanCustomerMutation,
+	useUpdateCustomerMutation,
+	useGetAllCustomersQuery,
+	useBanAdminMutation,
+	useToggleAdminActiveMutation,
+	useUpdateAdminMutation,
+	useCreateAdminMutation,
+	useGetAllAdminsQuery,
+	useGetBankAccountQuery,
+	useAddBankAccountMutation,
+	useRemoveBankAccountMutation,
+	useUpdateBankAccountMutation,
+	useUploadBillMutation,
+	useProcessWithdrawRequestMutation,
+	useGetWithdrawRequestAdminQuery,
+	useGetBMDashboardQuery,
+	useGetBMCustomerQuery,
+>>>>>>> 28744a5 (feat: adds Business Manager dashboard)
 } = gshopApi;
 
 export default gshopApi;
