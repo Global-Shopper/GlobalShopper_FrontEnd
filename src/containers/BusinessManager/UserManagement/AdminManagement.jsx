@@ -27,7 +27,10 @@ import {
 	ChevronDown,
 	ArrowUpDown,
 } from "lucide-react";
-import { useGetAllAdminsQuery, useBanAdminMutation } from "@/services/gshopApi";
+import {
+	useGetAllAdminsQuery,
+	useToggleAdminActiveMutation,
+} from "@/services/gshopApi";
 import { PaginationBar } from "@/utils/Pagination";
 import PageLoading from "@/components/PageLoading";
 import { toast } from "sonner";
@@ -50,6 +53,10 @@ const AdminManagement = () => {
 	const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
 	const [isEditFormOpen, setIsEditFormOpen] = useState(false);
 	const [editingAdmin, setEditingAdmin] = useState(null);
+
+	// Ban confirmation popup state
+	const [showBanConfirm, setShowBanConfirm] = useState(false);
+	const [adminToBan, setAdminToBan] = useState(null);
 
 	// URL sync for pagination
 	const page = parseInt(searchParams.get("page")) || 1;
@@ -86,7 +93,8 @@ const AdminManagement = () => {
 		error,
 	});
 
-	const [banAdmin] = useBanAdminMutation();
+	const [toggleAdminActive, { isLoading: isToggling }] =
+		useToggleAdminActiveMutation();
 
 	// Get all admins data
 	const allAdmins = Array.isArray(adminsData)
@@ -156,15 +164,15 @@ const AdminManagement = () => {
 	if (statusFilter && statusFilter !== "all") {
 		filteredAdmins = filteredAdmins.filter((admin) => {
 			console.log("Status filter check:", {
-				adminStatus: admin.status,
+				adminActive: admin.active,
 				filterValue: statusFilter,
 				match:
 					statusFilter === "active"
-						? admin.status === "ACTIVE"
-						: admin.status === "BANNED",
+						? admin.active !== false
+						: admin.active === false,
 			});
-			if (statusFilter === "active") return admin.status === "ACTIVE";
-			if (statusFilter === "banned") return admin.status === "BANNED";
+			if (statusFilter === "active") return admin.active !== false;
+			if (statusFilter === "banned") return admin.active === false;
 			return true;
 		});
 	}
@@ -232,17 +240,39 @@ const AdminManagement = () => {
 		});
 	};
 
-	const handleBanAdmin = async (adminId, isCurrentlyActive) => {
+	// Handle showing ban confirmation popup
+	const handleBanAdmin = (admin) => {
+		setAdminToBan(admin);
+		setShowBanConfirm(true);
+	};
+
+	// Handle confirming ban/unban action
+	const handleConfirmToggleActive = async () => {
+		if (!adminToBan) return;
+
 		try {
-			await banAdmin(adminId).unwrap();
+			console.log("Toggle admin active API call:", {
+				adminId: adminToBan.id,
+				currentStatus: adminToBan.active,
+				endpoint: `${adminToBan.id}/active`,
+			});
+
+			await toggleAdminActive(adminToBan.id).unwrap();
 			toast.success(
-				isCurrentlyActive
-					? "Admin đã được cấm thành công"
-					: "Admin đã được kích hoạt lại"
+				adminToBan.active
+					? "Admin đã được vô hiệu hóa thành công"
+					: "Admin đã được kích hoạt thành công"
 			);
 			refetch();
-		} catch {
-			toast.error("Có lỗi xảy ra khi thực hiện thao tác");
+		} catch (error) {
+			console.error("Toggle active error:", error);
+			toast.error(
+				"Có lỗi xảy ra khi thực hiện thao tác: " +
+					(error?.data?.message || error.message)
+			);
+		} finally {
+			setShowBanConfirm(false);
+			setAdminToBan(null);
 		}
 	};
 
@@ -355,7 +385,9 @@ const AdminManagement = () => {
 								<SelectItem value="active">
 									Hoạt động
 								</SelectItem>
-								<SelectItem value="banned">Đã cấm</SelectItem>
+								<SelectItem value="banned">
+									Vô hiệu hóa
+								</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -525,14 +557,14 @@ const AdminManagement = () => {
 								<TableCell className="py-3">
 									<span
 										className={`px-2 py-1 rounded-full text-xs font-medium ${
-											admin.isActive !== false
+											admin.active !== false
 												? "bg-green-100 text-green-800"
 												: "bg-red-100 text-red-800"
 										}`}
 									>
-										{admin.isActive !== false
+										{admin.active !== false
 											? "Hoạt động"
-											: "Bị cấm"}
+											: "Vô hiệu hóa"}
 									</span>
 								</TableCell>
 								<TableCell className="py-3">
@@ -552,23 +584,21 @@ const AdminManagement = () => {
 											variant="outline"
 											size="sm"
 											className={`h-8 w-8 p-0 ${
-												admin.isActive !== false
+												admin.active !== false
 													? "text-red-600 hover:text-red-700 hover:bg-red-50"
 													: "text-green-600 hover:text-green-700 hover:bg-green-50"
 											}`}
 											title={
-												admin.isActive !== false
-													? "Cấm admin"
+												admin.active !== false
+													? "Vô hiệu hóa admin"
 													: "Kích hoạt admin"
 											}
 											onClick={() =>
-												handleBanAdmin(
-													admin.id,
-													admin.isActive !== false
-												)
+												handleBanAdmin(admin)
 											}
+											disabled={isToggling}
 										>
-											{admin.isActive !== false ? (
+											{admin.active !== false ? (
 												<Ban className="h-4 w-4" />
 											) : (
 												<UserCheck className="h-4 w-4" />
@@ -599,6 +629,56 @@ const AdminManagement = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Ban Confirmation Popup */}
+			{showBanConfirm && adminToBan && (
+				<div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+					<div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+						<div className="p-6">
+							<h3 className="text-lg font-semibold text-gray-900 mb-4">
+								{adminToBan.active !== false
+									? "Xác nhận vô hiệu hóa admin"
+									: "Xác nhận kích hoạt admin"}
+							</h3>
+							<p className="text-gray-600 mb-6">
+								Bạn có chắc chắn muốn{" "}
+								{adminToBan.active !== false
+									? "vô hiệu hóa"
+									: "kích hoạt"}
+								tài khoản admin{" "}
+								<strong>{adminToBan.name}</strong>?
+							</p>
+							<div className="flex gap-3 justify-end">
+								<Button
+									variant="outline"
+									onClick={() => {
+										setShowBanConfirm(false);
+										setAdminToBan(null);
+									}}
+									disabled={isToggling}
+								>
+									Hủy bỏ
+								</Button>
+								<Button
+									className={
+										adminToBan.active !== false
+											? "bg-red-600 hover:bg-red-700"
+											: "bg-green-600 hover:bg-green-700"
+									}
+									onClick={handleConfirmToggleActive}
+									disabled={isToggling}
+								>
+									{isToggling
+										? "Đang xử lý..."
+										: adminToBan.active !== false
+										? "Vô hiệu hóa"
+										: "Kích hoạt"}
+								</Button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };

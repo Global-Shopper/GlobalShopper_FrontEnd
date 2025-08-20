@@ -46,13 +46,14 @@ const endpoints = {
 	CREATE_ADMIN: "/admin",
 	UPDATE_ADMIN: "/admin",
 	BAN_ADMIN: "/admin/ban",
+	TOGGLE_ADMIN_ACTIVE: "/admin",
 	GET_ALL_CUSTOMERS: "/customer",
 	CREATE_CUSTOMER: "/customer",
 	UPDATE_CUSTOMER: "/customer",
 	BAN_CUSTOMER: "/customer/ban",
-  BANK_ACCOUNT: "/bank-account",
-  WITHDRAW_REQUEST: "/wallet/withdraw-request",
-  WITHDRAW_CUSTOMER: "/wallet/withdraw-customer",
-  WITHDRAW_ADMIN: "/wallet/admin/withdraw-tickets",
+	BANK_ACCOUNT: "/bank-account",
+	WITHDRAW_REQUEST: "/wallet/withdraw-request",
+	WITHDRAW_CUSTOMER: "/wallet/withdraw-customer",
+	WITHDRAW_ADMIN: "/wallet/admin/withdraw-tickets",
 };
 export default endpoints;
