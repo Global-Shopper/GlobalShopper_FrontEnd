@@ -651,6 +651,13 @@ const gshopApi = createApi({
 			}),
 			invalidatesTags: ["Variants"],
 		}),
+		toggleVariantActive: builder.mutation({
+			query: (id) => ({
+				url: `${endpoints.TOGGLE_VARIANT_ACTIVE}/${id}/active`,
+				method: "PATCH",
+			}),
+			invalidatesTags: ["Variants"],
+		}),
 	}),
 });
 
@@ -736,6 +743,7 @@ export const {
 	useCreateVariantMutation,
 	useUpdateVariantMutation,
 	useDeleteVariantMutation,
+	useToggleVariantActiveMutation,
 } = gshopApi;
 
 export default gshopApi;

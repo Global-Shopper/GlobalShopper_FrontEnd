@@ -4,6 +4,7 @@ import {
 	useCreateVariantMutation,
 	useUpdateVariantMutation,
 	useDeleteVariantMutation,
+	useToggleVariantActiveMutation,
 } from "@/services/gshopApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Package, Search, Plus, Edit3, X, Check, Trash2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export default function VariantConfig() {
 	const [searchTerm, setSearchTerm] = useState("");
@@ -38,6 +40,7 @@ export default function VariantConfig() {
 	const [createVariant] = useCreateVariantMutation();
 	const [updateVariant] = useUpdateVariantMutation();
 	const [deleteVariant] = useDeleteVariantMutation();
+	const [toggleVariantActive] = useToggleVariantActiveMutation();
 
 	// Filter variants based on search
 	const filteredVariants =
@@ -113,6 +116,16 @@ export default function VariantConfig() {
 			handleCancelAdd();
 		} catch {
 			toast.error("Có lỗi xảy ra khi thêm thuộc tính!");
+		}
+	};
+
+	const handleToggleActive = async (variantId, currentStatus) => {
+		try {
+			await toggleVariantActive(variantId).unwrap();
+			const statusText = currentStatus ? "Vô hiệu hóa" : "Kích hoạt";
+			toast.success(`${statusText} thuộc tính thành công!`);
+		} catch {
+			toast.error("Có lỗi xảy ra khi thay đổi trạng thái thuộc tính!");
 		}
 	};
 
@@ -260,9 +273,9 @@ export default function VariantConfig() {
 									</div>
 
 									{/* Action Buttons */}
-									<div className="flex gap-2 ml-4">
+									<div className="flex items-center gap-4 ml-4">
 										{editingId === variant.id ? (
-											<>
+											<div className="flex gap-2">
 												<Button
 													onClick={handleSave}
 													size="sm"
@@ -277,31 +290,52 @@ export default function VariantConfig() {
 												>
 													<X className="h-4 w-4" />
 												</Button>
-											</>
+											</div>
 										) : (
 											<>
-												<Button
-													onClick={() =>
-														handleEdit(variant)
-													}
-													size="sm"
-													className="bg-blue-600 hover:bg-blue-700"
-												>
-													<Edit3 className="h-4 w-4" />
-												</Button>
-												<Button
-													onClick={() =>
-														handleDelete(
-															variant.id,
-															variant.name
-														)
-													}
-													size="sm"
-													variant="outline"
-													className="text-red-600 hover:text-red-700 hover:bg-red-50"
-												>
-													<Trash2 className="h-4 w-4" />
-												</Button>
+												<div className="flex items-center gap-2">
+													<span className="text-sm text-gray-600">
+														{variant.isActive
+															? "Hoạt động"
+															: "Vô hiệu"}
+													</span>
+													<Switch
+														checked={
+															variant.isActive
+														}
+														onCheckedChange={() =>
+															handleToggleActive(
+																variant.id,
+																variant.isActive
+															)
+														}
+														className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300"
+													/>
+												</div>
+												<div className="flex gap-2">
+													<Button
+														onClick={() =>
+															handleEdit(variant)
+														}
+														size="sm"
+														className="bg-blue-600 hover:bg-blue-700"
+													>
+														<Edit3 className="h-4 w-4" />
+													</Button>
+													<Button
+														onClick={() =>
+															handleDelete(
+																variant.id,
+																variant.name
+															)
+														}
+														size="sm"
+														variant="outline"
+														className="text-red-600 hover:text-red-700 hover:bg-red-50"
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												</div>
 											</>
 										)}
 									</div>
