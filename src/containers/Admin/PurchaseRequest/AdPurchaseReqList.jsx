@@ -24,6 +24,7 @@ import PageLoading from "@/components/PageLoading";
 import PageError from "@/components/PageError";
 import { useURLSync } from "@/hooks/useURLSync";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const TABS = [
   { value: "assigned", label: "Yêu cầu đã nhận" },
@@ -117,7 +118,7 @@ const AdPurchaseReqList = () => {
               Số điện thoại
             </TableHead>
             <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-              Email
+              Loại yêu cầu
             </TableHead>
             {type === "assigned" && <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
               Trạng thái
@@ -144,13 +145,43 @@ const AdPurchaseReqList = () => {
                 {request.customer?.name || "-"}
               </TableCell>
               <TableCell className="py-3">
-                {request.subRequests?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+                {request.subRequests?.slice(0, 2)?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+                {
+                  request.subRequests?.filter((sub) => sub?.seller)?.length > 2 &&
+                  <Tooltip>
+                  <TooltipTrigger className="ml-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)} group-hover:shadow`}>
+                      {request.subRequests?.filter((sub) => sub?.seller)?.length > 2 && ` + ${request.subRequests?.filter((sub) => sub?.seller)?.length - 2}`}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {request.subRequests?.filter((sub) => sub?.seller)?.slice(2, request.subRequests?.length)?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+                  </TooltipContent>
+                </Tooltip>
+                }
               </TableCell>
               <TableCell className="py-3">
-                {request.subRequests?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
+                {request.subRequests?.slice(0, 2)?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
+                {
+                  request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.length > 2 &&
+                  <Tooltip>
+                  <TooltipTrigger className="ml-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)} group-hover:shadow`}>
+                      {request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.length > 2 && ` + ${request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.length - 2}`}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.slice(2, request.subRequests?.length)?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
+                  </TooltipContent>
+                </Tooltip>
+                }
               </TableCell>
               <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
-              <TableCell className="py-3">{request.customer?.email || "-"}</TableCell>
+              <TableCell className="py-3">
+                <span>
+                  {request.requestType === "ONLINE" ? "E-commerce" : "Nội địa quốc tế"}
+                </span>
+              </TableCell>
               {type === "assigned" && <TableCell className="py-3">
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(

@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatCurrency, getLocaleCurrencyFormat } from "@/utils/formatCurrency";
 import { PACKAGE_TYPE } from "@/const/packageType";
+import { Separator } from "@/components/ui/separator";
 
 export default function QuotationPreviewDialog({ subRequest, values, quotationDetails, handleSubmit }) {
   const [open, setOpen] = useState(false);
@@ -155,7 +156,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
             </div>
 
             {/* Addresses */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
               <div className="overflow-x-auto">
                 <div className="font-semibold mb-2">Người gửi</div>
                 <Table>
@@ -187,6 +188,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                   </TableBody>
                 </Table>
               </div>
+              <Separator orientation="vertical" className="hidden md:block h-full w-px bg-border self-stretch justify-self-center" />
               <div className="overflow-x-auto">
                 <div className="font-semibold mb-2">Người nhận</div>
                 <Table>

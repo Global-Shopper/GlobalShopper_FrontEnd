@@ -33,9 +33,8 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
   // Remove manual dialog open state; will use DialogTrigger pattern
   const requestType = purchaseRequest?.requestType;
   const requestStatus = purchaseRequest?.status;
-  const customer = purchaseRequest.customer;
   const admin = purchaseRequest.admin;
-  const { addressLine, location } = purchaseRequest.shippingAddress;
+  const { addressLine, location, phoneNumber, name } = purchaseRequest.shippingAddress;
   const dispatch = useDispatch();
   const quotationState = useSelector(state => state.rootReducer.quotation?.subRequests?.[subRequest.id]);
   // API mutation (must be above early return)
@@ -83,7 +82,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
       shipmentCity: "",
       shipmentPostalCode: "",
       shipmentPhone: admin?.phone,
-      shipmentName: admin?.name,
+      shipmentName: "Global Shopper",
       shipmentCountryCode: region,
       shipmentStateOrProvinceCode: "",
     },
@@ -92,8 +91,8 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
       recipientCity: location.split(",")[2],
       recipientCountryCode: "VN",
       recipientPostalCode: "",
-      recipientPhone: customer?.phone,
-      recipientName: customer?.name,
+      recipientPhone: phoneNumber,
+      recipientName: name,
     },
   };
 
