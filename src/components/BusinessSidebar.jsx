@@ -26,7 +26,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signout } from "@/features/user";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect, useCallback } from "react";
-import logo from "@/assets/LOGO_Gshop.png";
+import BMLogo from "@/assets/logo_bm.png";
 import defaultAvt from "@/assets/defaultAvt.jpg";
 import {
 	Collapsible,
@@ -131,9 +131,9 @@ export function BusinessSidebar() {
 				<SidebarGroup>
 					<SidebarGroupLabel className="flex justify-center items-center py-6 px-2">
 						<img
-							src={logo}
+							src={BMLogo}
 							alt="GSHOP Logo"
-							className="h-14 w-auto"
+							className="h-24 w-auto"
 						/>
 					</SidebarGroupLabel>
 					<SidebarGroupContent className="px-2 pt-4">

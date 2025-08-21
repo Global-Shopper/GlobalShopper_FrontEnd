@@ -68,6 +68,21 @@ const gshopApi = createApi({
       }),
       providesTags: ["CustomerProfile"],
     }),
+    getAdminInfo: builder.query({
+      query: () => ({
+        url: endpoints.CURRENT_ADMIN,
+        method: "GET",
+      }),
+      providesTags: ["AdminProfile"],
+    }),
+    updateAdminAvatar: builder.mutation({
+      query: (formData) => ({
+        data: formData,
+        url: endpoints.ADMIN_AVATAR,
+        method: "POST",
+      }),
+      invalidatesTags: ["AdminProfile"],
+    }),
     updateCustomerProfile: builder.mutation({
       query: (data) => ({
         data: data,
@@ -566,6 +581,8 @@ export const {
   useDeleteShippingAddressMutation,
   useChangePasswordMutation,
   useGetCustomerInfoQuery,
+  useGetAdminInfoQuery,
+  useUpdateAdminAvatarMutation,
   useUpdateCustomerProfileMutation,
   useDefaultShippingAddressMutation,
   useUploadAvatarMutation,

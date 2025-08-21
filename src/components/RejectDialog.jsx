@@ -25,7 +25,6 @@ const RejectDialog = ({ subRequestId }) => {
 
   const reasons = [
     { value: "out_of_stock", label: "Hết hàng / Người bán không đáp ứng" },
-    { value: "price_high", label: "Giá quá cao" },
     { value: "lead_time", label: "Thời gian giao hàng không phù hợp" },
     { value: "info_issue", label: "Thông tin sản phẩm không đầy đủ/không chính xác" },
     { value: "other", label: "Khác (tự nhập)" },

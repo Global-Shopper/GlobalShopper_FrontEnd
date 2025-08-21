@@ -13,7 +13,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { signout } from "@/features/user";
 import { useDispatch, useSelector } from "react-redux";
-import logo from "@/assets/LOGO_Gshop.png";
+import adminLogo from "@/assets/logo_admin.png";
 import defaultAvt from "@/assets/defaultAvt.jpg";
 
 // Menu items.
@@ -39,6 +39,11 @@ const items = [
     icon: Banknote,
   },
   {
+    title: "Tài khoản",
+    url: "/admin/account",
+    icon: Settings,
+  },
+  {
     title: "Đăng xuất",
     url: "/login",
     icon: LogOut,
@@ -56,7 +61,7 @@ export function AdminSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-center items-center py-10">
-            <img src={logo} alt="GSHOP Logo" className="h-20 w-auto" />
+            <img src={adminLogo} alt="GSHOP Logo" className="h-20 w-auto" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

@@ -37,6 +37,7 @@ import AdRefundList from "@/containers/Admin/RefundRequests/AdRefundList";
 import AdWithdrawList from "@/containers/Admin/WithdrawRequests/AdWithdrawList";
 import WalletWithdraw from "@/containers/Wallet/WalletWithdraw";
 import WithdrawRequestList from "@/containers/CustomerCenter/WithdrawRequest/WithdrawRequestList";
+import AdAccountSetting from "@/containers/Admin/AdAccountSetting/AdAccountSetting";
 
 const AppRoutes = () => {
   return (
@@ -96,6 +97,7 @@ const AppRoutes = () => {
   				<Route path="orders/:id" element={<AdOrderDetail />} />
           <Route path="refunds" element={<AdRefundList />} />
           <Route path="withdraw" element={<AdWithdrawList />} />
+          <Route path="account" element={<AdAccountSetting />} />
   			</Route>
   
   			{/* Protected Business Manager Routes */}
