@@ -37,8 +37,14 @@ export default function Login() {
 			login(values)
 				.unwrap()
 				.then((res) => {
+					console.log("Login response:", res); // Debug log
 					dispatch(
-						setUserInfo({ ...res?.user, accessToken: res?.token })
+						setUserInfo({
+							...res?.user,
+							accessToken: res?.token,
+							// Fallback: nếu API không trả email, dùng email từ form
+							email: res?.user?.email || values.email,
+						})
 					);
 					toast("Đăng nhập thành công", {
 						description:

@@ -281,7 +281,7 @@ export function BusinessSidebar() {
 							className="text-xs text-gray-500 truncate w-full text-center mb-2"
 							title={email}
 						>
-							{email || "admin@gshop.com"}
+							{email || ""}
 						</div>
 					</div>
 				</div>
