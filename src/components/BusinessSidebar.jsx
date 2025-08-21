@@ -61,7 +61,7 @@ const items = [
 				icon: Settings,
 			},
 			{
-				title: "Cấu hình biến",
+				title: "Cấu hình thuộc tính",
 				url: "/business-manager/config/variant",
 				icon: Settings,
 			},

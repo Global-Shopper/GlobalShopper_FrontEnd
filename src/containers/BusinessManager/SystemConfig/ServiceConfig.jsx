@@ -1,210 +1,191 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { useUpdateServiceFeeMutation } from "@/services/gshopApi";
+import { toast } from "sonner";
 import {
 	DollarSign,
 	Settings,
 	Save,
-	Plus,
-	Trash2,
-	Edit,
-	AlertTriangle,
 	RefreshCw,
+	Edit3,
+	X,
+	Check,
 } from "lucide-react";
 
 export default function ServiceConfig() {
 	const [activeTab, setActiveTab] = useState("service");
+	const [serviceFeePercentage, setServiceFeePercentage] = useState(10); // Display as percentage (10%)
+	const [refundFeePercentage, setRefundFeePercentage] = useState(3); // Display as percentage (3%)
+	const [isLoading, setIsLoading] = useState(false);
 
-	// Mock data cho phí dịch vụ
-	const serviceFees = [
-		{
-			id: 1,
-			name: "Phí mua hộ cơ bản",
-			percentage: 5,
-			minFee: 50000,
-			maxFee: 500000,
-			status: "active",
-		},
-		{
-			id: 2,
-			name: "Phí vận chuyển quốc tế",
-			fixedAmount: 150000,
-			status: "active",
-		},
-		{
-			id: 3,
-			name: "Phí kiểm tra chất lượng",
-			percentage: 2,
-			minFee: 20000,
-			maxFee: 100000,
-			status: "active",
-		},
-	];
+	// RTK Query hooks
+	const [updateServiceFee] = useUpdateServiceFeeMutation();
 
-	// Mock data cho phí hủy
-	const cancelFees = [
-		{
-			id: 1,
-			name: "Phí hủy đơn trước 24h",
-			percentage: 0,
-			fixedAmount: 0,
-			status: "active",
-		},
-		{
-			id: 2,
-			name: "Phí hủy đơn sau 24h",
-			percentage: 10,
-			minFee: 50000,
-			status: "active",
-		},
-		{
-			id: 3,
-			name: "Phí hủy khi đã mua hàng",
-			percentage: 100,
-			status: "active",
-		},
-	];
+	// Edit states for each tab
+	const [isEditingService, setIsEditingService] = useState(false);
+	const [isEditingRefund, setIsEditingRefund] = useState(false);
 
-	// Mock data cho phí hoàn tiền
-	const refundFees = [
-		{
-			id: 1,
-			name: "Phí xử lý hoàn tiền",
-			percentage: 3,
-			minFee: 30000,
-			maxFee: 200000,
-			status: "active",
-		},
-		{
-			id: 2,
-			name: "Phí hoàn tiền chuyển khoản",
-			fixedAmount: 25000,
-			status: "active",
-		},
-		{
-			id: 3,
-			name: "Phí hoàn tiền ví điện tử",
-			percentage: 1,
-			minFee: 10000,
-			status: "active",
-		},
-	];
+	// Temp values for editing
+	const [tempServiceFee, setTempServiceFee] = useState(10);
+	const [tempRefundFee, setTempRefundFee] = useState(3);
 
-	const formatCurrency = (amount) => {
-		return new Intl.NumberFormat("vi-VN", {
-			style: "currency",
-			currency: "VND",
-		}).format(amount);
+	// Convert percentage to decimal for API (10% -> 0.1)
+	const convertToDecimal = (percentage) => {
+		return percentage / 100;
 	};
 
-	const getStatusBadge = (status) => {
-		return status === "active" ? (
-			<Badge className="bg-green-100 text-green-800">Đang áp dụng</Badge>
-		) : (
-			<Badge variant="secondary">Tạm dừng</Badge>
-		);
+	// Handle edit mode
+	const handleEditService = () => {
+		setTempServiceFee(serviceFeePercentage);
+		setIsEditingService(true);
 	};
 
-	const renderFeeRow = (fee) => (
-		<div
-			key={fee.id}
-			className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-		>
-			{/* Left side - Fee info */}
-			<div className="flex-1">
-				<div className="flex items-center gap-3 mb-2">
-					<h4 className="font-medium text-gray-900">{fee.name}</h4>
-					{getStatusBadge(fee.status)}
-				</div>
-				<div className="flex items-center gap-6 text-sm text-gray-600">
-					{fee.percentage && (
-						<span className="flex items-center gap-1">
-							<span className="text-xs text-gray-500">%:</span>
-							<span className="font-medium">
-								{fee.percentage}%
-							</span>
-						</span>
-					)}
-					{fee.fixedAmount && (
-						<span className="flex items-center gap-1">
-							<span className="text-xs text-gray-500">
-								Cố định:
-							</span>
-							<span className="font-medium">
-								{formatCurrency(fee.fixedAmount)}
-							</span>
-						</span>
-					)}
-					{fee.minFee && (
-						<span className="flex items-center gap-1">
-							<span className="text-xs text-gray-500">Min:</span>
-							<span className="font-medium">
-								{formatCurrency(fee.minFee)}
-							</span>
-						</span>
-					)}
-					{fee.maxFee && (
-						<span className="flex items-center gap-1">
-							<span className="text-xs text-gray-500">Max:</span>
-							<span className="font-medium">
-								{formatCurrency(fee.maxFee)}
-							</span>
-						</span>
-					)}
-				</div>
-			</div>
+	const handleEditRefund = () => {
+		setTempRefundFee(refundFeePercentage);
+		setIsEditingRefund(true);
+	};
 
-			{/* Right side - Actions */}
-			<div className="flex items-center gap-2">
-				<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-					<Edit className="h-4 w-4" />
-				</Button>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-				>
-					<Trash2 className="h-4 w-4" />
-				</Button>
-			</div>
-		</div>
-	);
+	const handleCancelService = () => {
+		setTempServiceFee(serviceFeePercentage);
+		setIsEditingService(false);
+	};
+
+	const handleCancelRefund = () => {
+		setTempRefundFee(refundFeePercentage);
+		setIsEditingRefund(false);
+	};
+
+	// Handle input change for temp values
+	const handleTempServiceFeeChange = (e) => {
+		const inputValue = e.target.value;
+
+		// Allow empty string
+		if (inputValue === "") {
+			setTempServiceFee("");
+			return;
+		}
+
+		const value = parseFloat(inputValue);
+		// Check if it's a valid number and within range
+		if (!isNaN(value) && value >= 0 && value <= 100) {
+			setTempServiceFee(value);
+		}
+	};
+
+	const handleTempRefundFeeChange = (e) => {
+		const inputValue = e.target.value;
+
+		// Allow empty string
+		if (inputValue === "") {
+			setTempRefundFee("");
+			return;
+		}
+
+		const value = parseFloat(inputValue);
+		// Check if it's a valid number and within range
+		if (!isNaN(value) && value >= 0 && value <= 100) {
+			setTempRefundFee(value);
+		}
+	};
+
+	// Save functions
+	const handleSaveService = async () => {
+		// Validate input before saving
+		if (
+			tempServiceFee === "" ||
+			tempServiceFee < 0 ||
+			tempServiceFee > 100
+		) {
+			toast.error("Vui lòng nhập phí dịch vụ hợp lệ (0-100%)");
+			return;
+		}
+
+		setIsLoading(true);
+		try {
+			const serviceDecimal = convertToDecimal(tempServiceFee);
+			console.log("Service Fee (decimal):", serviceDecimal);
+
+			// Call API to update service fee
+			const response = await updateServiceFee(serviceDecimal);
+
+			if (response.error) {
+				throw new Error(response.error.data?.message || "API Error");
+			}
+
+			// Update actual value and exit edit mode
+			setServiceFeePercentage(tempServiceFee);
+			setIsEditingService(false);
+			toast.success("Cập nhật phí dịch vụ thành công!");
+		} catch (error) {
+			console.error("Error updating service fee:", error);
+			toast.error("Có lỗi xảy ra khi cập nhật phí dịch vụ!");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+	const handleSaveRefund = async () => {
+		// Validate input before saving
+		if (tempRefundFee === "" || tempRefundFee < 0 || tempRefundFee > 100) {
+			toast.error("Vui lòng nhập phí hoàn tiền hợp lệ (0-100%)");
+			return;
+		}
+
+		setIsLoading(true);
+		try {
+			const refundDecimal = convertToDecimal(tempRefundFee);
+			console.log("Refund Fee (decimal):", refundDecimal);
+
+			// TODO: Call API to update refund fee when available
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+
+			// Update actual value and exit edit mode
+			setRefundFeePercentage(tempRefundFee);
+			setIsEditingRefund(false);
+			toast.success("Cập nhật phí hoàn tiền thành công!");
+		} catch (error) {
+			console.error("Error updating refund fee:", error);
+			toast.error("Có lỗi xảy ra khi cập nhật phí hoàn tiền!");
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	return (
-		<div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
-			<div className="bg-white rounded-xl shadow p-6 mb-6">
+		<div className="p-6">
+			{/* Header */}
+			<div className="mb-6">
 				<div className="flex items-center gap-3 mb-2">
-					<DollarSign className="h-6 w-6 text-blue-600" />
-					<h1 className="text-2xl font-bold text-gray-900">
-						Cấu hình phí dịch vụ
-					</h1>
+					<div className="p-2 bg-blue-100 rounded-lg">
+						<DollarSign className="h-6 w-6 text-blue-600" />
+					</div>
+					<div>
+						<h1 className="text-2xl font-bold text-gray-900">
+							Cấu hình phí dịch vụ
+						</h1>
+						<p className="text-gray-600 text-sm">
+							Quản lý các loại phí trong hệ thống mua hộ hàng nước
+							ngoài
+						</p>
+					</div>
 				</div>
-				<p className="text-gray-600">
-					Quản lý các loại phí trong hệ thống mua hộ hàng nước ngoài
-				</p>
 			</div>
 
-			<div className="bg-white rounded-xl shadow-md p-6">
+			{/* Main Content */}
+			<div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 				<Tabs
 					value={activeTab}
 					onValueChange={setActiveTab}
 					className="w-full"
 				>
-					<TabsList className="grid w-full grid-cols-3 mb-6">
+					<TabsList className="grid w-full grid-cols-2 mb-6">
 						<TabsTrigger
 							value="service"
 							className="flex items-center gap-2"
 						>
 							<Settings className="h-4 w-4" />
 							Phí dịch vụ
-						</TabsTrigger>
-						<TabsTrigger
-							value="cancel"
-							className="flex items-center gap-2"
-						>
-							<AlertTriangle className="h-4 w-4" />
-							Phí hủy đơn
 						</TabsTrigger>
 						<TabsTrigger
 							value="refund"
@@ -216,95 +197,205 @@ export default function ServiceConfig() {
 					</TabsList>
 
 					{/* Service Fees Tab */}
-					<TabsContent value="service" className="space-y-6">
-						<div className="flex items-center justify-between">
-							<div>
-								<h3 className="text-lg font-semibold text-gray-900">
-									Cấu hình phí dịch vụ
-								</h3>
-								<p className="text-gray-600 text-sm">
-									Quản lý các loại phí liên quan đến dịch vụ
-									mua hộ
-								</p>
+					<TabsContent value="service" className="space-y-3">
+						<div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6 shadow-sm">
+							<div className="flex items-center justify-between">
+								<div className="flex-1">
+									<div className="flex items-center gap-3">
+										<div className="p-2 bg-blue-500 rounded-lg">
+											<Settings className="h-4 w-4 text-white" />
+										</div>
+										<div>
+											<h4 className="text-lg font-semibold text-gray-900">
+												Phí dịch vụ
+											</h4>
+											<p className="text-gray-600 text-xs">
+												Tỷ lệ phần trăm áp dụng cho dịch
+												vụ mua hộ
+											</p>
+										</div>
+									</div>
+								</div>
+
+								<div className="flex items-center gap-6">
+									{/* Display/Edit Value */}
+									<div className="text-center">
+										{isEditingService ? (
+											<div className="flex items-center gap-2">
+												<Input
+													type="number"
+													value={tempServiceFee}
+													onChange={
+														handleTempServiceFeeChange
+													}
+													className="w-20 text-center text-lg font-semibold border-2 border-blue-300 focus:border-blue-500"
+													min="0"
+													max="100"
+													step="0.1"
+													disabled={isLoading}
+												/>
+												<span className="text-xl font-semibold text-blue-600">
+													%
+												</span>
+											</div>
+										) : (
+											<div className="flex items-center gap-2">
+												<span className="text-2xl font-semibold text-blue-700">
+													{serviceFeePercentage}
+												</span>
+												<span className="text-xl font-semibold text-blue-600">
+													%
+												</span>
+											</div>
+										)}
+									</div>
+
+									{/* Action Buttons */}
+									<div className="flex gap-2">
+										{isEditingService ? (
+											<>
+												<Button
+													onClick={handleSaveService}
+													disabled={isLoading}
+													className="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
+													size="sm"
+												>
+													<Check className="h-4 w-4 mr-1" />
+													{isLoading
+														? "Đang lưu..."
+														: "Lưu"}
+												</Button>
+												<Button
+													onClick={
+														handleCancelService
+													}
+													disabled={isLoading}
+													variant="outline"
+													className="border-gray-300 hover:bg-gray-50 px-4 py-2"
+													size="sm"
+												>
+													<X className="h-4 w-4 mr-1" />
+													Hủy
+												</Button>
+											</>
+										) : (
+											<Button
+												onClick={handleEditService}
+												className="bg-blue-600 hover:bg-blue-700 text-white"
+												size="sm"
+											>
+												<Edit3 className="h-4 w-4" />
+											</Button>
+										)}
+									</div>
+								</div>
 							</div>
-							<Button className="flex items-center gap-2">
-								<Plus className="h-4 w-4" />
-								Thêm phí mới
-							</Button>
-						</div>
-
-						<div className="space-y-3">
-							{serviceFees.map((fee) => renderFeeRow(fee))}
-						</div>
-					</TabsContent>
-
-					{/* Cancel Fees Tab */}
-					<TabsContent value="cancel" className="space-y-6">
-						<div className="flex items-center justify-between">
-							<div>
-								<h3 className="text-lg font-semibold text-gray-900">
-									Cấu hình phí hủy đơn
-								</h3>
-								<p className="text-gray-600 text-sm">
-									Thiết lập phí áp dụng khi khách hàng hủy đơn
-									hàng
-								</p>
-							</div>
-							<Button className="flex items-center gap-2">
-								<Plus className="h-4 w-4" />
-								Thêm quy định mới
-							</Button>
-						</div>
-
-						<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-							<div className="flex items-center gap-2">
-								<AlertTriangle className="h-5 w-5 text-yellow-600" />
-								<h4 className="font-medium text-yellow-800">
-									Lưu ý quan trọng
-								</h4>
-							</div>
-							<p className="text-yellow-700 text-sm mt-1">
-								Phí hủy đơn sẽ được áp dụng theo thời gian và
-								trạng thái đơn hàng. Vui lòng cân nhắc kỹ trước
-								khi thay đổi.
-							</p>
-						</div>
-
-						<div className="space-y-3">
-							{cancelFees.map((fee) => renderFeeRow(fee))}
 						</div>
 					</TabsContent>
 
 					{/* Refund Fees Tab */}
 					<TabsContent value="refund" className="space-y-6">
-						<div className="flex items-center justify-between">
-							<div>
-								<h3 className="text-lg font-semibold text-gray-900">
-									Cấu hình phí hoàn tiền
-								</h3>
-								<p className="text-gray-600 text-sm">
-									Quản lý phí xử lý và chuyển khoản hoàn tiền
-								</p>
-							</div>
-							<Button className="flex items-center gap-2">
-								<Plus className="h-4 w-4" />
-								Thêm loại phí
-							</Button>
+						<div className="pb-4">
+							<h3 className="text-xl font-semibold text-gray-900">
+								Cấu hình phí hoàn tiền
+							</h3>
 						</div>
 
-						<div className="space-y-3">
-							{refundFees.map((fee) => renderFeeRow(fee))}
+						<div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-6 shadow-sm">
+							<div className="flex items-center justify-between">
+								<div className="flex-1">
+									<div className="flex items-center gap-3">
+										<div className="p-2 bg-orange-500 rounded-lg">
+											<RefreshCw className="h-4 w-4 text-white" />
+										</div>
+										<div>
+											<h4 className="text-lg font-semibold text-gray-900">
+												Phí hoàn tiền
+											</h4>
+											<p className="text-gray-600 text-xs">
+												Tỷ lệ phần trăm áp dụng cho phí
+												hoàn tiền
+											</p>
+										</div>
+									</div>
+								</div>
+
+								<div className="flex items-center gap-6">
+									{/* Display/Edit Value */}
+									<div className="text-center">
+										{isEditingRefund ? (
+											<div className="flex items-center gap-2">
+												<Input
+													type="number"
+													value={tempRefundFee}
+													onChange={
+														handleTempRefundFeeChange
+													}
+													className="w-20 text-center text-lg font-semibold border-2 border-orange-300 focus:border-orange-500"
+													min="0"
+													max="100"
+													step="0.1"
+													disabled={isLoading}
+												/>
+												<span className="text-xl font-semibold text-orange-600">
+													%
+												</span>
+											</div>
+										) : (
+											<div className="flex items-center gap-2">
+												<span className="text-2xl font-semibold text-orange-700">
+													{refundFeePercentage}
+												</span>
+												<span className="text-xl font-semibold text-orange-600">
+													%
+												</span>
+											</div>
+										)}
+									</div>
+
+									{/* Action Buttons */}
+									<div className="flex gap-2">
+										{isEditingRefund ? (
+											<>
+												<Button
+													onClick={handleSaveRefund}
+													disabled={isLoading}
+													className="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
+													size="sm"
+												>
+													<Check className="h-4 w-4 mr-1" />
+													{isLoading
+														? "Đang lưu..."
+														: "Lưu"}
+												</Button>
+												<Button
+													onClick={handleCancelRefund}
+													disabled={isLoading}
+													variant="outline"
+													className="border-gray-300 hover:bg-gray-50 px-4 py-2"
+													size="sm"
+												>
+													<X className="h-4 w-4 mr-1" />
+													Hủy
+												</Button>
+											</>
+										) : (
+											<Button
+												onClick={handleEditRefund}
+												className="bg-orange-600 hover:bg-orange-700 text-white"
+												size="sm"
+											>
+												<Edit3 className="h-4 w-4" />
+											</Button>
+										)}
+									</div>
+								</div>
+							</div>
 						</div>
 					</TabsContent>
 				</Tabs>
 
 				{/* Save Changes Button */}
-				<div className="flex justify-end mt-6 pt-6 border-t">
-					<Button className="flex items-center gap-2">
-						<Save className="h-4 w-4" />
-						Lưu thay đổi
-					</Button>
-				</div>
 			</div>
 		</div>
 	);

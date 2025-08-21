@@ -16,6 +16,7 @@ const gshopApi = createApi({
 		"RefundList",
 		"WithdrawList",
 		"BMDashboard",
+		"Variants",
 	],
 >>>>>>> 28744a5 (feat: adds Business Manager dashboard)
 	baseQuery: axiosBaseQuery(),
@@ -777,6 +778,44 @@ export const {
 			}),
 			providesTags: ["BMDashboard"],
 		}),
+		updateServiceFee: builder.mutation({
+			query: (serviceFee) => ({
+				data: { serviceFee },
+				url: endpoints.BM_SERVICE_FEE,
+				method: "PUT",
+			}),
+			invalidatesTags: ["BMDashboard"],
+		}),
+		getAllVariants: builder.query({
+			query: () => ({
+				url: endpoints.VARIANTS,
+				method: "GET",
+			}),
+			providesTags: ["Variants"],
+		}),
+		createVariant: builder.mutation({
+			query: (variantData) => ({
+				params: variantData,
+				url: endpoints.VARIANTS,
+				method: "POST",
+			}),
+			invalidatesTags: ["Variants"],
+		}),
+		updateVariant: builder.mutation({
+			query: ({ id, name }) => ({
+				params: { newName: name },
+				url: `${endpoints.VARIANTS}/${id}`,
+				method: "PUT",
+			}),
+			invalidatesTags: ["Variants"],
+		}),
+		deleteVariant: builder.mutation({
+			query: (id) => ({
+				url: `${endpoints.VARIANTS}/${id}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["Variants"],
+		}),
 	}),
 });
 
@@ -852,7 +891,11 @@ export const {
 	useGetWithdrawRequestAdminQuery,
 	useGetBMDashboardQuery,
 	useGetBMCustomerQuery,
->>>>>>> 28744a5 (feat: adds Business Manager dashboard)
+	useUpdateServiceFeeMutation,
+	useGetAllVariantsQuery,
+	useCreateVariantMutation,
+	useUpdateVariantMutation,
+	useDeleteVariantMutation,
 } = gshopApi;
 
 export default gshopApi;

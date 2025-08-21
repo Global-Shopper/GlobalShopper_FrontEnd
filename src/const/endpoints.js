@@ -57,5 +57,7 @@ const endpoints = {
 	WITHDRAW_ADMIN: "/wallet/admin/withdraw-tickets",
 	BM_DASHBOARD: "/business-manager/dashboard",
 	BM_CUSTOMER: "/business-manager/customer",
+	BM_SERVICE_FEE: "/business-manager/servicefee",
+	VARIANTS: "/variant",
 };
 export default endpoints;
