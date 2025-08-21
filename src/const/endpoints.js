@@ -50,7 +50,7 @@ const endpoints = {
 	GET_ALL_CUSTOMERS: "/customer",
 	CREATE_CUSTOMER: "/customer",
 	UPDATE_CUSTOMER: "/customer",
-	BAN_CUSTOMER: "/customer/ban",
+	BAN_CUSTOMER: "/user",
 	BANK_ACCOUNT: "/bank-account",
 	WITHDRAW_REQUEST: "/wallet/withdraw-request",
 	WITHDRAW_CUSTOMER: "/wallet/withdraw-customer",
