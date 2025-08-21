@@ -786,6 +786,14 @@ export const {
 			}),
 			invalidatesTags: ["BMDashboard"],
 		}),
+		getRevenue: builder.query({
+			query: ({ startDate, endDate }) => ({
+				params: { startDate, endDate },
+				url: endpoints.BM_REVENUE,
+				method: "GET",
+			}),
+			providesTags: ["BMDashboard"],
+		}),
 		getAllVariants: builder.query({
 			query: () => ({
 				url: endpoints.VARIANTS,
@@ -892,6 +900,7 @@ export const {
 	useGetBMDashboardQuery,
 	useGetBMCustomerQuery,
 	useUpdateServiceFeeMutation,
+	useGetRevenueQuery,
 	useGetAllVariantsQuery,
 	useCreateVariantMutation,
 	useUpdateVariantMutation,

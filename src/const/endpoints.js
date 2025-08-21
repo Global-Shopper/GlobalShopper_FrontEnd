@@ -58,6 +58,7 @@ const endpoints = {
 	BM_DASHBOARD: "/business-manager/dashboard",
 	BM_CUSTOMER: "/business-manager/customer",
 	BM_SERVICE_FEE: "/business-manager/servicefee",
+	BM_REVENUE: "/business-manager/revenue",
 	VARIANTS: "/variant",
 };
 export default endpoints;
