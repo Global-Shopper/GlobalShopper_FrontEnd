@@ -10,7 +10,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import SystemConfig from "@/containers/BusinessManager/SystemConfig/SystemConfig";
+import SystemConfig from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
+import HsCodeDialogContent from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
 
 export function QuotationForm({ purchaseRequest, product, errors = {}, onChange }) {
   const [hsOpen, setHsOpen] = useState(false);
@@ -88,7 +89,7 @@ export function QuotationForm({ purchaseRequest, product, errors = {}, onChange 
             </DialogDescription>
           </DialogHeader>
           <div className="px-6 pb-6 h-[calc(100%-90px)] overflow-auto">
-            <SystemConfig setHScode={handleTakeHsCode} />
+            <HsCodeDialogContent setHScode={handleTakeHsCode} />
           </div>
         </DialogContent>
       </Dialog>

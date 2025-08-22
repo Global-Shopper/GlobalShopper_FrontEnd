@@ -719,6 +719,7 @@ export const {
 	useCancelOrderMutation,
 	useUpdateShippingMutation,
 	useGetHsCodesQuery,
+	useLazyGetHsCodesQuery,
 	useGetShipmentRateQuery,
 	useLazyGetShippingTrackingQuery,
 	useCreateShipmentMutation,
