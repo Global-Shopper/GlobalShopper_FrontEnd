@@ -11,9 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Loader2, Upload, X, Trash2 } from 'lucide-react'
-import { PREDEFINED_VARIANT_FIELDS } from '@/const/variant'
 import { uploadToCloudinary } from '@/utils/uploadToCloudinary'
-import { useGetShippingAddressQuery, useUpdatePurchaseRequestMutation } from '@/services/gshopApi'
+import { useGetShippingAddressQuery, useGetVariantOnlyNameQuery, useUpdatePurchaseRequestMutation } from '@/services/gshopApi'
 import AddressCardSkeleton from '@/components/AddressCardSkeleton'
 
 const toVariantRows = (raw) => {
@@ -74,6 +73,7 @@ const makeValidationSchema = () =>
 
 const PurchaseRequestEditOnline = ({ id, data }) => {
   const navigate = useNavigate()
+  const { data: variantNames } = useGetVariantOnlyNameQuery()
   const { data: addresses, isLoading: isAddressLoading, isError: isAddressError } = useGetShippingAddressQuery()
   const [updatePurchaseRequest, { isLoading: isSubmitting }] = useUpdatePurchaseRequestMutation()
   const [uploadingIndex, setUploadingIndex] = useState(null)
@@ -136,7 +136,7 @@ const PurchaseRequestEditOnline = ({ id, data }) => {
 
       await updatePurchaseRequest({ id, payload }).unwrap()
       toast.success('Cập nhật yêu cầu mua hàng thành công!')
-      navigate(`/purchase-request/${id}`)
+      navigate(`/account-center/purchase-request/${id}`)
     } catch (e) {
       toast.error(e?.data?.message || 'Cập nhật thất bại. Vui lòng thử lại!')
     }
@@ -367,9 +367,9 @@ const PurchaseRequestEditOnline = ({ id, data }) => {
                                   <div className="space-y-2">
                                     <Label>Thuộc tính sản phẩm</Label>
                                     {(variantRows || []).map((row, variantIdx) => {
-                                      const isPredefined = PREDEFINED_VARIANT_FIELDS.includes(row?.attributeName)
+                                      const isPredefined = variantNames?.includes(row?.attributeName)
                                       const usedNames = (variantRows || []).map((r, i) => (i !== variantIdx ? r?.attributeName : null))
-                                      const options = PREDEFINED_VARIANT_FIELDS.filter((field) => field === 'Khác' || !usedNames.includes(field))
+                                      const options = variantNames?.filter((field) => field === 'Khác' || !usedNames.includes(field))
                                       return (
                                         <div key={`vr-${variantIdx}`} className="flex gap-2 mb-2 items-center">
                                           <Select
@@ -421,7 +421,7 @@ const PurchaseRequestEditOnline = ({ id, data }) => {
                                         <SelectContent>
                                           {(() => {
                                             const used = (variantRows || []).map((r) => r?.attributeName)
-                                            return PREDEFINED_VARIANT_FIELDS.filter((field) => field === 'Khác' || !used.includes(field)).map((opt) => (
+                                            return variantNames?.filter((field) => field === 'Khác' || !used.includes(field)).map((opt) => (
                                               <SelectItem key={opt} value={opt}>
                                                 {opt}
                                               </SelectItem>

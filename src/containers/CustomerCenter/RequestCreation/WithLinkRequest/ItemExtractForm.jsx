@@ -10,7 +10,6 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Loader2, Upload, X, Trash2 } from "lucide-react";
-import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant";
 
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,9 +23,11 @@ import {
   removeImageUrl,
   selectAllItems,
 } from "@/features/onlineReq";
+import { useGetVariantOnlyNameQuery } from "@/services/gshopApi";
 
 export default function ItemExtractForm({ index }) {
   const dispatch = useDispatch();
+  const { data: variantNames } = useGetVariantOnlyNameQuery()
   const items = useSelector(selectAllItems);
   const item = items[index]?.product || {};
   const variantRows = item.variantRows || [];
@@ -199,9 +200,7 @@ export default function ItemExtractForm({ index }) {
             Thuộc tính sản phẩm
           </Label>
           {variantRows.map((row, variantIdx) => {
-            const isPredefined = PREDEFINED_VARIANT_FIELDS.includes(
-              row.attributeName
-            );
+            const isPredefined = variantNames?.includes(row?.attributeName)
             return (
               <div key={variantIdx} className="flex gap-2 mb-2 items-center">
                 <Select
@@ -218,7 +217,7 @@ export default function ItemExtractForm({ index }) {
                     <SelectValue placeholder="Chọn thuộc tính" />
                   </SelectTrigger>
                   <SelectContent>
-                    {PREDEFINED_VARIANT_FIELDS.filter(
+                    {variantNames?.filter(
                       (field) =>
                         field === "Khác" ||
                         !variantRows
@@ -275,7 +274,7 @@ export default function ItemExtractForm({ index }) {
                 <SelectValue placeholder="+ Thêm thuộc tính" />
               </SelectTrigger>
               <SelectContent>
-                {PREDEFINED_VARIANT_FIELDS.filter(
+                {variantNames?.filter(
                   (field) =>
                     field === "Khác" ||
                     !variantRows.map((r) => r.attributeName).includes(field)

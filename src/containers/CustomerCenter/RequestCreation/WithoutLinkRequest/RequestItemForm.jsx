@@ -22,7 +22,6 @@ import {
   Image as ImageIcon,
   Loader2,
 } from "lucide-react";
-import { PREDEFINED_VARIANT_FIELDS } from "@/const/variant";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 import { toast } from "sonner";
 
@@ -40,6 +39,8 @@ import {
   removeDraftLocalImage,
   removeItem,
 } from "@/features/offlineReq";
+import { useGetVariantOnlyNameQuery } from "@/services/gshopApi";
+import PageLoading from "@/components/PageLoading";
 
 export default function RequestItemForm({
   onNext,
@@ -52,13 +53,15 @@ export default function RequestItemForm({
   const [showFieldDropdown, setShowFieldDropdown] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const { data: variantNames, isLoading: isVariantLoading } = useGetVariantOnlyNameQuery();
+  console.log(variantNames)
 
   // Redux preview images
   const localImages = currentItemDraft.localImages || [];
 
   // Compute available fields for adding new variant
   const usedFieldTypes = variantRows.map((row) => row.fieldType);
-  const availableFieldTypes = PREDEFINED_VARIANT_FIELDS.filter(
+  const availableFieldTypes = variantNames?.filter(
     (field) => field === "Khác" || !usedFieldTypes.includes(field)
   );
 
@@ -134,6 +137,9 @@ export default function RequestItemForm({
   const removeRequestItem = (requestItemId) => {
     dispatch(removeItem(requestItemId));
   };
+  if (isVariantLoading) {
+    return <PageLoading />;
+  }
 
   // Render
   return (
@@ -380,7 +386,7 @@ export default function RequestItemForm({
                     <SelectValue placeholder="Chọn thuộc tính" />
                   </SelectTrigger>
                   <SelectContent>
-                    {PREDEFINED_VARIANT_FIELDS.filter(
+                    {variantNames?.filter(
                       (field) =>
                         field === "Khác" ||
                         !usedFieldTypes.includes(field) ||
@@ -436,12 +442,12 @@ export default function RequestItemForm({
                   <SelectValue placeholder="Thêm thuộc tính" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableFieldTypes.length === 0 ? (
+                  {availableFieldTypes?.length === 0 ? (
                     <SelectItem value="" disabled>
                       Không còn thuộc tính nào
                     </SelectItem>
                   ) : (
-                    availableFieldTypes.map((opt) => (
+                    availableFieldTypes?.map((opt) => (
                       <SelectItem key={opt} value={opt}>
                         {opt}
                       </SelectItem>
