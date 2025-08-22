@@ -51,7 +51,7 @@ export default function OrderCard({ order, onCancel, cancelling }) {
               <div className="flex items-center gap-1">
                 <span className="text-sm text-gray-500 font-medium">Tổng tiền:</span>
                 <span className="text-xs font-semibold text-orange-800 bg-orange-50 px-2 py-1 rounded">
-                  {formatCurrency(order.totalPrice, "VND", "vn")}
+                  {formatCurrency(order.totalPrice + order.shippingFee, "VND", "vn")}
                 </span>
               </div>
               <div className="flex items-center gap-1">

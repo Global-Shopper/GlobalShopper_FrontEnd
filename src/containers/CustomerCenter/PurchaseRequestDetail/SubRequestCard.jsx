@@ -161,25 +161,23 @@ function SubRequestCard({ subRequest, expired, requestType }) {
         ))}
       </div>
       <div>
-        {subRequest.quotationForPurchase ? (
+        {subRequest?.status === "QUOTED" || subRequest?.status === "PAID" ? (
+          requestType === "ONLINE" &&
           <div className="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
-            {
-              requestType === "ONLINE" &&
-              <>
-                {subRequest?.quotationForPurchase?.fees?.map((fee) =>
-                  <div className="text-sm text-gray-700">
-                    {fee.feeName}: {formatCurrency(fee.amount, fee.currency, getLocaleCurrencyFormat(fee.currency))}
-                  </div>
-                )}
-                <div className="text-sm text-gray-700">
-                  Phí vận chuyển: <span className="font-semibold">
-                    {formatCurrency(subRequest.quotationForPurchase.shippingEstimate, "VND", "vn")}
-                  </span>
-                </div>
-              </>
-            }
-            {subRequest.quotationForPurchase.note && (
-              <div className="text-sm text-gray-500">Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}</div>
+            {subRequest?.quotationForPurchase?.fees?.map((fee) =>
+              <div className="text-sm text-gray-700">
+                {fee.feeName}: {formatCurrency(fee.amount, fee.currency, getLocaleCurrencyFormat(fee.currency))}
+              </div>
+            )}
+            <div className="text-sm text-gray-700">
+              Phí vận chuyển: <span className="font-semibold">
+                {formatCurrency(subRequest.quotationForPurchase.shippingEstimate, "VND", "vn")}
+              </span>
+            </div>
+            {subRequest?.quotationForPurchase?.note && (
+              <div className="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
+                Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}
+              </div>
             )}
           </div>
         ) : (

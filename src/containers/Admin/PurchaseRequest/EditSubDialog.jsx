@@ -140,7 +140,7 @@ const EditSubDialog = ({ subRequest, requestItemsGroupByPlatform }) => {
                 {(subRequest?.requestItems || []).map(item => (
                   <div key={item.id} className="flex items-center justify-between rounded border p-2">
                     <div className="flex items-center gap-2">
-                      <div className="font-medium truncate">{item.productName}</div>
+                      <div className="font-medium break-words max-w-[400px]">{item.productName}</div>
                       <div className="text-xs text-gray-500">×{item.quantity}</div>
                     </div>
                     <div className="flex items-center gap-4">
