@@ -28,6 +28,7 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
     : setShippingAddressIdOffline;
 
   const items = useSelector(isOnline ? selectOnlineItems : selectOfflineItems);
+  console.log(items)
   const { data: isLoadingCreate } = useCreateWithoutLinkPurchaseRequestMutation();
   const {
 		data: addresses,
@@ -178,6 +179,7 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                     </div>
                   );
                 }) : items?.map((item, index) => {
+                  {console.log(item)}
                   // For offline requests, item.product is always present
                   // For online, adapt as needed in the future
                   return (
@@ -212,6 +214,26 @@ export default function RequestConfirmation({ type, onNext, onBack }) {
                               </span>
                             )}
                           </div>
+                          {item.variantRows && item.variantRows.length > 0 && (
+                            <ul className="mt-1 space-y-1">
+                              {item.variantRows.map((variant, vIdx) => {
+                                if (variant?.fieldType === "Khác") {
+                                  return (
+                                    <li key={vIdx} className="text-sm text-gray-700 pl-2 border-l-2 border-orange-300">
+                                      {variant?.customFieldName}: {variant?.fieldValue}
+                                    </li>
+                                  );
+                                }
+                                else {
+                                  return (
+                                    <li key={vIdx} className="text-sm text-gray-700 pl-2 border-l-2 border-orange-300">
+                                      {variant?.fieldType}: {variant?.fieldValue}
+                                    </li>
+                                  );
+                                }
+                              })}
+                            </ul>
+                          )}
                           {item.description && (
                             <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                               <strong>Ghi chú:</strong> {item.description}

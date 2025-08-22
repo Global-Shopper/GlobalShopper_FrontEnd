@@ -171,7 +171,9 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
               >
                 {expanded ? "Đóng báo giá nhóm" : "Nhập thông tin và gửi báo giá đơn hàng"}
               </Button>
-              <EditSubDialog subRequest={subRequest} requestItemsGroupByPlatform={purchaseRequest?.requestItemsGroupByPlatform} />
+              {
+                purchaseRequest?.requestType === "ONLINE" && <EditSubDialog subRequest={subRequest} requestItemsGroupByPlatform={purchaseRequest?.requestItemsGroupByPlatform} />
+              }
               {expanded && (
                 <Formik
                   initialValues={initialValues}

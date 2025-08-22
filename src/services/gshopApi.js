@@ -628,6 +628,16 @@ const gshopApi = createApi({
 			}),
 			providesTags: ["Variants"],
 		}),
+		getVariantOnlyName: builder.query({
+			query: () => ({
+				url: endpoints.VARIANTS,
+				method: "GET",
+			}),
+			transformResponse: (response) => {
+				return response.map((variant) => variant.name).concat("Khác");
+			},
+			providesTags: ["Variants"],
+		}),
 		createVariant: builder.mutation({
 			query: (variantData) => ({
 				params: variantData,
@@ -744,6 +754,7 @@ export const {
 	useUpdateVariantMutation,
 	useDeleteVariantMutation,
 	useToggleVariantActiveMutation,
+	useGetVariantOnlyNameQuery,
 } = gshopApi;
 
 export default gshopApi;

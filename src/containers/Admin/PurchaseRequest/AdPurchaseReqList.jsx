@@ -41,6 +41,7 @@ const AdPurchaseReqList = () => {
   const [size] = useURLSync(searchParams, setSearchParams, "size", "number", 10);
   const [type] = useURLSync(searchParams, setSearchParams, "type", "string", "assigned");
   const [status] = useURLSync(searchParams, setSearchParams, "status", "string", "ALL");
+  const [requestType] = useURLSync(searchParams, setSearchParams, "requestType", "string", "ALL");
   const [sort] = useURLSync(searchParams, setSearchParams, "sort", "arraySort", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
 
@@ -54,6 +55,7 @@ const AdPurchaseReqList = () => {
     type,
     sort,
     ...(status !== "ALL" && { status }),
+    ...(requestType !== "ALL" && { requestType }),
   });
 
   // Pagination controls
@@ -80,6 +82,13 @@ const AdPurchaseReqList = () => {
     setSearchParams((searchParams) => {
       searchParams.set("page", 1);
       searchParams.set("status", value);
+      return searchParams;
+    });
+  };
+  const handleRequestTypeChange = (value) => {
+    setSearchParams((searchParams) => {
+      searchParams.set("page", 1);
+      searchParams.set("requestType", value);
       return searchParams;
     });
   };
@@ -251,6 +260,25 @@ const AdPurchaseReqList = () => {
                       {size}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <label
+                htmlFor="requestType"
+                className="text-sm text-gray-600 font-medium ml-4"
+              >
+                Loại yêu cầu:
+              </label>
+              <Select value={requestType} onValueChange={(value) => handleRequestTypeChange(value)}>
+                <SelectTrigger
+                  id="requestType"
+                  className="w-40 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500"
+                >
+                  <SelectValue placeholder="Tất cả" />
+                </SelectTrigger>
+                <SelectContent className="rounded-lg shadow">
+                  <SelectItem value="ALL" className="rounded-lg">Tất cả</SelectItem>
+                  <SelectItem value="ONLINE" className="rounded-lg">E-commerce</SelectItem>
+                  <SelectItem value="OFFLINE" className="rounded-lg">Nội địa quốc tế</SelectItem>
                 </SelectContent>
               </Select>
               {/* Status filter dropdown */}

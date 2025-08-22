@@ -56,7 +56,7 @@ const mapExtensionProductsToItems = (products = []) => {
       variantRows: [],
       images: p?.mainImage ? [p.mainImage] : [],
       link: p?.url || '',
-      ecommercePlatform: extractHost(p?.url || ''),
+      ecommercePlatform: p?.platform || '',
     },
   }));
 };
