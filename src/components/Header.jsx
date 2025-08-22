@@ -180,7 +180,7 @@ const Header = () => {
                   asChild
                 >
                   <Link
-                    to="/policies/terms"
+                    to="/term-of-service"
                     className="group flex items-center px-4 py-3 w-full hover:bg-blue-50 transition-colors duration-200"
                   >
                     <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700">
@@ -193,7 +193,7 @@ const Header = () => {
                   asChild
                 >
                   <Link
-                    to="/policies/refund"
+                    to="/refund-policy"
                     className="group flex items-center px-4 py-3 w-full hover:bg-blue-50 transition-colors duration-200"
                   >
                     <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700">
@@ -206,7 +206,7 @@ const Header = () => {
                   asChild
                 >
                   <Link
-                    to="/policies/privacy"
+                    to="/privacy-policy"
                     className="group flex items-center px-4 py-3 w-full hover:bg-blue-50 transition-colors duration-200"
                   >
                     <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700">
@@ -219,11 +219,24 @@ const Header = () => {
                   asChild
                 >
                   <Link
-                    to="/policies/return"
+                    to="/return-exchange-policy"
                     className="group flex items-center px-4 py-3 w-full hover:bg-blue-50 transition-colors duration-200"
                   >
                     <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700">
                       Chính sách hoàn trả
+                    </span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="p-0 hover:bg-blue-50 focus:bg-blue-50"
+                  asChild
+                >
+                  <Link
+                    to="/faq"
+                    className="group flex items-center px-4 py-3 w-full hover:bg-blue-50 transition-colors duration-200"
+                  >
+                    <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700">
+                      Câu hỏi thường gặp
                     </span>
                   </Link>
                 </DropdownMenuItem>
