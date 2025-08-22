@@ -10,6 +10,9 @@ import { REDIRECT_URI } from '@/const/urlconst';
 import { getFedexCreateShipPayload, getFedexRatePayload } from '@/utils/fedexPayload';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
+import { SHIPMENT_TYPE } from '@/const/shippingType';
 
 const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase }) => {
   const navigate = useNavigate()
@@ -20,14 +23,14 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
   const { data: rate, isLoading: isRateLoading } = useGetShipmentRateQuery(
     shouldFetchRate
       ? {
-          inputJson: getFedexRatePayload(
-            subRequest?.quotationForPurchase?.totalWeightEstimate,
-            subRequest?.quotationForPurchase?.shipper,
-            subRequest?.quotationForPurchase?.recipient,
-            'VND',
-            subRequest?.quotationForPurchase?.packageType
-          ),
-        }
+        inputJson: getFedexRatePayload(
+          subRequest?.quotationForPurchase?.totalWeightEstimate,
+          subRequest?.quotationForPurchase?.shipper,
+          subRequest?.quotationForPurchase?.recipient,
+          'VND',
+          subRequest?.quotationForPurchase?.packageType
+        ),
+      }
       : undefined,
     { skip: !shouldFetchRate }
   )
@@ -35,19 +38,33 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
   const [open, setOpen] = useState(false)
   const [method, setMethod] = useState('wallet') // 'wallet' | 'vnpay'
   const [selectedRateType, setSelectedRateType] = useState(null)
+  const rateReplyDetails = rate?.output?.rateReplyDetails
+  const isProcessingPayment = isCheckoutLoading || isDirectCheckoutLoading || isCreateShipmentLoading;
+  const isBusy = isWalletLoading || isRateLoading || isProcessingPayment;
+  const onlineShipCost = subRequest?.quotationForPurchase?.shippingEstimate ?? null;
   useEffect(() => {
     if (requestType !== 'OFFLINE') {
       setSelectedRateType(null);
     }
   }, [requestType])
-  const rateReplyDetails = rate?.output?.rateReplyDetails
+
+  useEffect(() => {
+    if (
+      requestType === 'OFFLINE' &&
+      !isRateLoading &&
+      Array.isArray(rateReplyDetails) &&
+      rateReplyDetails.length > 0 &&
+      !rateReplyDetails.some((r) => r?.serviceType === selectedRateType)
+    ) {
+      setSelectedRateType(rateReplyDetails[0]?.serviceType ?? null)
+    }
+  }, [requestType, isRateLoading, rateReplyDetails, selectedRateType])
   const totalAmount = useMemo(() => {
     const q = subRequest?.quotationForPurchase
     if (!q) return 0
     return (q.totalPriceEstimate || 0)
   }, [subRequest])
 
-  // Selected shipping cost derived from FedEx rateReplyDetails
   const selectedService = useMemo(() => {
     if (!selectedRateType || !Array.isArray(rateReplyDetails)) return null;
     return rateReplyDetails.find((r) => r?.serviceType === selectedRateType) || null;
@@ -58,11 +75,6 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
     const preferred = selectedService?.ratedShipmentDetails?.find((d) => d?.rateType === 'PREFERRED_CURRENCY');
     return preferred?.totalNetChargeWithDutiesAndTaxes ?? null;
   }, [selectedService])
-
-  // Aggregated loading states for UX
-  const isProcessingPayment = isCheckoutLoading || isDirectCheckoutLoading || isCreateShipmentLoading;
-  const isBusy = isWalletLoading || isRateLoading || isProcessingPayment;
-  const onlineShipCost = subRequest?.quotationForPurchase?.shippingEstimate ?? null;
 
   const handleConfirm = async () => {
     try {
@@ -204,7 +216,17 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
         ))}
         {(requestType === 'OFFLINE' ? selectedShipCost != null : onlineShipCost != null) && (
           <div className="mb-3 text-sm flex justify-between">
-            <span>Phí vận chuyển{requestType === 'OFFLINE' && selectedService?.serviceName ? ` (${selectedService.serviceName})` : ''}</span>
+            <span>
+              Phí vận chuyển{requestType === 'OFFLINE' && selectedService?.serviceName ? ` (${selectedService.serviceName})` : ''}
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4" />
+                </TooltipTrigger>
+                <TooltipContent>
+                    {SHIPMENT_TYPE.find((item) => item.type === selectedService?.serviceType)?.value}
+                </TooltipContent>
+              </Tooltip>
+            </span>
             <span className="font-medium">{formatCurrency(requestType === 'OFFLINE' ? selectedShipCost : onlineShipCost, 'VND', getLocaleCurrencyFormat('VND'))}</span>
           </div>
         )}
@@ -215,7 +237,6 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
             </SelectTrigger>
             <SelectContent>
               {rateReplyDetails?.map((rate, index) => (
-
                 <SelectItem key={index} value={rate?.serviceType}>{rate?.serviceName} - {formatCurrency(rate?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}</SelectItem>
               ))}
             </SelectContent>

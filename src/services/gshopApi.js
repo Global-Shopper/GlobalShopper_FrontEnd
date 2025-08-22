@@ -237,7 +237,7 @@ const gshopApi = createApi({
 		updatePurchaseRequest: builder.mutation({
 			query: ({ id, payload }) => ({
 				data: payload,
-				url: `${endpoints.PURCHASE_REQUEST}/${id}`,
+				url: `${endpoints.PURCHASE_REQUEST}/edit/${id}`,
 				method: "PUT",
 			}),
 			invalidatesTags: ["PurchaseRequest", "PurchaseRequestDetail"],
