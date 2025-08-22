@@ -6,7 +6,7 @@ const ReturnExchangePolicy = () => {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center justify-center gap-2">
           <CardTitle className="text-2xl">Chính sách đổi/hoàn trả GShop</CardTitle>
           <CardDescription>
             Minh bạch, công bằng và xử lý nhanh chóng mọi yêu cầu đổi hoặc trả hàng.

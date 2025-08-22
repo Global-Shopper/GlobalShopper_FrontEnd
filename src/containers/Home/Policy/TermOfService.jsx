@@ -6,7 +6,7 @@ const TermOfService = () => {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center justify-center gap-2">
           <CardTitle className="text-2xl">Điều khoản dịch vụ</CardTitle>
           <CardDescription>
             Các điều khoản sử dụng dịch vụ mua hộ quốc tế của GShop. Vui lòng đọc kỹ trước khi sử dụng.

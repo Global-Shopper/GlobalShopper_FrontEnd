@@ -6,7 +6,7 @@ const RefundPolicy = () => {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center justify-center gap-2">
           <CardTitle className="text-2xl">Chính sách hoàn tiền GShop</CardTitle>
           <CardDescription>
             Minh bạch, nhanh chóng và bảo vệ quyền lợi khách hàng trong mọi giao dịch.

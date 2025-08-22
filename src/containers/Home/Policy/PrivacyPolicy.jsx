@@ -6,7 +6,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center justify-center gap-2">
           <CardTitle className="text-2xl">Chính sách bảo mật GShop</CardTitle>
           <CardDescription>
             GShop cam kết bảo vệ dữ liệu cá nhân của khách hàng trong suốt quá trình sử dụng dịch vụ mua hộ quốc tế.

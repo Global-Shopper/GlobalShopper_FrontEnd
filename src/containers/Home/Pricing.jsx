@@ -6,7 +6,7 @@ const Pricing = () => {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center justify-center gap-2">
           <CardTitle className="text-2xl">Bảng giá</CardTitle>
           <CardDescription>
             Thông tin minh bạch về phí dịch vụ, phí vận chuyển quốc tế và công thức tính tổng chi phí.

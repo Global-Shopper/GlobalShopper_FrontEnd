@@ -7,7 +7,7 @@ const FAQ = () => {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center justify-center gap-2">
           <CardTitle className="text-2xl">Câu hỏi thường gặp (FAQ)</CardTitle>
           <CardDescription>Những thắc mắc phổ biến về dịch vụ mua hộ quốc tế của GShop.</CardDescription>
         </CardHeader>
