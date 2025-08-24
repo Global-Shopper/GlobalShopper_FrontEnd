@@ -31,6 +31,10 @@ import {
 	Line,
 	Area,
 	AreaChart,
+	PieChart,
+	Pie,
+	ComposedChart,
+	Cell,
 } from "recharts";
 import {
 	Card,
@@ -41,6 +45,9 @@ import {
 } from "@/components/ui/card";
 
 const BMDashboard = () => {
+	// Year filter state
+	const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
 	// Date state for dashboard filtering with localStorage persistence
 	const [dateRange, setDateRange] = useState(() => {
 		// Try to get saved date range from localStorage
@@ -133,6 +140,77 @@ const BMDashboard = () => {
 		size: 1, // We only need total count
 		startDate: apiParams.startDate,
 		endDate: apiParams.endDate,
+	});
+
+	// Helper function to get month range for API calls
+	const getMonthRange = (year, month) => {
+		const startDate = new Date(year, month - 1, 1);
+		const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+		return {
+			start: startDate.getTime(),
+			end: endDate.getTime(),
+		};
+	};
+
+	// API calls for monthly data based on selected year
+	const { data: janData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 1).start,
+		endDate: getMonthRange(selectedYear, 1).end,
+	});
+
+	const { data: febData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 2).start,
+		endDate: getMonthRange(selectedYear, 2).end,
+	});
+
+	const { data: marData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 3).start,
+		endDate: getMonthRange(selectedYear, 3).end,
+	});
+
+	const { data: aprData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 4).start,
+		endDate: getMonthRange(selectedYear, 4).end,
+	});
+
+	const { data: mayData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 5).start,
+		endDate: getMonthRange(selectedYear, 5).end,
+	});
+
+	const { data: junData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 6).start,
+		endDate: getMonthRange(selectedYear, 6).end,
+	});
+
+	const { data: julData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 7).start,
+		endDate: getMonthRange(selectedYear, 7).end,
+	});
+
+	const { data: augData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 8).start,
+		endDate: getMonthRange(selectedYear, 8).end,
+	});
+
+	const { data: sepData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 9).start,
+		endDate: getMonthRange(selectedYear, 9).end,
+	});
+
+	const { data: octData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 10).start,
+		endDate: getMonthRange(selectedYear, 10).end,
+	});
+
+	const { data: novData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 11).start,
+		endDate: getMonthRange(selectedYear, 11).end,
+	});
+
+	const { data: decData } = useGetBMDashboardQuery({
+		startDate: getMonthRange(selectedYear, 12).start,
+		endDate: getMonthRange(selectedYear, 12).end,
 	});
 
 	// Use real data if available, otherwise fallback to mock data
@@ -290,8 +368,10 @@ const BMDashboard = () => {
 		if (!dashboardData?.dashBoardList) {
 			return {
 				purchaseRequest: null,
+				purchaseRequestType: null,
 				refundTicket: null,
 				withdrawTicket: null,
+				order: null,
 			};
 		}
 
@@ -302,12 +382,82 @@ const BMDashboard = () => {
 
 		return {
 			purchaseRequest: dashboards.PurchaseRequest,
+			purchaseRequestType: dashboards.PurchaseRequestType,
 			refundTicket: dashboards.RefundTicket,
 			withdrawTicket: dashboards.WithdrawTicket,
+			order: dashboards.Order,
 		};
 	}, [dashboardData]);
 
-	// Data cho biểu đồ tròn theo danh mục
+	// Data cho biểu đồ tròn Purchase Request Type (Online/Offline)
+	const purchaseTypeData = useMemo(() => {
+		if (!dashboardStats.purchaseRequestType?.statusList) return [];
+
+		return dashboardStats.purchaseRequestType.statusList.map((item) => ({
+			name: item.status === "ONLINE" ? "Online" : "Offline",
+			value: item.count,
+			color: item.status === "ONLINE" ? "#10b981" : "#f59e0b",
+		}));
+	}, [dashboardStats.purchaseRequestType]);
+
+	// Helper function to extract online/offline counts from monthly data
+	const extractMonthlyOnlineOffline = (monthData) => {
+		if (!monthData?.dashBoardList) return { online: 0, offline: 0 };
+
+		const purchaseRequestType = monthData.dashBoardList.find(
+			(item) => item.dashBoardName === "PurchaseRequestType"
+		);
+
+		if (!purchaseRequestType?.statusList) return { online: 0, offline: 0 };
+
+		const online =
+			purchaseRequestType.statusList.find((s) => s.status === "ONLINE")
+				?.count || 0;
+		const offline =
+			purchaseRequestType.statusList.find((s) => s.status === "OFFLINE")
+				?.count || 0;
+
+		return { online, offline };
+	};
+
+	// Data cho biểu đồ xu hướng tháng từ API
+	const monthlyTrendData = useMemo(() => {
+		const monthsData = [
+			{ month: "T1", data: janData },
+			{ month: "T2", data: febData },
+			{ month: "T3", data: marData },
+			{ month: "T4", data: aprData },
+			{ month: "T5", data: mayData },
+			{ month: "T6", data: junData },
+			{ month: "T7", data: julData },
+			{ month: "T8", data: augData },
+			{ month: "T9", data: sepData },
+			{ month: "T10", data: octData },
+			{ month: "T11", data: novData },
+			{ month: "T12", data: decData },
+		];
+
+		return monthsData.map(({ month, data }) => {
+			const { online, offline } = extractMonthlyOnlineOffline(data);
+			return { month, online, offline };
+		});
+	}, [
+		janData,
+		febData,
+		marData,
+		aprData,
+		mayData,
+		junData,
+		julData,
+		augData,
+		sepData,
+		octData,
+		novData,
+		decData,
+	]);
+
+	// Colors for pie chart
+	const PIE_COLORS = ["#10b981", "#f59e0b"]; // Data cho biểu đồ tròn theo danh mục
 
 	const formatNumber = (num) => {
 		return new Intl.NumberFormat("vi-VN").format(num);
@@ -517,20 +667,23 @@ const BMDashboard = () => {
 
 			{/* Charts Section */}
 			<div className="space-y-8">
-				{/* Dashboard Charts Grid */}
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					{/* Purchase Request Dashboard */}
+				{/* Purchase Request Charts - Row 1 */}
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					{/* Purchase Request Status Chart */}
 					{dashboardStats.purchaseRequest && (
 						<Card className="hover:shadow-lg transition-all duration-300">
-							<CardHeader>
-								<CardTitle className="flex items-center gap-1 text-lg">
-									<ShoppingCart className="h-5 w-5 text-blue-600" />
-									Yêu cầu mua hàng
-								</CardTitle>
-								<CardDescription>
-									Tổng: {dashboardStats.purchaseRequest.total}{" "}
-									yêu cầu
-								</CardDescription>
+							<CardHeader className="flex flex-row items-center justify-between">
+								<div>
+									<CardTitle className="flex items-center gap-2 text-lg">
+										<ShoppingCart className="h-5 w-5 text-blue-600" />
+										Yêu cầu mua hàng
+									</CardTitle>
+									<CardDescription>
+										Tổng:{" "}
+										{dashboardStats.purchaseRequest.total}{" "}
+										yêu cầu
+									</CardDescription>
+								</div>
 							</CardHeader>
 							<CardContent>
 								<ResponsiveContainer width="100%" height={300}>
@@ -589,6 +742,359 @@ const BMDashboard = () => {
 						</Card>
 					)}
 
+					{/* Purchase Request Type Pie Chart */}
+					{dashboardStats.purchaseRequestType && (
+						<Card className="hover:shadow-lg transition-all duration-300 overflow-hidden">
+							<CardHeader className="pb-2">
+								<CardTitle className="flex items-center gap-2 text-lg">
+									<Target className="h-5 w-5 text-blue-600" />
+									Loại yêu cầu mua hàng
+								</CardTitle>
+								<p className="text-sm text-gray-500">
+									Tổng:{" "}
+									{dashboardStats.purchaseRequestType.total}{" "}
+									yêu cầu
+								</p>
+							</CardHeader>
+							<CardContent className="p-6 pt-2">
+								<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+									{/* Left Side - Statistics with Single Progress Bar */}
+									<div className="space-y-4">
+										{/* Statistics Display */}
+										<div className="space-y-3">
+											{purchaseTypeData.map(
+												(item, index) => {
+													const percentage = (
+														(item.value /
+															dashboardStats
+																.purchaseRequestType
+																.total) *
+														100
+													).toFixed(1);
+													return (
+														<div
+															key={index}
+															className="flex items-center justify-between"
+														>
+															<div className="flex items-center gap-3">
+																<div
+																	className="w-4 h-4 rounded-full"
+																	style={{
+																		backgroundColor:
+																			item.color,
+																	}}
+																></div>
+																<span className="text-sm font-semibold text-gray-800">
+																	{item.name}
+																</span>
+															</div>
+															<div className="text-right">
+																<div className="text-lg font-bold text-gray-900">
+																	{item.value}
+																</div>
+																<div className="text-xs text-gray-500">
+																	{percentage}
+																	%
+																</div>
+															</div>
+														</div>
+													);
+												}
+											)}
+										</div>
+
+										{/* Single Combined Progress Bar */}
+										<div className="space-y-2">
+											<div className="flex justify-between text-xs text-gray-600">
+												<span>Online</span>
+												<span>Offline</span>
+											</div>
+											<div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+												{purchaseTypeData.length >=
+													2 && (
+													<div className="h-full flex">
+														{/* Online part - always green */}
+														<div
+															className="h-full transition-all duration-500 ease-out"
+															style={{
+																backgroundColor:
+																	"#10b981", // Online = green
+																width: `${(
+																	((purchaseTypeData.find(
+																		(
+																			item
+																		) =>
+																			item.name ===
+																			"Online"
+																	)?.value ||
+																		0) /
+																		dashboardStats
+																			.purchaseRequestType
+																			.total) *
+																	100
+																).toFixed(1)}%`,
+															}}
+														></div>
+														{/* Offline part - always orange */}
+														<div
+															className="h-full transition-all duration-500 ease-out"
+															style={{
+																backgroundColor:
+																	"#f59e0b", // Offline = orange
+																width: `${(
+																	((purchaseTypeData.find(
+																		(
+																			item
+																		) =>
+																			item.name ===
+																			"Offline"
+																	)?.value ||
+																		0) /
+																		dashboardStats
+																			.purchaseRequestType
+																			.total) *
+																	100
+																).toFixed(1)}%`,
+															}}
+														></div>
+													</div>
+												)}
+											</div>
+										</div>
+
+										{/* Summary Stats */}
+										<div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-gray-200">
+											<div className="grid grid-cols-2 gap-4 text-center">
+												<div>
+													<div className="text-2xl font-bold text-blue-600">
+														{purchaseTypeData.find(
+															(item) =>
+																item.name ===
+																"Online"
+														)?.value || 0}
+													</div>
+													<div className="text-xs text-gray-600">
+														Online
+													</div>
+												</div>
+												<div>
+													<div className="text-2xl font-bold text-amber-600">
+														{purchaseTypeData.find(
+															(item) =>
+																item.name ===
+																"Offline"
+														)?.value || 0}
+													</div>
+													<div className="text-xs text-gray-600">
+														Offline
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									{/* Right Side - Pie Chart */}
+									<div className="flex justify-center">
+										<ResponsiveContainer
+											width={240}
+											height={240}
+										>
+											<PieChart>
+												<Pie
+													data={purchaseTypeData}
+													cx="50%"
+													cy="50%"
+													labelLine={false}
+													outerRadius={100}
+													innerRadius={50}
+													fill="#8884d8"
+													dataKey="value"
+													stroke="#fff"
+													strokeWidth={3}
+												>
+													{purchaseTypeData.map(
+														(entry, index) => (
+															<Cell
+																key={`cell-${index}`}
+																fill={
+																	entry.color
+																}
+															/>
+														)
+													)}
+												</Pie>
+												<Tooltip
+													formatter={(
+														value,
+														name
+													) => [
+														`${value} yêu cầu`,
+														name,
+													]}
+													contentStyle={{
+														backgroundColor: "#fff",
+														border: "1px solid #e5e7eb",
+														borderRadius: "8px",
+														boxShadow:
+															"0 4px 12px rgba(0, 0, 0, 0.1)",
+														fontSize: "13px",
+													}}
+												/>
+											</PieChart>
+										</ResponsiveContainer>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					)}
+				</div>
+
+				{/* Monthly Request Trend Chart - Row 2 */}
+				<Card className="hover:shadow-lg transition-all duration-300">
+					<CardHeader className="flex flex-row items-center justify-between">
+						<div>
+							<CardTitle className="flex items-center gap-2 text-lg">
+								<FileText className="h-5 w-5 text-purple-600" />
+								Xu hướng yêu cầu theo tháng
+							</CardTitle>
+							<CardDescription>
+								Biểu đồ số lượng yêu cầu Online/Offline theo
+								tháng
+							</CardDescription>
+						</div>
+						{/* Year Filter */}
+						<div className="flex items-center gap-2">
+							<label className="text-sm font-medium text-gray-700">
+								Năm:
+							</label>
+							<select
+								value={selectedYear}
+								onChange={(e) =>
+									setSelectedYear(parseInt(e.target.value))
+								}
+								className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+							>
+								<option value={2025}>2025</option>
+								<option value={2024}>2024</option>
+								<option value={2023}>2023</option>
+							</select>
+						</div>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={400}>
+							<BarChart
+								data={monthlyTrendData.map((item) => ({
+									...item,
+									total: item.online + item.offline,
+								}))}
+								margin={{
+									top: 20,
+									right: 30,
+									left: 20,
+									bottom: 20,
+								}}
+								barCategoryGap="20%"
+							>
+								{/* Simple Clean Grid */}
+								<CartesianGrid
+									strokeDasharray="2 2"
+									stroke="#e2e8f0"
+									opacity={0.5}
+									horizontal={true}
+									vertical={false}
+								/>
+
+								{/* Clean Axes */}
+								<XAxis
+									dataKey="month"
+									tick={{
+										fontSize: 12,
+										fill: "#64748b",
+									}}
+									axisLine={{
+										stroke: "#cbd5e1",
+										strokeWidth: 1,
+									}}
+									tickLine={{ stroke: "#cbd5e1" }}
+								/>
+								<YAxis
+									tick={{
+										fontSize: 12,
+										fill: "#64748b",
+									}}
+									axisLine={{
+										stroke: "#cbd5e1",
+										strokeWidth: 1,
+									}}
+									tickLine={{ stroke: "#cbd5e1" }}
+								/>
+
+								{/* Clean Tooltip */}
+								<Tooltip
+									formatter={(value, name) => {
+										const displayName =
+											name === "online"
+												? "Online"
+												: name === "offline"
+												? "Offline"
+												: "Tổng";
+										return [
+											new Intl.NumberFormat(
+												"vi-VN"
+											).format(value),
+											displayName,
+										];
+									}}
+									labelFormatter={(label) => `Tháng ${label}`}
+									contentStyle={{
+										backgroundColor: "#ffffff",
+										border: "1px solid #e2e8f0",
+										borderRadius: "8px",
+										boxShadow:
+											"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+										fontSize: "14px",
+									}}
+									cursor={{
+										fill: "rgba(148, 163, 184, 0.08)",
+									}}
+								/>
+
+								{/* Simple Stacked Bars */}
+								<Bar
+									dataKey="online"
+									stackId="requests"
+									fill="#10b981"
+									radius={[0, 0, 3, 3]}
+								/>
+								<Bar
+									dataKey="offline"
+									stackId="requests"
+									fill="#f59e0b"
+									radius={[3, 3, 0, 0]}
+								/>
+							</BarChart>
+						</ResponsiveContainer>
+
+						{/* Simple Legend */}
+						<div className="flex justify-center items-center gap-6 mt-4">
+							<div className="flex items-center gap-2">
+								<div className="w-3 h-3 rounded bg-emerald-500"></div>
+								<span className="text-sm text-gray-600">
+									Online
+								</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<div className="w-3 h-3 rounded bg-amber-500"></div>
+								<span className="text-sm text-gray-600">
+									Offline
+								</span>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Refund and Withdraw Charts - Row 3 */}
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					{/* Refund Ticket Dashboard */}
 					{dashboardStats.refundTicket && (
 						<Card className="hover:shadow-lg transition-all duration-300">
