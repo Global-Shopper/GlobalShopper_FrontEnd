@@ -328,6 +328,33 @@ const BMDashboard = () => {
 		});
 	};
 
+	// Unified color scheme for consistent status colors across all charts
+	const STATUS_COLORS = {
+		// Pending/Waiting states - Yellow/Orange
+		PENDING: "#fbbf24", // amber-400
+		SENT: "#f59e0b", // amber-500
+		CHECKING: "#d97706", // amber-600
+
+		// Approved states - Blue
+		APPROVED: "#3b82f6", // blue-500
+		QUOTED: "#1d4ed8", // blue-700
+
+		// Completed/Success states - Green
+		COMPLETED: "#10b981", // emerald-500
+		PAID: "#059669", // emerald-600
+
+		// Failed/Rejected states - Red
+		FAILED: "#ef4444", // red-500
+		CANCELLED: "#dc2626", // red-600
+		REJECTED: "#b91c1c", // red-700
+
+		// Update states - Purple
+		INSUFFICIENT: "#8b5cf6", // violet-500
+
+		// Default
+		DEFAULT: "#6b7280", // gray-500
+	};
+
 	// Helper functions for status display
 	const getStatusLabel = (status) => {
 		const statusLabels = {
@@ -347,20 +374,60 @@ const BMDashboard = () => {
 	};
 
 	const getStatusColor = (status) => {
-		const statusColors = {
-			SENT: "#3b82f6",
-			PAID: "#10b981",
-			INSUFFICIENT: "#f59e0b",
-			CHECKING: "#8b5cf6",
-			CANCELLED: "#ef4444",
-			QUOTED: "#06b6d4",
-			APPROVED: "#10b981",
-			COMPLETED: "#22c55e",
-			FAILED: "#ef4444",
-			PENDING: "#f59e0b",
-			REJECTED: "#ef4444",
-		};
-		return statusColors[status] || "#6b7280";
+		return STATUS_COLORS[status] || STATUS_COLORS.DEFAULT;
+	};
+
+	// Function to get representative color for status categories (for monthly charts)
+	const getCategoryColor = (category) => {
+		switch (category) {
+			case "pending":
+				return STATUS_COLORS.PENDING; // "#fbbf24"
+			case "approved":
+				return STATUS_COLORS.APPROVED; // "#3b82f6"
+			case "completed":
+				// Use same green color for both refund and withdraw completed
+				return STATUS_COLORS.COMPLETED; // "#10b981" for both
+			case "rejected":
+				return STATUS_COLORS.REJECTED; // "#ef4444"
+			case "insufficient":
+				return STATUS_COLORS.INSUFFICIENT; // "#8b5cf6"
+			default:
+				return STATUS_COLORS.DEFAULT;
+		}
+	};
+
+	// Function to get consistent color for individual status (to match grouped categories)
+	const getConsistentStatusColor = (status) => {
+		// Map individual status to category color for consistency
+		switch (status) {
+			case "PENDING":
+			case "SENT":
+			case "CHECKING":
+				return getCategoryColor("pending");
+			case "APPROVED":
+			case "QUOTED":
+				return getCategoryColor("approved");
+			case "COMPLETED":
+			case "PAID":
+				return getCategoryColor("completed");
+			case "REJECTED":
+			case "CANCELLED":
+			case "FAILED":
+				return getCategoryColor("rejected");
+			case "INSUFFICIENT":
+				return getCategoryColor("insufficient");
+			default:
+				return STATUS_COLORS.DEFAULT;
+		}
+	};
+
+	// Unified colors for status categories (used in stacked charts)
+	const CATEGORY_COLORS = {
+		pending: "#fbbf24", // amber-400 - for pending/waiting states
+		approved: "#3b82f6", // blue-500 - for approved states
+		completed: "#10b981", // emerald-500 - for completed states
+		rejected: "#ef4444", // red-500 - for failed/rejected states
+		insufficient: "#8b5cf6", // violet-500 - for insufficient/update states
 	};
 
 	// Process dashboard data from API
@@ -420,6 +487,123 @@ const BMDashboard = () => {
 		return { online, offline };
 	};
 
+	// Helper function to extract monthly refund status data
+	const extractMonthlyRefundStatus = (monthData) => {
+		if (!monthData?.dashBoardList)
+			return {
+				pending: 0,
+				approved: 0,
+				completed: 0,
+				rejected: 0,
+				insufficient: 0,
+			};
+
+		const refundData = monthData.dashBoardList.find(
+			(item) => item.dashBoardName === "RefundTicket"
+		);
+		if (!refundData?.statusList)
+			return {
+				pending: 0,
+				approved: 0,
+				completed: 0,
+				rejected: 0,
+				insufficient: 0,
+			};
+
+		const statusBreakdown = {
+			pending: 0,
+			approved: 0,
+			completed: 0,
+			rejected: 0,
+			insufficient: 0,
+		};
+
+		refundData.statusList.forEach((status) => {
+			switch (status.status) {
+				case "PENDING":
+				case "SENT":
+				case "CHECKING":
+					statusBreakdown.pending += status.count;
+					break;
+				case "APPROVED":
+				case "QUOTED":
+					statusBreakdown.approved += status.count;
+					break;
+				case "COMPLETED":
+				case "PAID":
+					statusBreakdown.completed += status.count;
+					break;
+				case "REJECTED":
+				case "CANCELLED":
+				case "FAILED":
+					statusBreakdown.rejected += status.count;
+					break;
+				case "INSUFFICIENT":
+					statusBreakdown.insufficient += status.count;
+					break;
+			}
+		});
+
+		return statusBreakdown;
+	};
+
+	// Helper function to extract monthly withdraw status data
+	const extractMonthlyWithdrawStatus = (monthData) => {
+		if (!monthData?.dashBoardList)
+			return { pending: 0, approved: 0, completed: 0 };
+
+		const withdrawData = monthData.dashBoardList.find(
+			(item) => item.dashBoardName === "WithdrawTicket"
+		);
+		if (!withdrawData?.statusList)
+			return { pending: 0, approved: 0, completed: 0 };
+
+		const statusBreakdown = {
+			pending: 0,
+			approved: 0,
+			completed: 0,
+		};
+
+		withdrawData.statusList.forEach((status) => {
+			switch (status.status) {
+				case "PENDING":
+				case "SENT":
+				case "CHECKING":
+					statusBreakdown.pending += status.count;
+					break;
+				case "APPROVED":
+				case "QUOTED":
+					statusBreakdown.approved += status.count;
+					break;
+				case "COMPLETED":
+				case "PAID":
+					statusBreakdown.completed += status.count;
+					break;
+				// Withdraw không có rejected status
+			}
+		});
+
+		return statusBreakdown;
+	};
+
+	// Helper function to extract monthly refund data
+	const extractMonthlyRefund = (monthData) => {
+		if (!monthData?.dashBoardList) return 0;
+		const refundTicket = monthData.dashBoardList.find(
+			(item) => item.dashBoardName === "RefundTicket"
+		);
+		return refundTicket?.total || 0;
+	};
+
+	// Helper function to extract monthly withdraw data
+	const extractMonthlyWithdraw = (monthData) => {
+		if (!monthData?.dashBoardList) return 0;
+		const withdrawTicket = monthData.dashBoardList.find(
+			(item) => item.dashBoardName === "WithdrawTicket"
+		);
+		return withdrawTicket?.total || 0;
+	};
+
 	// Data cho biểu đồ xu hướng tháng từ API
 	const monthlyTrendData = useMemo(() => {
 		const monthsData = [
@@ -441,6 +625,150 @@ const BMDashboard = () => {
 			const { online, offline } = extractMonthlyOnlineOffline(data);
 			return { month, online, offline };
 		});
+	}, [
+		janData,
+		febData,
+		marData,
+		aprData,
+		mayData,
+		junData,
+		julData,
+		augData,
+		sepData,
+		octData,
+		novData,
+		decData,
+	]);
+
+	// Data cho biểu đồ xu hướng hoàn tiền theo tháng
+	const monthlyRefundData = useMemo(() => {
+		const monthsData = [
+			{ month: "T1", data: janData },
+			{ month: "T2", data: febData },
+			{ month: "T3", data: marData },
+			{ month: "T4", data: aprData },
+			{ month: "T5", data: mayData },
+			{ month: "T6", data: junData },
+			{ month: "T7", data: julData },
+			{ month: "T8", data: augData },
+			{ month: "T9", data: sepData },
+			{ month: "T10", data: octData },
+			{ month: "T11", data: novData },
+			{ month: "T12", data: decData },
+		];
+
+		return monthsData.map(({ month, data }) => ({
+			month,
+			count: extractMonthlyRefund(data),
+		}));
+	}, [
+		janData,
+		febData,
+		marData,
+		aprData,
+		mayData,
+		junData,
+		julData,
+		augData,
+		sepData,
+		octData,
+		novData,
+		decData,
+	]);
+
+	// Data cho biểu đồ xu hướng rút tiền theo tháng
+	const monthlyWithdrawData = useMemo(() => {
+		const monthsData = [
+			{ month: "T1", data: janData },
+			{ month: "T2", data: febData },
+			{ month: "T3", data: marData },
+			{ month: "T4", data: aprData },
+			{ month: "T5", data: mayData },
+			{ month: "T6", data: junData },
+			{ month: "T7", data: julData },
+			{ month: "T8", data: augData },
+			{ month: "T9", data: sepData },
+			{ month: "T10", data: octData },
+			{ month: "T11", data: novData },
+			{ month: "T12", data: decData },
+		];
+
+		return monthsData.map(({ month, data }) => ({
+			month,
+			count: extractMonthlyWithdraw(data),
+		}));
+	}, [
+		janData,
+		febData,
+		marData,
+		aprData,
+		mayData,
+		junData,
+		julData,
+		augData,
+		sepData,
+		octData,
+		novData,
+		decData,
+	]);
+
+	// Data cho biểu đồ trạng thái hoàn tiền theo tháng
+	const monthlyRefundStatusData = useMemo(() => {
+		const monthsData = [
+			{ month: 1, data: janData },
+			{ month: 2, data: febData },
+			{ month: 3, data: marData },
+			{ month: 4, data: aprData },
+			{ month: 5, data: mayData },
+			{ month: 6, data: junData },
+			{ month: 7, data: julData },
+			{ month: 8, data: augData },
+			{ month: 9, data: sepData },
+			{ month: 10, data: octData },
+			{ month: 11, data: novData },
+			{ month: 12, data: decData },
+		];
+
+		return monthsData.map(({ month, data }) => ({
+			month,
+			...extractMonthlyRefundStatus(data),
+		}));
+	}, [
+		janData,
+		febData,
+		marData,
+		aprData,
+		mayData,
+		junData,
+		julData,
+		augData,
+		sepData,
+		octData,
+		novData,
+		decData,
+	]);
+
+	// Data cho biểu đồ trạng thái rút tiền theo tháng
+	const monthlyWithdrawStatusData = useMemo(() => {
+		const monthsData = [
+			{ month: 1, data: janData },
+			{ month: 2, data: febData },
+			{ month: 3, data: marData },
+			{ month: 4, data: aprData },
+			{ month: 5, data: mayData },
+			{ month: 6, data: junData },
+			{ month: 7, data: julData },
+			{ month: 8, data: augData },
+			{ month: 9, data: sepData },
+			{ month: 10, data: octData },
+			{ month: 11, data: novData },
+			{ month: 12, data: decData },
+		];
+
+		return monthsData.map(({ month, data }) => ({
+			month,
+			...extractMonthlyWithdrawStatus(data),
+		}));
 	}, [
 		janData,
 		febData,
@@ -1094,7 +1422,7 @@ const BMDashboard = () => {
 				</Card>
 
 				{/* Refund and Withdraw Charts - Row 3 */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<div className="space-y-6">
 					{/* Refund Ticket Dashboard */}
 					{dashboardStats.refundTicket && (
 						<Card className="hover:shadow-lg transition-all duration-300">
@@ -1108,58 +1436,318 @@ const BMDashboard = () => {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ResponsiveContainer width="100%" height={300}>
-									<BarChart
-										data={dashboardStats.refundTicket.statusList.map(
-											(item) => ({
-												name: getStatusLabel(
-													item.status
-												),
-												value: item.count,
-												fill: getStatusColor(
-													item.status
-												),
-											})
-										)}
-										margin={{
-											top: 20,
-											right: 10,
-											left: -40,
-											bottom: 5,
-										}}
-									>
-										<CartesianGrid
-											strokeDasharray="3 3"
-											stroke="#f0f0f0"
-										/>
-										<XAxis
-											dataKey="name"
-											fontSize={11}
-											tick={{ fill: "#6b7280" }}
-										/>
-										<YAxis
-											fontSize={11}
-											tick={{ fill: "#6b7280" }}
-										/>
-										<Tooltip
-											formatter={(value) => [
-												value,
-												"Số lượng",
-											]}
-											contentStyle={{
-												backgroundColor: "#fff",
-												border: "1px solid #e5e7eb",
-												borderRadius: "8px",
-												boxShadow:
-													"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-											}}
-										/>
-										<Bar
-											dataKey="value"
-											radius={[4, 4, 0, 0]}
-										/>
-									</BarChart>
-								</ResponsiveContainer>
+								<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+									{/* Left Side - Status Chart */}
+									<div>
+										<h4 className="text-sm font-medium text-gray-700 mb-3">
+											Phân bố theo trạng thái
+										</h4>
+										<ResponsiveContainer
+											width="100%"
+											height={280}
+										>
+											<PieChart>
+												<Pie
+													data={dashboardStats.refundTicket.statusList.map(
+														(item) => ({
+															name: getStatusLabel(
+																item.status
+															),
+															value: item.count,
+															fill: getConsistentStatusColor(
+																item.status
+															),
+														})
+													)}
+													cx="50%"
+													cy="50%"
+													outerRadius={80}
+													dataKey="value"
+													labelLine={false}
+													label={({
+														name,
+														percent,
+													}) =>
+														`${name}: ${(
+															percent * 100
+														).toFixed(0)}%`
+													}
+												>
+													{dashboardStats.refundTicket.statusList.map(
+														(item, index) => (
+															<Cell
+																key={`cell-${index}`}
+																fill={getConsistentStatusColor(
+																	item.status
+																)}
+															/>
+														)
+													)}
+												</Pie>
+												<Tooltip
+													formatter={(
+														value,
+														name
+													) => [value, name]}
+													contentStyle={{
+														backgroundColor: "#fff",
+														border: "1px solid #e5e7eb",
+														borderRadius: "8px",
+														boxShadow:
+															"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+													}}
+												/>
+											</PieChart>
+										</ResponsiveContainer>
+									</div>
+
+									{/* Middle - Monthly Trend */}
+									<div>
+										<h4 className="text-sm font-medium text-gray-700 mb-3">
+											Xu hướng theo tháng ({selectedYear})
+										</h4>
+										<ResponsiveContainer
+											width="100%"
+											height={280}
+										>
+											<AreaChart
+												data={monthlyRefundData}
+												margin={{
+													top: 20,
+													right: 30,
+													left: 20,
+													bottom: 5,
+												}}
+											>
+												<defs>
+													<linearGradient
+														id="refundGradient"
+														x1="0"
+														y1="0"
+														x2="0"
+														y2="1"
+													>
+														<stop
+															offset="5%"
+															stopColor="#10b981"
+															stopOpacity={0.8}
+														/>
+														<stop
+															offset="95%"
+															stopColor="#10b981"
+															stopOpacity={0.1}
+														/>
+													</linearGradient>
+												</defs>
+												<CartesianGrid
+													strokeDasharray="2 2"
+													stroke="#e2e8f0"
+													opacity={0.5}
+												/>
+												<XAxis
+													dataKey="month"
+													tick={{
+														fontSize: 12,
+														fill: "#64748b",
+													}}
+												/>
+												<YAxis
+													tick={{
+														fontSize: 12,
+														fill: "#64748b",
+													}}
+												/>
+												<Tooltip
+													formatter={(value) => [
+														value,
+														"Yêu cầu hoàn tiền",
+													]}
+													labelFormatter={(label) =>
+														`Tháng ${label}`
+													}
+													contentStyle={{
+														backgroundColor:
+															"#ffffff",
+														border: "1px solid #e2e8f0",
+														borderRadius: "8px",
+														boxShadow:
+															"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+														fontSize: "14px",
+													}}
+												/>
+												<Area
+													type="monotone"
+													dataKey="count"
+													stroke="#10b981"
+													strokeWidth={3}
+													fill="url(#refundGradient)"
+													dot={{
+														fill: "#10b981",
+														strokeWidth: 2,
+														r: 5,
+													}}
+													activeDot={{
+														r: 7,
+														stroke: "#10b981",
+														strokeWidth: 2,
+														fill: "#fff",
+													}}
+												/>
+											</AreaChart>
+										</ResponsiveContainer>
+									</div>
+
+									{/* Right Side - Monthly Status Breakdown */}
+									<div>
+										<h4 className="text-sm font-medium text-gray-700 mb-3">
+											Trạng thái theo tháng (
+											{selectedYear})
+										</h4>
+										<ResponsiveContainer
+											width="100%"
+											height={280}
+										>
+											<BarChart
+												data={monthlyRefundStatusData}
+												margin={{
+													top: 20,
+													right: 10,
+													left: -20,
+													bottom: 5,
+												}}
+											>
+												<CartesianGrid
+													strokeDasharray="2 2"
+													stroke="#e2e8f0"
+													opacity={0.5}
+												/>
+												<XAxis
+													dataKey="month"
+													fontSize={10}
+													tick={{ fill: "#6b7280" }}
+												/>
+												<YAxis
+													fontSize={10}
+													tick={{ fill: "#6b7280" }}
+												/>
+												<Tooltip
+													contentStyle={{
+														backgroundColor: "#fff",
+														border: "1px solid #e5e7eb",
+														borderRadius: "8px",
+														boxShadow:
+															"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+													}}
+												/>
+												<Bar
+													dataKey="pending"
+													stackId="refundStatus"
+													fill={getCategoryColor(
+														"pending"
+													)}
+													name="Chờ xử lý"
+												/>
+												<Bar
+													dataKey="approved"
+													stackId="refundStatus"
+													fill={getCategoryColor(
+														"approved"
+													)}
+													name="Đã duyệt"
+												/>
+												<Bar
+													dataKey="completed"
+													stackId="refundStatus"
+													fill={getCategoryColor(
+														"completed"
+													)}
+													name="Hoàn thành"
+												/>
+												<Bar
+													dataKey="rejected"
+													stackId="refundStatus"
+													fill={getCategoryColor(
+														"rejected"
+													)}
+													name="Từ chối"
+												/>
+												<Bar
+													dataKey="insufficient"
+													stackId="refundStatus"
+													fill={getCategoryColor(
+														"insufficient"
+													)}
+													name="Cập nhật"
+													radius={[2, 2, 0, 0]}
+												/>
+											</BarChart>
+										</ResponsiveContainer>
+
+										{/* Legend for Refund Status */}
+										<div className="flex justify-center items-center gap-3 mt-2 text-xs">
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"pending"
+															),
+													}}
+												></div>
+												<span>Chờ xử lý</span>
+											</div>
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"approved"
+															),
+													}}
+												></div>
+												<span>Đã duyệt</span>
+											</div>
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"completed"
+															),
+													}}
+												></div>
+												<span>Hoàn thành</span>
+											</div>
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"rejected"
+															),
+													}}
+												></div>
+												<span>Từ chối</span>
+											</div>
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"insufficient"
+															),
+													}}
+												></div>
+												<span>Cập nhật</span>
+											</div>
+										</div>
+									</div>
+								</div>
 							</CardContent>
 						</Card>
 					)}
@@ -1178,58 +1766,278 @@ const BMDashboard = () => {
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ResponsiveContainer width="100%" height={300}>
-									<BarChart
-										data={dashboardStats.withdrawTicket.statusList.map(
-											(item) => ({
-												name: getStatusLabel(
-													item.status
-												),
-												value: item.count,
-												fill: getStatusColor(
-													item.status
-												),
-											})
-										)}
-										margin={{
-											top: 20,
-											right: 10,
-											left: -30,
-											bottom: 5,
-										}}
-									>
-										<CartesianGrid
-											strokeDasharray="3 3"
-											stroke="#f0f0f0"
-										/>
-										<XAxis
-											dataKey="name"
-											fontSize={11}
-											tick={{ fill: "#6b7280" }}
-										/>
-										<YAxis
-											fontSize={11}
-											tick={{ fill: "#6b7280" }}
-										/>
-										<Tooltip
-											formatter={(value) => [
-												value,
-												"Số lượng",
-											]}
-											contentStyle={{
-												backgroundColor: "#fff",
-												border: "1px solid #e5e7eb",
-												borderRadius: "8px",
-												boxShadow:
-													"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-											}}
-										/>
-										<Bar
-											dataKey="value"
-											radius={[4, 4, 0, 0]}
-										/>
-									</BarChart>
-								</ResponsiveContainer>
+								<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+									{/* Left Side - Status Chart */}
+									<div>
+										<h4 className="text-sm font-medium text-gray-700 mb-3">
+											Phân bố theo trạng thái
+										</h4>
+										<ResponsiveContainer
+											width="100%"
+											height={280}
+										>
+											<PieChart>
+												<Pie
+													data={dashboardStats.withdrawTicket.statusList.map(
+														(item) => ({
+															name: getStatusLabel(
+																item.status
+															),
+															value: item.count,
+															fill: getConsistentStatusColor(
+																item.status
+															),
+														})
+													)}
+													cx="50%"
+													cy="50%"
+													outerRadius={80}
+													dataKey="value"
+													labelLine={false}
+													label={({
+														name,
+														percent,
+													}) =>
+														`${name}: ${(
+															percent * 100
+														).toFixed(0)}%`
+													}
+												>
+													{dashboardStats.withdrawTicket.statusList.map(
+														(item, index) => (
+															<Cell
+																key={`cell-${index}`}
+																fill={getConsistentStatusColor(
+																	item.status
+																)}
+															/>
+														)
+													)}
+												</Pie>
+												<Tooltip
+													formatter={(
+														value,
+														name
+													) => [value, name]}
+													contentStyle={{
+														backgroundColor: "#fff",
+														border: "1px solid #e5e7eb",
+														borderRadius: "8px",
+														boxShadow:
+															"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+													}}
+												/>
+											</PieChart>
+										</ResponsiveContainer>
+									</div>
+
+									{/* Middle - Monthly Trend */}
+									<div>
+										<h4 className="text-sm font-medium text-gray-700 mb-3">
+											Xu hướng theo tháng ({selectedYear})
+										</h4>
+										<ResponsiveContainer
+											width="100%"
+											height={280}
+										>
+											<AreaChart
+												data={monthlyWithdrawData}
+												margin={{
+													top: 20,
+													right: 30,
+													left: 20,
+													bottom: 5,
+												}}
+											>
+												<defs>
+													<linearGradient
+														id="withdrawGradient"
+														x1="0"
+														y1="0"
+														x2="0"
+														y2="1"
+													>
+														<stop
+															offset="5%"
+															stopColor="#7c3aed"
+															stopOpacity={0.8}
+														/>
+														<stop
+															offset="95%"
+															stopColor="#7c3aed"
+															stopOpacity={0.1}
+														/>
+													</linearGradient>
+												</defs>
+												<CartesianGrid
+													strokeDasharray="2 2"
+													stroke="#e2e8f0"
+													opacity={0.5}
+												/>
+												<XAxis
+													dataKey="month"
+													tick={{
+														fontSize: 12,
+														fill: "#64748b",
+													}}
+												/>
+												<YAxis
+													tick={{
+														fontSize: 12,
+														fill: "#64748b",
+													}}
+												/>
+												<Tooltip
+													formatter={(value) => [
+														value,
+														"Yêu cầu rút tiền",
+													]}
+													labelFormatter={(label) =>
+														`Tháng ${label}`
+													}
+													contentStyle={{
+														backgroundColor:
+															"#ffffff",
+														border: "1px solid #e2e8f0",
+														borderRadius: "8px",
+														boxShadow:
+															"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+														fontSize: "14px",
+													}}
+												/>
+												<Area
+													type="monotone"
+													dataKey="count"
+													stroke="#7c3aed"
+													strokeWidth={3}
+													fill="url(#withdrawGradient)"
+													dot={{
+														fill: "#7c3aed",
+														strokeWidth: 2,
+														r: 5,
+													}}
+													activeDot={{
+														r: 7,
+														stroke: "#7c3aed",
+														strokeWidth: 2,
+														fill: "#fff",
+													}}
+												/>
+											</AreaChart>
+										</ResponsiveContainer>
+									</div>
+
+									{/* Right Side - Monthly Status Breakdown */}
+									<div>
+										<h4 className="text-sm font-medium text-gray-700 mb-3">
+											Trạng thái theo tháng (
+											{selectedYear})
+										</h4>
+										<ResponsiveContainer
+											width="100%"
+											height={280}
+										>
+											<BarChart
+												data={monthlyWithdrawStatusData}
+												margin={{
+													top: 20,
+													right: 10,
+													left: -20,
+													bottom: 5,
+												}}
+											>
+												<CartesianGrid
+													strokeDasharray="2 2"
+													stroke="#e2e8f0"
+													opacity={0.5}
+												/>
+												<XAxis
+													dataKey="month"
+													fontSize={10}
+													tick={{ fill: "#6b7280" }}
+												/>
+												<YAxis
+													fontSize={10}
+													tick={{ fill: "#6b7280" }}
+												/>
+												<Tooltip
+													contentStyle={{
+														backgroundColor: "#fff",
+														border: "1px solid #e5e7eb",
+														borderRadius: "8px",
+														boxShadow:
+															"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+													}}
+												/>
+												<Bar
+													dataKey="pending"
+													stackId="withdrawStatus"
+													fill={getCategoryColor(
+														"pending"
+													)}
+													name="Chờ xử lý"
+												/>
+												<Bar
+													dataKey="approved"
+													stackId="withdrawStatus"
+													fill={getCategoryColor(
+														"approved"
+													)}
+													name="Đã duyệt"
+												/>
+												<Bar
+													dataKey="completed"
+													stackId="withdrawStatus"
+													fill={getCategoryColor(
+														"completed"
+													)}
+													name="Hoàn thành"
+													radius={[2, 2, 0, 0]}
+												/>
+											</BarChart>
+										</ResponsiveContainer>
+
+										{/* Legend for Withdraw Status */}
+										<div className="flex justify-center items-center gap-4 mt-2 text-xs">
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"pending"
+															),
+													}}
+												></div>
+												<span>Chờ xử lý</span>
+											</div>
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"approved"
+															),
+													}}
+												></div>
+												<span>Đã duyệt</span>
+											</div>
+											<div className="flex items-center gap-1">
+												<div
+													className="w-3 h-3 rounded"
+													style={{
+														backgroundColor:
+															getCategoryColor(
+																"completed"
+															),
+													}}
+												></div>
+												<span>Hoàn thành</span>
+											</div>
+										</div>
+									</div>
+								</div>
 							</CardContent>
 						</Card>
 					)}
