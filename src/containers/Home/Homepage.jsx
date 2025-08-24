@@ -21,8 +21,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/heroImage.jpg";
+import { useLoginTokenQuery } from "@/services/gshopApi";
 
 export default function Homepage() {
+	const { data: userInfo } = useLoginTokenQuery();
 	return (
 		<div className="min-h-screen bg-white">
 			<main className="w-full max-w-none mx-auto">
@@ -552,7 +554,9 @@ export default function Homepage() {
 								dịch vụ tuyệt vời!
 							</p>
 
-							<div className="flex flex-col sm:flex-row gap-6 pt-8">
+							{
+								!userInfo &&
+								<div className="flex flex-col sm:flex-row gap-6 pt-8">
 								<Link
 									to="/signup"
 									className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform transition-all duration-300 hover:scale-105"
@@ -571,6 +575,7 @@ export default function Homepage() {
 									Đăng nhập ngay
 								</Link>
 							</div>
+						}
 						</div>
 					</div>
 				</section>

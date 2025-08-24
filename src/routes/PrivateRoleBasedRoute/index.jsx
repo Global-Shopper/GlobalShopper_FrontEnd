@@ -1,20 +1,20 @@
 import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
-const PrivateRoleBasedRoute  = (props) => {
-	const { path, Component, requiredRoles } = props;
-	// Should replace by get user role (from storage, redux store or anything...) localStorage || cookies
-	const userRole = useSelector((state) => state.rootReducer.user.role);
-	// Check user role with route's required roles
-	const canAccessWithRoles = requiredRoles.includes(userRole);
-	// Send navigate state, included last path
-	const routingState = {
-		requestedPath: path,
-		rejectAccess: !canAccessWithRoles
-	};
+const PrivateRoleBasedRoute = ({ requiredRoles }) => {
+    // Read current location to save the path user attempted to access
+    const location = useLocation();
+    // Should replace by get user role (from storage, redux store or anything...) localStorage || cookies
+    const userRole = useSelector((state) => state.rootReducer?.user?.role);
+    // Check user role with route's required roles
+    const canAccessWithRoles = Array.isArray(requiredRoles) && requiredRoles.includes(userRole);
+    // Send navigate state, included last path
+    const routingState = {
+        requestedPath: location.pathname + location.search,
+        rejectAccess: !canAccessWithRoles
+    };
 
-	return canAccessWithRoles ? <Component /> : <Navigate to='/login' state={routingState} />;
+    return canAccessWithRoles ? <Outlet /> : <Navigate to='/' state={routingState} replace />;
 };
-
 
 export default PrivateRoleBasedRoute;

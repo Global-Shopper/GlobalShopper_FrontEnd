@@ -49,7 +49,7 @@ const Header = () => {
   const handleSignout = () => {
     dispatch(gshopApi.util.resetApiState());
     dispatch(signout());
-    navigate("/");
+    navigate("/login");
   };
 
   const formatCurrency = (amount) => {
@@ -60,8 +60,10 @@ const Header = () => {
   };
 
   useEffect(() => {
-    console.log(userInfo?.user?.role)
     if (!userInfo) return;
+    if(userInfo?.user?.role === "CUSTOMER") {
+      navigate("/");
+    }
     if (userInfo?.user?.role === "ADMIN") {
       navigate("/admin");
     }

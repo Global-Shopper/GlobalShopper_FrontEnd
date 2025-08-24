@@ -46,6 +46,7 @@ import TermOfService from "@/containers/Home/Policy/TermOfService";
 import Pricing from "@/containers/Home/Pricing";
 import FAQ from "@/containers/Home/FAQ";
 import HsCodeDialogContent from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
+import PrivateRoleBasedRoute from "./PrivateRoleBasedRoute";
 
 const AppRoutes = () => {
 	return (
@@ -102,20 +103,23 @@ const AppRoutes = () => {
 					</Route>
 
 					{/* Protected Admin Routes */}
-					<Route path="/admin" element={<AdminLayout />}>
-						<Route index element={<AdPurchaseReqList />} />
-						<Route
-							path="purchase-request/:id"
-							element={<AdPurchaseReqDetail />}
-						/>
-						<Route path="orders" element={<AdOrderList />} />
-						<Route path="orders/:id" element={<AdOrderDetail />} />
-						<Route path="refunds" element={<AdRefundList />} />
-						<Route path="withdraw" element={<AdWithdrawList />} />
-						<Route path="account" element={<AdAccountSetting />} />
+					<Route element={<PrivateRoleBasedRoute requiredRoles={["ADMIN"]} />}>
+						<Route path="/admin" element={<AdminLayout />}>
+							<Route index element={<AdPurchaseReqList />} />
+							<Route
+								path="purchase-request/:id"
+								element={<AdPurchaseReqDetail />}
+							/>
+							<Route path="orders" element={<AdOrderList />} />
+							<Route path="orders/:id" element={<AdOrderDetail />} />
+							<Route path="refunds" element={<AdRefundList />} />
+							<Route path="withdraw" element={<AdWithdrawList />} />
+							<Route path="account" element={<AdAccountSetting />} />
+						</Route>
 					</Route>
 
 					{/* Protected Business Manager Routes */}
+					<Route element={<PrivateRoleBasedRoute requiredRoles={["BUSINESS_MANAGER"]} />}>
 					<Route path="/business-manager" element={<BusinessManagerLayout />}>
 						<Route index element={<BMDashboard />} />
 						<Route path="overview" element={<BMDashboard />} />
@@ -132,7 +136,8 @@ const AppRoutes = () => {
 						<Route path="config/service" element={<ServiceConfig />} />
 						<Route path="config/variant" element={<VariantConfig />} />
 					</Route>
-					<Route path="*" element={<Navigate to="/" replace />} />
+				</Route>
+				<Route path="*" element={<Navigate to="/" replace />} />
 				</Routes>
 			</ScrollToTop>
 		</>

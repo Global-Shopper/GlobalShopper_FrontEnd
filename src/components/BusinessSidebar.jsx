@@ -288,10 +288,10 @@ export function BusinessSidebar() {
 				</div>
 
 				<button
-					onClick={() => {
+					onClick={async () => {
 						dispatch(gshopApi.util.resetApiState());
+						setTimeout(() => navigate("/login"), 0);//note: important for waiting the navigate of private route
 						dispatch(signout());
-						navigate("/login");
 					}}
 					className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-xs font-medium transition-all duration-200 w-full justify-center shadow-md hover:shadow-lg transform hover:scale-[1.02]"
 				>

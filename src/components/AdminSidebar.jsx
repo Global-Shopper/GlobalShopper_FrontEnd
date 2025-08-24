@@ -107,8 +107,8 @@ export function AdminSidebar() {
         <button
           onClick={() => {
             dispatch(gshopApi.util.resetApiState());
+            setTimeout(() => navigate("/login"), 0);//note: important for waiting the navigate of private route
             dispatch(signout());
-            navigate("/login");
           }}
           className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm text-gray-700 font-medium transition w-full justify-center"
         >
