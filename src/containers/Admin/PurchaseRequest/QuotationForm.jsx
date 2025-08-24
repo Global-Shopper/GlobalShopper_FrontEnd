@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import SystemConfig from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
 import HsCodeDialogContent from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
 
 export function QuotationForm({ purchaseRequest, product, errors = {}, onChange }) {

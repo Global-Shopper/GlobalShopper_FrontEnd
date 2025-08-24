@@ -97,12 +97,17 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
         ).unwrap()
           .then(async (res) => {
             if (method === 'wallet') {
+              if (!res?.output?.transactionShipments[0]?.masterTrackingNumber) {
+                toast.error('Có lỗi xảy ra của bên dịch vụ FEDEX')
+                return
+              }
               await checkout(
                 {
                   subRequestId: subRequest?.id,
                   totalPriceEstimate: totalAmount + selectedShipCost,
                   shippingFee: selectedShipCost,
-                  trackingNumber: res?.output?.transactionShipments[0]?.masterTrackingNumber
+                  trackingNumber: res?.output?.transactionShipments[0]?.masterTrackingNumber,
+                  shippingCarrier: "FEDEX"
                 }
               ).unwrap()
                 .then((res) => {
@@ -111,13 +116,18 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
                   navigate(`/account-center/orders/${res?.id}`)
                 })
             } else {
+              if (!res?.output?.transactionShipments[0]?.masterTrackingNumber) {
+                toast.error('Có lỗi xảy ra của bên dịch vụ FEDEX')
+                return
+              }
               await directCheckout(
                 {
                   subRequestId: subRequest?.id,
                   totalPriceEstimate: totalAmount + selectedShipCost,
                   redirectUri: `${REDIRECT_URI}/account-center/orders/:id`,
                   shippingFee: selectedShipCost,
-                  trackingNumber: res?.output?.transactionShipments[0]?.masterTrackingNumber
+                  trackingNumber: res?.output?.transactionShipments[0]?.masterTrackingNumber,
+                  shippingCarrier: "FEDEX"
                 }
               ).unwrap()
                 .then((res) => {
@@ -218,12 +228,12 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
           <div className="mb-3 text-sm flex justify-between">
             <span>
               Phí vận chuyển{requestType === 'OFFLINE' && selectedService?.serviceName ? ` (${selectedService.serviceName})` : ''}
-              <Tooltip>
+              <Tooltip >
                 <TooltipTrigger>
                   <Info className="w-4 h-4" />
                 </TooltipTrigger>
-                <TooltipContent>
-                    {SHIPMENT_TYPE.find((item) => item.type === selectedService?.serviceType)?.value}
+                <TooltipContent className="w-64 break-words">
+                    {requestType === 'OFFLINE' ? (SHIPMENT_TYPE.find((item) => item.type === selectedService?.serviceType)?.value) : "Phí vận chuyển do bên TMĐT cung cấp"}
                 </TooltipContent>
               </Tooltip>
             </span>

@@ -11,7 +11,7 @@ import { toast } from "sonner";
 const ContactPage = () => {
   return (
     <div className="min-h-[60vh] bg-white">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto py-8 px-20">
         {/* Breadcrumb */}
         <div className="text-sm text-slate-500 mb-6">
           <Link to="/" className="hover:text-blue-600">Trang chủ</Link>

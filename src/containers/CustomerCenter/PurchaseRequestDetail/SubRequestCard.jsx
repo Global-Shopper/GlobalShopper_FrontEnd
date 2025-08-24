@@ -175,7 +175,7 @@ function SubRequestCard({ subRequest, expired, requestType }) {
               </span>
             </div>
             {subRequest?.quotationForPurchase?.note && (
-              <div className="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
+              <div className="text-sm text-gray-700">
                 Ghi chú của đơn hàng: {subRequest.quotationForPurchase.note}
               </div>
             )}

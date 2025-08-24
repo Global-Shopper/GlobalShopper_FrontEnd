@@ -1,33 +1,35 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useGetOrderByIDQuery, useLazyGetShippingTrackingQuery } from '@/services/gshopApi'
+import { useGetOrderByIDQuery } from '@/services/gshopApi'
 import PageLoading from '@/components/PageLoading'
 import PageError from '@/components/PageError'
 import { AdminInfo } from '@/components/AdminInfo'
 import ShippingInfoCard from '@/components/ShippingInfoCard'
 import HistoryTimeline from '@/components/HistoryTimeline'
-import ShippingTrackingCard from '@/components/ShippingTrackingCard'
+import ShippingTrackingCard from '@/components/OffShippingTrackingCard'
 import OrderInfo from './OrderInfo'
 import OrderItemList from './OrderItemList'
+import { getTracking } from '@/services/trackingMoreService'
+import OffShippingTrackingCard from '@/components/OffShippingTrackingCard'
+import OnlShippingTrackingCard from '@/components/OnlShippingTrackingCard'
 
 const OrderDetail = () => {
   const { id } = useParams()
+  const [trackingMoreData, setTrackingMoreData] = useState(null)
   const {
     data: orderData,
     isLoading: isOrderLoading,
     isError: isOrderError,
   } = useGetOrderByIDQuery(id)
-  const [getShippingTracking, { data: shippingTrackingData }] = useLazyGetShippingTrackingQuery()
 
-  // Trigger shipping tracking fetch when tracking number becomes available
   useEffect(() => {
-    if (orderData?.trackingNumber) {
-      getShippingTracking({
-        trackingNumber: orderData.trackingNumber,
-        deliveryCode: 'FEDEX',
+    if (orderData?.trackingNumber && orderData?.shippingCarrier) {
+      getTracking(orderData.trackingNumber)
+      .then((res) => {
+        setTrackingMoreData(res.data)
       })
     }
-  }, [orderData?.trackingNumber, getShippingTracking])
+  }, [orderData?.trackingNumber, orderData?.shippingCarrier])
 
   if (isOrderLoading) return <PageLoading />
   if (isOrderError) return <PageError />
@@ -70,9 +72,13 @@ const OrderDetail = () => {
         />
       </div>
 
-      {shippingTrackingData && (
+      {orderData.shipmentTrackingEvents.length > 0 ? (
         <div className="mt-6">
-          <ShippingTrackingCard data={shippingTrackingData} />
+          <OffShippingTrackingCard data={orderData.shipmentTrackingEvents} />
+        </div>
+      ) : (
+        <div>
+          <OnlShippingTrackingCard data={trackingMoreData?.data[0]} />
         </div>
       )}
 

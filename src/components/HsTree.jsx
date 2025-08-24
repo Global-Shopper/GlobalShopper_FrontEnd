@@ -113,7 +113,6 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
 
     // Hide non-visible nodes during search
     if (visibleSet && !visibleSet.has(code)) return null;
-
     return (
       <div key={code} className="pl-2">
         <div className={`flex items-center justify-between py-1 ${selectedCode === code ? "bg-blue-50" : ""}`}
@@ -132,7 +131,7 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
               <span className="text-gray-800">{node.description}</span>
             </div>
           </div>
-          {setHScode && (
+          {setHScode && node.level === 8 && (
             <div className="pr-2">
               <Button size="sm" onClick={() => setHScode(code)}>Nhập</Button>
             </div>

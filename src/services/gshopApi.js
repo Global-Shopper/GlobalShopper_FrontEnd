@@ -396,13 +396,6 @@ const gshopApi = createApi({
 				method: "POST",
 			}),
 		}),
-		getShippingTracking: builder.query({
-			query: (data) => ({
-				params: data,
-				url: `${endpoints.SHIPMENT_TRACKING}`,
-				method: "GET",
-			}),
-		}),
 		createFeedback: builder.mutation({
 			query: (data) => ({
 				data: data,
@@ -721,7 +714,6 @@ export const {
 	useGetHsCodesQuery,
 	useLazyGetHsCodesQuery,
 	useGetShipmentRateQuery,
-	useLazyGetShippingTrackingQuery,
 	useCreateShipmentMutation,
 	useCreateFeedbackMutation,
 	useCreateRefundMutation,

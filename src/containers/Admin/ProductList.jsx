@@ -178,7 +178,7 @@ export function ProductList({
               Xem sản phẩm
             </a>
           </div>
-          {((subStatus === "PENDING" || !subStatus) && (status === "CHECKING" || status === "QUOTED")) && (
+          {((subStatus === "PENDING" || !subStatus) && (status === "CHECKING" || status === "QUOTED" || status === "PAID")) && (
             <>
               <div className="flex justify-end mt-3">
                 <Button
