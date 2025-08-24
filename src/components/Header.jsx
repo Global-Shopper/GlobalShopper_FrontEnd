@@ -30,12 +30,12 @@ import {
 } from "lucide-react";
 import { setUserInfo, signout } from "@/features/user";
 import defaultAvt from "@/assets/defaultAvt.jpg";
-import gshopApi, { useGetCustomerInfoQuery, useGetWalletQuery } from "@/services/gshopApi";
+import gshopApi, { useGetWalletQuery, useLoginTokenQuery } from "@/services/gshopApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 
 const Header = () => {
-  const { data: customerInfo } = useGetCustomerInfoQuery();
+  const { data: userInfo } = useLoginTokenQuery();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery();
@@ -60,15 +60,16 @@ const Header = () => {
   };
 
   useEffect(() => {
-    if (!customerInfo) return;
-    if (customerInfo?.role === "admin") {
+    console.log(userInfo?.user?.role)
+    if (!userInfo) return;
+    if (userInfo?.user?.role === "ADMIN") {
       navigate("/admin");
     }
-    if (customerInfo?.role === "business-manager") {
+    if (userInfo?.user?.role === "BUSINESS_MANAGER") {
       navigate("/business-manager");
     }
-    dispatch(setUserInfo(customerInfo));
-  }, [isLoggedIn, customerInfo, dispatch, navigate]);
+    dispatch(setUserInfo(userInfo?.user));
+  }, [isLoggedIn, userInfo, dispatch, navigate]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-lg shadow-black/5">

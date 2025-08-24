@@ -15,6 +15,7 @@ import { signout } from "@/features/user";
 import { useDispatch, useSelector } from "react-redux";
 import adminLogo from "@/assets/logo_admin.png";
 import defaultAvt from "@/assets/defaultAvt.jpg";
+import gshopApi from "@/services/gshopApi";
 
 // Menu items.
 const items = [
@@ -105,6 +106,7 @@ export function AdminSidebar() {
         </div>
         <button
           onClick={() => {
+            dispatch(gshopApi.util.resetApiState());
             dispatch(signout());
             navigate("/login");
           }}

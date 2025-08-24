@@ -33,6 +33,7 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import gshopApi from "@/services/gshopApi";
 
 // Menu items.
 const items = [
@@ -288,6 +289,7 @@ export function BusinessSidebar() {
 
 				<button
 					onClick={() => {
+						dispatch(gshopApi.util.resetApiState());
 						dispatch(signout());
 						navigate("/login");
 					}}

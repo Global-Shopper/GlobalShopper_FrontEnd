@@ -71,6 +71,12 @@ const gshopApi = createApi({
 				url: endpoints.FORGOT_PASSWORD,
 			}),
 		}),
+		loginToken: builder.query({
+			query: () => ({
+				url: endpoints.LOGIN_TOKEN,
+				method: "GET",
+			}),
+		}),
 		getCustomerInfo: builder.query({
 			query: () => ({
 				url: `${endpoints.CUSTOMER_PROFILE}/current-information`,
@@ -666,6 +672,7 @@ const gshopApi = createApi({
 
 export const {
 	useLoginMutation,
+	useLoginTokenQuery,
 	useVerifyOTPMutation,
 	useLazyResendOTPQuery,
 	useLazyForgotPasswordQuery,

@@ -1,5 +1,6 @@
 const endpoints = {
 	LOGIN: "/auth/login",
+	LOGIN_TOKEN: "/auth/login-token",
 	REGISTER: "/auth/register",
 	VERIFY_OTP: "/auth/verify-otp",
 	VERIFY_CHANGE_EMAIL: "/auth/verify-otp-and-change-email",

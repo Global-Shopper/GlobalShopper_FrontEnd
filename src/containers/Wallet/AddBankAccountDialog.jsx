@@ -81,6 +81,7 @@ const AddBankAccountDialog = () => {
             try {
               await addBankAccount({
                 ...values,
+                accountHolderName: values.accountHolderName.toUpperCase(),
                 expirationDate: values.expirationDate.split('-')[1] + '/' + values.expirationDate.split('-')[0].slice(-2),
               }).unwrap()
               toast.success('Đã thêm tài khoản ngân hàng')
@@ -164,7 +165,7 @@ const AddBankAccountDialog = () => {
               {/* Account holder name */}
               <div>
                 <Label htmlFor="accountHolderName" className="mb-1 block">Tên chủ tài khoản</Label>
-                <Field as={Input} id="accountHolderName" name="accountHolderName" placeholder="Nhập tên chủ tài khoản" />
+                <Field className="uppercase" as={Input} id="accountHolderName" name="accountHolderName" placeholder="Nhập tên chủ tài khoản" />
                 {touched.accountHolderName && errors.accountHolderName && (
                   <p className="mt-1 text-sm text-red-600">{errors.accountHolderName}</p>
                 )}
