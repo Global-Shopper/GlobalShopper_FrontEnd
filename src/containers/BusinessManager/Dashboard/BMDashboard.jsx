@@ -35,6 +35,7 @@ import {
 	Pie,
 	ComposedChart,
 	Cell,
+	Legend,
 } from "recharts";
 import {
 	Card,
@@ -358,6 +359,7 @@ const BMDashboard = () => {
 	// Helper functions for status display
 	const getStatusLabel = (status) => {
 		const statusLabels = {
+			// Purchase Request Status
 			SENT: "Đã gửi",
 			PAID: "Đã thanh toán",
 			INSUFFICIENT: "Cập nhật",
@@ -369,6 +371,16 @@ const BMDashboard = () => {
 			FAILED: "Thất bại",
 			PENDING: "Chờ xử lý",
 			REJECTED: "Từ chối",
+			// Order Status
+			PROCESSING: "Đang xử lý",
+			SHIPPED: "Đã gửi",
+			DELIVERED: "Đã giao",
+			RETURNED: "Đã trả lại",
+			CANCELED: "Đã hủy",
+			IN_TRANSIT: "Đang thông quan",
+			ORDER_REQUESTED: "Yêu cầu đặt hàng",
+			PURCHASED: "Đã mua",
+			AWAITING_PAYMENT: "Đợi thanh toán",
 		};
 		return statusLabels[status] || status;
 	};
@@ -403,16 +415,25 @@ const BMDashboard = () => {
 			case "PENDING":
 			case "SENT":
 			case "CHECKING":
+			case "PROCESSING": // Order status
+			case "ORDER_REQUESTED": // Order status
+			case "AWAITING_PAYMENT": // Order status
 				return getCategoryColor("pending");
 			case "APPROVED":
 			case "QUOTED":
+			case "SHIPPED": // Order status
+			case "IN_TRANSIT": // Order status
+			case "PURCHASED": // Order status
 				return getCategoryColor("approved");
 			case "COMPLETED":
 			case "PAID":
+			case "DELIVERED": // Order status
 				return getCategoryColor("completed");
 			case "REJECTED":
 			case "CANCELLED":
+			case "CANCELED": // Order status (different spelling)
 			case "FAILED":
+			case "RETURNED": // Order status
 				return getCategoryColor("rejected");
 			case "INSUFFICIENT":
 				return getCategoryColor("insufficient");
@@ -604,6 +625,167 @@ const BMDashboard = () => {
 		return withdrawTicket?.total || 0;
 	};
 
+	// Helper function to extract monthly order status data for comparison (OLD - NOT USED)
+	/*
+	const extractMonthlyOrderStatusComparison = (responses) => {
+		const monthlyData = {};
+
+		for (let month = 1; month <= 12; month++) {
+			const response = responses[month - 1];
+			const monthName = `T${month}`; // Đổi format thành T1, T2, T3...
+
+			monthlyData[monthName] = {
+				month: monthName,
+				cancelled: 0,
+				delivered: 0,
+			};
+
+			// Debug: Log structure of first month to understand API response
+			if (month === 1 && response?.data) {
+				console.log("January API response structure:", {
+					hasData: !!response.data,
+					hasDashboardData: !!response.data.dashboardData,
+					hasOrder: !!response.data.dashboardData?.order,
+					orderStructure: response.data.dashboardData?.order,
+					hasDashBoardList: !!response.data.dashBoardList,
+					dashBoardList: response.data.dashBoardList,
+					fullResponse: response.data, // Log toàn bộ response để hiểu cấu trúc
+				});
+			}
+
+			// Kiểm tra nhiều path khác nhau
+			let orderData = null;
+
+			// Path 1: dashboardData.order.statusList
+			if (response?.data?.dashboardData?.order?.statusList) {
+				orderData = response.data.dashboardData.order.statusList;
+				console.log(
+					`Month ${month} - Found order data in dashboardData.order:`,
+					orderData
+				);
+			}
+			// Path 2: dashBoardList find Order
+			else if (response?.data?.dashBoardList) {
+				const orderItem = response.data.dashBoardList.find(
+					(item) => item.dashBoardName === "Order"
+				);
+				if (orderItem?.statusList) {
+					orderData = orderItem.statusList;
+					console.log(
+						`Month ${month} - Found order data in dashBoardList:`,
+						orderData
+					);
+				}
+			}
+			// Path 3: Directly in dashBoardList as array
+			else if (response?.data?.dashBoardList?.length > 0) {
+				const orderItem = response.data.dashBoardList.find(
+					(item) =>
+						item.dashBoardName === "Order" ||
+						item.dashBoardName === "order"
+				);
+				if (orderItem) {
+					orderData = orderItem.statusList || orderItem.data;
+					console.log(
+						`Month ${month} - Found order data (path 3):`,
+						orderData
+					);
+				}
+			}
+			// Path 4: Kiểm tra trong response.data trực tiếp
+			else if (response?.data?.Order) {
+				orderData =
+					response.data.Order.statusList || response.data.Order;
+				console.log(
+					`Month ${month} - Found order data in direct Order:`,
+					orderData
+				);
+			}
+			// Path 5: Kiểm tra nếu có data array ở top level
+			else if (response?.data && Array.isArray(response.data)) {
+				const orderItem = response.data.find(
+					(item) =>
+						item.dashBoardName === "Order" || item.type === "Order"
+				);
+				if (orderItem) {
+					orderData = orderItem.statusList || orderItem.data;
+					console.log(
+						`Month ${month} - Found order data in array:`,
+						orderData
+					);
+				}
+			}
+
+			if (orderData && Array.isArray(orderData)) {
+				orderData.forEach((status) => {
+					const statusName =
+						status.statusName?.toLowerCase?.() ||
+						status.status?.toLowerCase?.() ||
+						status.name?.toLowerCase?.();
+					const count =
+						parseInt(status.count) || parseInt(status.total) || 0;
+
+					console.log(
+						`Month ${month} - Processing status: ${statusName}, count: ${count}, original:`,
+						status
+					);
+
+					// Xử lý cancelled (nhiều variant)
+					if (
+						statusName === "cancelled" ||
+						statusName === "canceled" ||
+						statusName === "CANCELLED" ||
+						statusName === "CANCELED" ||
+						statusName === "hủy" ||
+						statusName === "đã hủy" ||
+						statusName === "bị hủy"
+					) {
+						monthlyData[monthName].cancelled += count;
+					}
+
+					// Xử lý delivered (nhiều variant)
+					if (
+						statusName === "delivered" ||
+						statusName === "DELIVERED" ||
+						statusName === "completed" ||
+						statusName === "COMPLETED" ||
+						statusName === "giao_thanh_cong" ||
+						statusName === "giao thành công" ||
+						statusName === "đã giao" ||
+						statusName === "hoàn thành" ||
+						statusName === "thành công"
+					) {
+						monthlyData[monthName].delivered += count;
+					}
+				});
+			} else {
+				console.log(`Month ${month} - No valid order data found:`, {
+					orderData,
+					responseData: response?.data,
+					responseType: typeof response?.data,
+					responseKeys: response?.data
+						? Object.keys(response.data)
+						: "no data",
+				});
+			}
+		}
+
+		console.log("Final monthlyData for comparison:", monthlyData);
+		const result = Object.values(monthlyData);
+		console.log("Returning comparison data:", result);
+
+		return result;
+	*/
+
+	// Helper function to extract monthly order data
+	const extractMonthlyOrder = (monthData) => {
+		if (!monthData?.dashBoardList) return 0;
+		const orderData = monthData.dashBoardList.find(
+			(item) => item.dashBoardName === "Order"
+		);
+		return orderData?.total || 0;
+	};
+
 	// Data cho biểu đồ xu hướng tháng từ API
 	const monthlyTrendData = useMemo(() => {
 		const monthsData = [
@@ -784,12 +966,185 @@ const BMDashboard = () => {
 		decData,
 	]);
 
+	// Data cho biểu đồ tổng đơn hàng theo tháng
+	const monthlyOrderData = useMemo(() => {
+		const monthsData = [
+			{ month: "T1", data: janData },
+			{ month: "T2", data: febData },
+			{ month: "T3", data: marData },
+			{ month: "T4", data: aprData },
+			{ month: "T5", data: mayData },
+			{ month: "T6", data: junData },
+			{ month: "T7", data: julData },
+			{ month: "T8", data: augData },
+			{ month: "T9", data: sepData },
+			{ month: "T10", data: octData },
+			{ month: "T11", data: novData },
+			{ month: "T12", data: decData },
+		];
+
+		return monthsData.map(({ month, data }) => ({
+			month,
+			count: extractMonthlyOrder(data),
+		}));
+	}, [
+		janData,
+		febData,
+		marData,
+		aprData,
+		mayData,
+		junData,
+		julData,
+		augData,
+		sepData,
+		octData,
+		novData,
+		decData,
+	]);
+
+	// Data cho biểu đồ so sánh CANCELLED vs DELIVERED theo tháng
+	const monthlyOrderComparisonData = useMemo(() => {
+		console.log("=== DEBUGGING ORDER COMPARISON DATA ===");
+		console.log("Full dashboardData:", dashboardData);
+
+		// Lấy Order data từ main dashboard data
+		const extractOrderStatus = () => {
+			console.log("🔍 Checking dashboardData structure...");
+
+			// Trường hợp 1: dashboardData.data.dashBoardList
+			if (dashboardData?.data?.dashBoardList) {
+				console.log("✅ Found dashboardData.data.dashBoardList");
+				console.log(
+					"Available dashboard names:",
+					dashboardData.data.dashBoardList.map(
+						(item) => item.dashBoardName
+					)
+				);
+
+				const orderItem = dashboardData.data.dashBoardList.find(
+					(item) => item.dashBoardName === "Order"
+				);
+
+				if (orderItem?.statusList) {
+					console.log(
+						"✅ Found Order item with statusList:",
+						orderItem.statusList
+					);
+
+					let cancelled = 0;
+					let delivered = 0;
+
+					orderItem.statusList.forEach((statusItem) => {
+						const { status, count } = statusItem;
+						console.log(
+							`📊 Processing status: ${status}, count: ${count}`
+						);
+
+						if (status === "CANCELLED") {
+							cancelled = count;
+							console.log(`🔴 Set cancelled to: ${cancelled}`);
+						}
+						if (status === "DELIVERED") {
+							delivered = count;
+							console.log(`🟢 Set delivered to: ${delivered}`);
+						}
+					});
+
+					return { cancelled, delivered };
+				}
+			}
+
+			// Trường hợp 2: dashboardData.dashBoardList (không có .data)
+			if (dashboardData?.dashBoardList) {
+				console.log("✅ Found dashboardData.dashBoardList (no .data)");
+				console.log(
+					"Available dashboard names:",
+					dashboardData.dashBoardList.map(
+						(item) => item.dashBoardName
+					)
+				);
+
+				const orderItem = dashboardData.dashBoardList.find(
+					(item) => item.dashBoardName === "Order"
+				);
+
+				if (orderItem?.statusList) {
+					console.log(
+						"✅ Found Order item with statusList:",
+						orderItem.statusList
+					);
+
+					let cancelled = 0;
+					let delivered = 0;
+
+					orderItem.statusList.forEach((statusItem) => {
+						const { status, count } = statusItem;
+						console.log(
+							`📊 Processing status: ${status}, count: ${count}`
+						);
+
+						if (status === "CANCELLED") {
+							cancelled = count;
+							console.log(`🔴 Set cancelled to: ${cancelled}`);
+						}
+						if (status === "DELIVERED") {
+							delivered = count;
+							console.log(`🟢 Set delivered to: ${delivered}`);
+						}
+					});
+
+					return { cancelled, delivered };
+				}
+			}
+
+			console.log("❌ No Order data found in any structure");
+			console.log(
+				"Full dashboardData structure:",
+				JSON.stringify(dashboardData, null, 2)
+			);
+			return { cancelled: 0, delivered: 0 };
+		};
+
+		const orderStatus = extractOrderStatus();
+		console.log("🎯 Extracted order status:", orderStatus);
+
+		// Tạo data cho 12 tháng (hiện tại chỉ có data tháng hiện tại)
+		const currentMonth = new Date().getMonth() + 1;
+		console.log(`📅 Current month: ${currentMonth}`);
+		const result = [];
+
+		for (let i = 1; i <= 12; i++) {
+			const monthData = {
+				month: `T${i}`,
+				cancelled: i === currentMonth ? orderStatus.cancelled : 0,
+				delivered: i === currentMonth ? orderStatus.delivered : 0,
+			};
+			result.push(monthData);
+
+			if (i === currentMonth) {
+				console.log(`📊 Current month (T${i}) data:`, monthData);
+			}
+		}
+
+		console.log("🎯 Generated monthly comparison data:", result);
+		console.log("=== END DEBUGGING ===");
+		return result;
+	}, [dashboardData]);
+
 	// Colors for pie chart
 	const PIE_COLORS = ["#10b981", "#f59e0b"]; // Data cho biểu đồ tròn theo danh mục
 
 	const formatNumber = (num) => {
 		return new Intl.NumberFormat("vi-VN").format(num);
 	};
+
+	// Debug: Log tất cả API data để kiểm tra
+	console.log("All API data loaded:", {
+		jan: janData?.data ? "loaded" : "no data",
+		feb: febData?.data ? "loaded" : "no data",
+		mar: marData?.data ? "loaded" : "no data",
+		comparison: monthlyOrderComparisonData,
+	});
 
 	return (
 		<div className="p-6 space-y-8 bg-gray-50 min-h-screen">
@@ -945,13 +1300,21 @@ const BMDashboard = () => {
 				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-green-500">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
 						<CardTitle className="text-sm font-medium text-gray-600">
-							Đơn hàng thành công
+							Tổng đơn hàng
 						</CardTitle>
 						<ShoppingCart className="h-5 w-5 text-green-600" />
 					</CardHeader>
 					<CardContent className="pb-4">
 						<div className="text-3xl font-bold text-gray-900 leading-none">
-							{formatNumber(stats.totalOrders)}
+							{formatNumber(dashboardStats.order?.total || 0)}
+						</div>
+						<div className="mt-1 text-xs text-gray-500">
+							{formatNumber(
+								dashboardStats.order?.statusList?.find(
+									(s) => s.status === "DELIVERED"
+								)?.count || 0
+							)}{" "}
+							giao thành công
 						</div>
 					</CardContent>
 				</Card>
@@ -1421,7 +1784,424 @@ const BMDashboard = () => {
 					</CardContent>
 				</Card>
 
-				{/* Refund and Withdraw Charts - Row 3 */}
+				{/* Order Charts - Row 3 */}
+				{dashboardStats.order && (
+					<div className="space-y-6">
+						{/* Order Charts Row 1 - Status Distribution and Monthly Total */}
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+							{/* Order Status Distribution */}
+							<Card className="hover:shadow-lg transition-all duration-300">
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2 text-lg">
+										<ShoppingCart className="h-5 w-5 text-blue-600" />
+										Phân bố trạng thái đơn hàng
+									</CardTitle>
+									<CardDescription>
+										Tổng: {dashboardStats.order.total} đơn
+										hàng
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<ResponsiveContainer
+										width="100%"
+										height={300}
+									>
+										<BarChart
+											data={dashboardStats.order.statusList.map(
+												(item) => ({
+													name: getStatusLabel(
+														item.status
+													),
+													value: item.count,
+													fill: getConsistentStatusColor(
+														item.status
+													),
+												})
+											)}
+											margin={{
+												top: 20,
+												right: 30,
+												left: 20,
+												bottom: 5,
+											}}
+										>
+											<CartesianGrid strokeDasharray="3 3" />
+											<XAxis
+												dataKey="name"
+												tick={{
+													fontSize: 12,
+													fill: "#64748b",
+												}}
+												angle={-45}
+												textAnchor="end"
+												height={80}
+											/>
+											<YAxis
+												tick={{
+													fontSize: 12,
+													fill: "#64748b",
+												}}
+											/>
+											<Tooltip
+												formatter={(value) => [
+													value,
+													"Số đơn hàng",
+												]}
+												labelFormatter={(label) =>
+													`Trạng thái: ${label}`
+												}
+												contentStyle={{
+													backgroundColor: "#fff",
+													border: "1px solid #e5e7eb",
+													borderRadius: "8px",
+													boxShadow:
+														"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+												}}
+											/>
+											<Bar
+												dataKey="value"
+												radius={[4, 4, 0, 0]}
+											>
+												{dashboardStats.order.statusList.map(
+													(item, index) => (
+														<Cell
+															key={`cell-${index}`}
+															fill={getConsistentStatusColor(
+																item.status
+															)}
+														/>
+													)
+												)}
+											</Bar>
+										</BarChart>
+									</ResponsiveContainer>
+								</CardContent>
+							</Card>
+
+							{/* Monthly Order Total */}
+							<Card className="hover:shadow-lg transition-all duration-300">
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2 text-lg">
+										<ShoppingCart className="h-5 w-5 text-green-600" />
+										Số lượng đơn hàng theo tháng
+									</CardTitle>
+									<CardDescription className="flex items-center gap-4">
+										<span>Tổng quan theo từng tháng</span>
+										<select
+											value={selectedYear}
+											onChange={(e) =>
+												setSelectedYear(
+													Number(e.target.value)
+												)
+											}
+											className="ml-auto px-3 py-1 border rounded-md text-sm"
+										>
+											{Array.from(
+												{ length: 5 },
+												(_, i) => {
+													const year =
+														new Date().getFullYear() -
+														i;
+													return (
+														<option
+															key={year}
+															value={year}
+														>
+															{year}
+														</option>
+													);
+												}
+											)}
+										</select>
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<ResponsiveContainer
+										width="100%"
+										height={300}
+									>
+										<AreaChart
+											data={monthlyOrderData}
+											margin={{
+												top: 20,
+												right: 30,
+												left: 20,
+												bottom: 5,
+											}}
+										>
+											<defs>
+												<linearGradient
+													id="orderGradient"
+													x1="0"
+													y1="0"
+													x2="0"
+													y2="1"
+												>
+													<stop
+														offset="5%"
+														stopColor="#3b82f6"
+														stopOpacity={0.8}
+													/>
+													<stop
+														offset="95%"
+														stopColor="#3b82f6"
+														stopOpacity={0.1}
+													/>
+												</linearGradient>
+											</defs>
+											<CartesianGrid
+												strokeDasharray="2 2"
+												stroke="#e2e8f0"
+												opacity={0.5}
+											/>
+											<XAxis
+												dataKey="month"
+												tick={{
+													fontSize: 12,
+													fill: "#64748b",
+												}}
+											/>
+											<YAxis
+												tick={{
+													fontSize: 12,
+													fill: "#64748b",
+												}}
+											/>
+											<Tooltip
+												formatter={(value) => [
+													value,
+													"Số đơn hàng",
+												]}
+												labelFormatter={(label) =>
+													`Tháng ${label}`
+												}
+												contentStyle={{
+													backgroundColor: "#ffffff",
+													border: "1px solid #e2e8f0",
+													borderRadius: "8px",
+													boxShadow:
+														"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+													fontSize: "14px",
+												}}
+											/>
+											<Area
+												type="monotone"
+												dataKey="count"
+												stroke="#3b82f6"
+												strokeWidth={2}
+												fill="url(#orderGradient)"
+											/>
+										</AreaChart>
+									</ResponsiveContainer>
+								</CardContent>
+							</Card>
+						</div>
+
+						{/* Order Charts Row 2 - Cancelled vs Delivered Comparison */}
+						<div className="grid grid-cols-1 gap-6">
+							{/* Cancelled vs Delivered Orders Comparison */}
+							<Card className="hover:shadow-lg transition-all duration-300">
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2 text-lg">
+										<ShoppingCart className="h-5 w-5 text-purple-600" />
+										Tỉ lệ đơn hàng bị hủy và giao thành công
+										theo tháng
+									</CardTitle>
+									<CardDescription className="flex items-center gap-4">
+										<span>
+											Theo dõi tỷ lệ thành công và thất
+											bại
+										</span>
+										{/* Debug info */}
+										<span className="text-xs text-gray-500">
+											(Data points:{" "}
+											{monthlyOrderComparisonData?.length ||
+												0}
+											)
+										</span>
+										<select
+											value={selectedYear}
+											onChange={(e) =>
+												setSelectedYear(
+													Number(e.target.value)
+												)
+											}
+											className="ml-auto px-3 py-1 border rounded-md text-sm"
+										>
+											{Array.from(
+												{ length: 5 },
+												(_, i) => {
+													const year =
+														new Date().getFullYear() -
+														i;
+													return (
+														<option
+															key={year}
+															value={year}
+														>
+															{year}
+														</option>
+													);
+												}
+											)}
+										</select>
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<ResponsiveContainer
+										width="100%"
+										height={350}
+									>
+										<BarChart
+											data={
+												monthlyOrderComparisonData?.length >
+												0
+													? monthlyOrderComparisonData
+													: [
+															{
+																month: "T1",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T2",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T3",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T4",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T5",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T6",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T7",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T8",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T9",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T10",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T11",
+																cancelled: 0,
+																delivered: 0,
+															},
+															{
+																month: "T12",
+																cancelled: 0,
+																delivered: 0,
+															},
+													  ]
+											}
+											margin={{
+												top: 20,
+												right: 30,
+												left: 20,
+												bottom: 5,
+											}}
+										>
+											<CartesianGrid strokeDasharray="3 3" />
+											<XAxis
+												dataKey="month"
+												tick={{
+													fontSize: 12,
+													fill: "#64748b",
+												}}
+											/>
+											<YAxis
+												tick={{
+													fontSize: 12,
+													fill: "#64748b",
+												}}
+											/>
+											<Tooltip
+												formatter={(value, name) => {
+													console.log(
+														"Tooltip - value:",
+														value,
+														"name:",
+														name
+													);
+													if (name === "cancelled") {
+														return [
+															value,
+															"Đơn hàng bị hủy",
+														];
+													} else if (
+														name === "delivered"
+													) {
+														return [
+															value,
+															"Đơn hàng giao thành công",
+														];
+													}
+													// Fallback cho trường hợp name khác
+													return [value, name];
+												}}
+												labelFormatter={(label) =>
+													`Tháng ${label.replace(
+														"T",
+														""
+													)}`
+												}
+												contentStyle={{
+													backgroundColor: "#ffffff",
+													border: "1px solid #e2e8f0",
+													borderRadius: "8px",
+													boxShadow:
+														"0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+													fontSize: "14px",
+												}}
+											/>
+											<Legend />
+											<Bar
+												dataKey="cancelled"
+												name="Đơn hàng bị hủy"
+												fill="#ef4444"
+												radius={[4, 4, 0, 0]}
+											/>
+											<Bar
+												dataKey="delivered"
+												name="Đơn hàng giao thành công"
+												fill="#10b981"
+												radius={[4, 4, 0, 0]}
+											/>
+										</BarChart>
+									</ResponsiveContainer>
+								</CardContent>
+							</Card>
+						</div>
+					</div>
+				)}
+
+				{/* Refund and Withdraw Charts - Row 4 */}
 				<div className="space-y-6">
 					{/* Refund Ticket Dashboard */}
 					{dashboardStats.refundTicket && (
