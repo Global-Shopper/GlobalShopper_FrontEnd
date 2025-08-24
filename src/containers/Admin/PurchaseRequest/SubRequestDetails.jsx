@@ -161,7 +161,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
 
         <CardContent className="pt-0">
           <div className="space-y-2">{children}</div>
-          {((subRequest.status === "PENDING" || !subRequest.status) && (requestStatus === "CHECKING" || requestStatus === "QUOTED")) && (
+          {((subRequest.status === "PENDING" || !subRequest.status ) && (requestStatus === "CHECKING" || requestStatus === "QUOTED" || requestStatus === "PAID")) && (
             <>
               <Button
                 type="button"

@@ -45,6 +45,7 @@ import ReturnExchangePolicy from "@/containers/Home/Policy/ReturnExchangePolicy"
 import TermOfService from "@/containers/Home/Policy/TermOfService";
 import Pricing from "@/containers/Home/Pricing";
 import FAQ from "@/containers/Home/FAQ";
+import HsCodeDialogContent from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
 
 const AppRoutes = () => {
 	return (
@@ -127,7 +128,7 @@ const AppRoutes = () => {
 							path="user-management/customer"
 							element={<CustomerManagement />}
 						/>
-						<Route path="config/hs-code" element={<HsCodeConfig />} />
+						<Route path="config/hs-code" element={<HsCodeDialogContent />} />
 						<Route path="config/service" element={<ServiceConfig />} />
 						<Route path="config/variant" element={<VariantConfig />} />
 					</Route>

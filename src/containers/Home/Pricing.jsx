@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 
 const Pricing = () => {
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 px-20">
       <Card>
         <CardHeader className="flex flex-col items-center justify-center gap-2">
           <CardTitle className="text-2xl">Bảng giá</CardTitle>
