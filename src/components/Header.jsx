@@ -35,7 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 
 const Header = () => {
-  const { data: userInfo } = useLoginTokenQuery();
+  const { data: userInfo, isLoading: infoLoading } = useLoginTokenQuery();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery();
@@ -60,18 +60,20 @@ const Header = () => {
   };
 
   useEffect(() => {
-    if (!userInfo) return;
-    if(userInfo?.user?.role === "CUSTOMER") {
-      navigate("/");
+    const handleRoleNavigate = () => {
+      if (!userInfo) return;
+      if (userInfo?.user?.role === "ADMIN") {
+        navigate("/admin");
+      }
+      if (userInfo?.user?.role === "BUSINESS_MANAGER") {
+        navigate("/business-manager");
+      }
+      dispatch(setUserInfo(userInfo?.user));
     }
-    if (userInfo?.user?.role === "ADMIN") {
-      navigate("/admin");
+    if (userInfo && !infoLoading) {
+      handleRoleNavigate();
     }
-    if (userInfo?.user?.role === "BUSINESS_MANAGER") {
-      navigate("/business-manager");
-    }
-    dispatch(setUserInfo(userInfo?.user));
-  }, [isLoggedIn, userInfo, dispatch, navigate]);
+  }, [isLoggedIn, userInfo, dispatch, navigate, infoLoading]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-lg shadow-black/5">

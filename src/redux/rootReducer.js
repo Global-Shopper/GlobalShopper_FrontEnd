@@ -11,7 +11,7 @@ import offlineReqReducer from "../features/offlineReq";
 const userPersistConfig = {
   key: "user",
   storage: storage,
-  whitelist: ['accessToken', 'isLoggedIn']
+  whitelist: ['accessToken', 'isLoggedIn', 'role']
 };
 
 const combinedReducer = combineReducers({

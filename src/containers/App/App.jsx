@@ -1,4 +1,3 @@
-import { useSelector } from 'react-redux';
 import setUpInterceptor from '@/services/baseRequest';
 import { store } from '@/store/store';
 import './App.css'
