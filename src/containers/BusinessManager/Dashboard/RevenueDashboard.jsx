@@ -202,6 +202,14 @@ const RevenueDashboard = () => {
 			parseFloat(totalRevenueData?.total) ||
 			parseFloat(thisMonthRevenueData?.total || 0) +
 				parseFloat(lastMonthRevenueData?.total || 0),
+		totalOnline:
+			parseFloat(totalRevenueData?.totalOnline) ||
+			parseFloat(thisMonthRevenueData?.totalOnline || 0) +
+				parseFloat(lastMonthRevenueData?.totalOnline || 0),
+		totalOffline:
+			parseFloat(totalRevenueData?.totalOffline) ||
+			parseFloat(thisMonthRevenueData?.totalOffline || 0) +
+				parseFloat(lastMonthRevenueData?.totalOffline || 0),
 		todayRevenue: parseFloat(todayRevenueData?.total || 0),
 		thisMonthRevenue: parseFloat(thisMonthRevenueData?.total || 0),
 		lastMonthRevenue: parseFloat(lastMonthRevenueData?.total || 0),
@@ -216,61 +224,85 @@ const RevenueDashboard = () => {
 		{
 			month: "T1",
 			revenue: parseFloat(jan2024Data?.total || 0),
+			online: parseFloat(jan2024Data?.totalOnline || 0),
+			offline: parseFloat(jan2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T2",
 			revenue: parseFloat(feb2024Data?.total || 0),
+			online: parseFloat(feb2024Data?.totalOnline || 0),
+			offline: parseFloat(feb2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T3",
 			revenue: parseFloat(mar2024Data?.total || 0),
+			online: parseFloat(mar2024Data?.totalOnline || 0),
+			offline: parseFloat(mar2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T4",
 			revenue: parseFloat(apr2024Data?.total || 0),
+			online: parseFloat(apr2024Data?.totalOnline || 0),
+			offline: parseFloat(apr2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T5",
 			revenue: parseFloat(may2024Data?.total || 0),
+			online: parseFloat(may2024Data?.totalOnline || 0),
+			offline: parseFloat(may2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T6",
 			revenue: parseFloat(june2024Data?.total || 0),
+			online: parseFloat(june2024Data?.totalOnline || 0),
+			offline: parseFloat(june2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T7",
 			revenue: parseFloat(july2024Data?.total || 0),
+			online: parseFloat(july2024Data?.totalOnline || 0),
+			offline: parseFloat(july2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T8",
 			revenue: parseFloat(aug2024Data?.total || 0),
+			online: parseFloat(aug2024Data?.totalOnline || 0),
+			offline: parseFloat(aug2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T9",
 			revenue: parseFloat(sep2024Data?.total || 0),
+			online: parseFloat(sep2024Data?.totalOnline || 0),
+			offline: parseFloat(sep2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T10",
 			revenue: parseFloat(oct2024Data?.total || 0),
+			online: parseFloat(oct2024Data?.totalOnline || 0),
+			offline: parseFloat(oct2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T11",
 			revenue: parseFloat(nov2024Data?.total || 0),
+			online: parseFloat(nov2024Data?.totalOnline || 0),
+			offline: parseFloat(nov2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 		{
 			month: "T12",
 			revenue: parseFloat(dec2024Data?.total || 0),
+			online: parseFloat(dec2024Data?.totalOnline || 0),
+			offline: parseFloat(dec2024Data?.totalOffline || 0),
 			orders: 0,
 		},
 	];
@@ -330,7 +362,7 @@ const RevenueDashboard = () => {
 			</div>
 
 			{/* Revenue Stats Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
 				{/* Total Revenue */}
 				<Card className="hover:shadow-lg transition-shadow">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -345,6 +377,52 @@ const RevenueDashboard = () => {
 						</div>
 						<div className="text-sm text-gray-500 mt-1">
 							Tổng doanh thu toàn thời gian
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Online Revenue */}
+				<Card className="hover:shadow-lg transition-shadow">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+						<CardTitle className="text-sm font-medium text-gray-600">
+							Đơn từ các sàn thương mại
+						</CardTitle>
+						<TrendingUp className="h-5 w-5 text-green-600" />
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold text-gray-900">
+							{formatCurrency(revenueStats.totalOnline)}
+						</div>
+						<div className="text-sm text-gray-500 mt-1">
+							{(
+								(revenueStats.totalOnline /
+									revenueStats.totalRevenue) *
+								100
+							).toFixed(1)}
+							% tổng doanh thu
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Offline Revenue */}
+				<Card className="hover:shadow-lg transition-shadow">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+						<CardTitle className="text-sm font-medium text-gray-600">
+							Đơn nội địa quốc tế
+						</CardTitle>
+						<BarChart3 className="h-5 w-5 text-orange-600" />
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold text-gray-900">
+							{formatCurrency(revenueStats.totalOffline)}
+						</div>
+						<div className="text-sm text-gray-500 mt-1">
+							{(
+								(revenueStats.totalOffline /
+									revenueStats.totalRevenue) *
+								100
+							).toFixed(1)}
+							% tổng doanh thu
 						</div>
 					</CardContent>
 				</Card>
@@ -399,7 +477,7 @@ const RevenueDashboard = () => {
 			</div>
 
 			{/* Revenue Trend Line Chart */}
-			<div className="grid grid-cols-1 gap-6">
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between">
 						<div>
@@ -460,6 +538,73 @@ const RevenueDashboard = () => {
 									activeDot={{ r: 7 }}
 								/>
 							</LineChart>
+						</ResponsiveContainer>
+					</CardContent>
+				</Card>
+
+				{/* Online vs Offline Revenue Chart */}
+				<Card>
+					<CardHeader className="flex flex-row items-center justify-between">
+						<div>
+							<CardTitle className="flex items-center gap-2">
+								<BarChart3 className="h-5 w-5" />
+								Loại đơn hàng
+							</CardTitle>
+							<CardDescription>
+								Doanh thu loại đơn hàng theo tháng trong năm
+							</CardDescription>
+						</div>
+						<Select
+							value={selectedYear.toString()}
+							onValueChange={(value) =>
+								setSelectedYear(parseInt(value))
+							}
+						>
+							<SelectTrigger className="w-32">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="2025">2025</SelectItem>
+								<SelectItem value="2024">2024</SelectItem>
+								<SelectItem value="2023">2023</SelectItem>
+							</SelectContent>
+						</Select>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={350}>
+							<BarChart data={monthlyData}>
+								<CartesianGrid
+									strokeDasharray="3 3"
+									stroke="#f0f0f0"
+								/>
+								<XAxis dataKey="month" />
+								<YAxis
+									tickFormatter={(value) =>
+										formatCurrency(value)
+									}
+								/>
+								<Tooltip
+									formatter={(value, name) => [
+										formatCurrency(value),
+										name === "online"
+											? "Online"
+											: "Offline",
+									]}
+									labelFormatter={(label) => `Tháng ${label}`}
+								/>
+								<Bar
+									dataKey="online"
+									fill="#10b981"
+									name="online"
+									radius={[2, 2, 0, 0]}
+								/>
+								<Bar
+									dataKey="offline"
+									fill="#f59e0b"
+									name="offline"
+									radius={[2, 2, 0, 0]}
+								/>
+							</BarChart>
 						</ResponsiveContainer>
 					</CardContent>
 				</Card>
