@@ -239,7 +239,9 @@ export function ProductList({
             ? "Chọn các sản phẩm bằng checkbox để tạo nhóm"
             : status === "SENT"
               ? "Xem thông tin sản phẩm trong yêu cầu mua hàng"
-              : "Chọn sản phẩm để xem chi tiết và nhập giá báo giá"}
+              : 
+              <p className="text-sm text-red-500">Lưu ý: Chỉ có thể báo giá cho các sản phẩm đã được tạo nhóm</p>
+              }
         </CardDescription>
         {isGroupingMode && (
           <div className="flex justify-end">

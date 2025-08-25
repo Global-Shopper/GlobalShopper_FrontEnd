@@ -148,7 +148,7 @@ const AdRefundList = () => {
                       <img
                         src={e}
                         alt={`evidence-${index}`}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                       />
                     </div>
                   ))}

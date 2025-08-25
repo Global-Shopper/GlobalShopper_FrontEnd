@@ -304,7 +304,7 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
         </Tabs>
         {/* Footer: summary and submit */}
         <DialogFooter className="flex flex-col gap-2 mt-6">
-          <Button onClick={handleSubmit} type="button" className="mt-2 w-full">
+          <Button onClick={handleSubmit} type="button" className="mt-2 w-full bg-green-600 hover:bg-green-700">
             Gửi báo giá
           </Button>
         </DialogFooter>

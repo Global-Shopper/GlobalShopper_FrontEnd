@@ -90,7 +90,7 @@ export default function WithoutLinkWorkflowPage() {
       </Button>
       <span className="text-gray-400">/</span>
       <span className="font-medium text-orange-600">
-        Sản phẩm nội địa
+        Sản phẩm nội địa quốc tế
       </span>
     </div>
   );
@@ -251,7 +251,7 @@ export default function WithoutLinkWorkflowPage() {
 
         <div className="text-center space-y-2 mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
-            Yêu cầu mua sản phẩm nội địa
+            Yêu cầu mua sản phẩm nội địa quốc tế
           </h1>
           <p className="text-gray-600 max-w-xl mx-auto">
             Cung cấp thông tin cửa hàng và sản phẩm để chúng tôi hỗ trợ bạn mua

@@ -73,11 +73,11 @@ const OrderDetail = () => {
       </div>
 
       {orderData.shipmentTrackingEvents.length > 0 ? (
-        <div className="mt-6">
+        <div className="my-6">
           <OffShippingTrackingCard data={orderData.shipmentTrackingEvents} />
         </div>
       ) : (
-        <div>
+        <div className="my-6">
           <OnlShippingTrackingCard data={trackingMoreData?.data[0]} />
         </div>
       )}

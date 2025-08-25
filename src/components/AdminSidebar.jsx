@@ -15,7 +15,7 @@ import { signout } from "@/features/user";
 import { useDispatch, useSelector } from "react-redux";
 import adminLogo from "@/assets/logo_admin.png";
 import defaultAvt from "@/assets/defaultAvt.jpg";
-import gshopApi from "@/services/gshopApi";
+import gshopApi, { useLoginTokenQuery } from "@/services/gshopApi";
 
 // Menu items.
 const items = [
@@ -54,6 +54,7 @@ const items = [
 export function AdminSidebar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { data: userInfo, isLoading: infoLoading } = useLoginTokenQuery();
   const { avatar, name, email } = useSelector(
     (state) => state.rootReducer.user
   );
@@ -89,20 +90,20 @@ export function AdminSidebar() {
       <div className="sticky bottom-0 left-0 w-full bg-white z-10 border-t border-gray-100 px-4 pt-4 pb-6 flex flex-col items-center select-none">
         <img
           src={
-            avatar ||
+            userInfo?.user?.avatar ||
             defaultAvt
           }
           alt="Avatar"
           className="w-14 h-14 rounded-full border border-gray-300 object-contain shadow mb-1"
         />
         <div className="text-sm font-semibold text-gray-900 truncate w-full text-center max-w-[150px]">
-          {name || "Admin"}
+          {userInfo?.user?.name || "Admin"}
         </div>
         <div
           className="text-xs text-gray-400 truncate w-full text-center max-w-[150px] mb-2"
-          title={email}
+          title={userInfo?.user?.email}
         >
-          {email || ""}
+          {userInfo?.user?.email || ""}
         </div>
         <button
           onClick={() => {
