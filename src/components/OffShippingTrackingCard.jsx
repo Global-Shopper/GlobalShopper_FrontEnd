@@ -65,9 +65,6 @@ export default function OffShippingTrackingCard({ data }) {
             {latest?.eventTime ? (
               <div className="text-xs text-slate-500 mt-0.5">Cập nhật gần nhất: {fmtDate(latest.eventTime)}</div>
             ) : null}
-            {statusLocation ? (
-              <div className="text-xs text-slate-500 mt-0.5">Vị trí: {statusLocation}</div>
-            ) : null}
           </div>
         </div>
 

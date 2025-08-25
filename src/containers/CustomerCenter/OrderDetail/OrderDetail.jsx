@@ -23,7 +23,7 @@ const OrderDetail = () => {
   } = useGetOrderByIDQuery(id)
 
   useEffect(() => {
-    if (orderData?.trackingNumber && orderData?.shippingCarrier) {
+    if (orderData?.trackingNumber && orderData?.shippingCarrier !== "fedex") {
       getTracking(orderData.trackingNumber)
       .then((res) => {
         setTrackingMoreData(res.data)

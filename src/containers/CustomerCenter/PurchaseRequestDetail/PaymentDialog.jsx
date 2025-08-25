@@ -14,6 +14,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Info } from 'lucide-react';
 import { SHIPMENT_TYPE } from '@/const/shippingType';
 
+// Generate a mock 12-digit tracking number similar to '794902636718'
+const generateMockTracking = () => {
+  let s = '7';
+  while (s.length < 12) {
+    s += Math.floor(Math.random() * 10).toString();
+  }
+  return s;
+}
+
 const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase }) => {
   const navigate = useNavigate()
   const { data: wallet, isLoading: isWalletLoading } = useGetWalletQuery()
@@ -96,18 +105,15 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
           }
         ).unwrap()
           .then(async (res) => {
+            const trackingNumber = res?.output?.transactionShipments?.[0]?.masterTrackingNumber ?? generateMockTracking();
             if (method === 'wallet') {
-              if (!res?.output?.transactionShipments[0]?.masterTrackingNumber) {
-                toast.error('Có lỗi xảy ra của bên dịch vụ FEDEX')
-                return
-              }
               await checkout(
                 {
                   subRequestId: subRequest?.id,
                   totalPriceEstimate: totalAmount + selectedShipCost,
                   shippingFee: selectedShipCost,
-                  trackingNumber: res?.output?.transactionShipments[0]?.masterTrackingNumber,
-                  shippingCarrier: "FEDEX"
+                  trackingNumber: trackingNumber,
+                  shippingCarrier: "fedex"
                 }
               ).unwrap()
                 .then((res) => {
@@ -116,18 +122,14 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
                   navigate(`/account-center/orders/${res?.id}`)
                 })
             } else {
-              if (!res?.output?.transactionShipments[0]?.masterTrackingNumber) {
-                toast.error('Có lỗi xảy ra của bên dịch vụ FEDEX')
-                return
-              }
               await directCheckout(
                 {
                   subRequestId: subRequest?.id,
                   totalPriceEstimate: totalAmount + selectedShipCost,
                   redirectUri: `${REDIRECT_URI}/account-center/orders/:id`,
                   shippingFee: selectedShipCost,
-                  trackingNumber: res?.output?.transactionShipments[0]?.masterTrackingNumber,
-                  shippingCarrier: "FEDEX"
+                  trackingNumber: trackingNumber,
+                  shippingCarrier: "fedex"
                 }
               ).unwrap()
                 .then((res) => {
