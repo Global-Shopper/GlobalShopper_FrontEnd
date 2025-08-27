@@ -14,8 +14,6 @@ export default function OffShippingTrackingCard({ data }) {
       return String(value)
     }
   }
-
-  events.sort((a, b) => Number(b?.eventTime ?? 0) - Number(a?.eventTime ?? 0))
   const latest = events[0]
 
   const trackingNumber = latest?.trackingNumber || events?.[0]?.trackingNumber || null
@@ -62,8 +60,8 @@ export default function OffShippingTrackingCard({ data }) {
             {statusDesc ? (
               <div className="text-sm font-bold text-slate-700 mt-1">{statusDesc}</div>
             ) : null}
-            {latest?.eventTime ? (
-              <div className="text-xs text-slate-500 mt-0.5">Cập nhật gần nhất: {fmtDate(latest.eventTime)}</div>
+            {latest?.createdAt ? (
+              <div className="text-xs text-slate-500 mt-0.5">Cập nhật gần nhất: {fmtDate(latest.createdAt)}</div>
             ) : null}
           </div>
         </div>
@@ -72,8 +70,8 @@ export default function OffShippingTrackingCard({ data }) {
           <div className="text-slate-700 font-medium mb-2">Sự kiện gần đây</div>
           <ul className="space-y-3">
             {events.slice(0, 10).map((ev, idx) => (
-              <li key={ev.id || `${ev.eventTime}-${idx}`} className="flex gap-3">
-                <div className="flex-none text-xs text-slate-500 w-40">{fmtDate(ev.eventTime)}</div>
+              <li key={ev.id || `${ev.createdAt}-${idx}`} className="flex gap-3">
+                <div className="flex-none text-xs text-slate-500 w-40">{fmtDate(ev.createdAt)}</div>
                 <div className="flex-1">
                   <div className={`text-sm text-slate-800 ${idx === 0 ? 'font-bold' : ''}`}>{(ev.eventDescription || ev.shipmentStatus || ev.eventCode || '').toString().trim()}</div>
                   <div className="text-xs text-slate-500">

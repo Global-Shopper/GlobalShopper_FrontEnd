@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { signout } from "@/features/user";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import adminLogo from "@/assets/logo_admin.png";
 import defaultAvt from "@/assets/defaultAvt.jpg";
 import gshopApi, { useLoginTokenQuery } from "@/services/gshopApi";
@@ -55,9 +55,6 @@ export function AdminSidebar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data: userInfo, isLoading: infoLoading } = useLoginTokenQuery();
-  const { avatar, name, email } = useSelector(
-    (state) => state.rootReducer.user
-  );
   return (
     <Sidebar>
       <SidebarContent>
