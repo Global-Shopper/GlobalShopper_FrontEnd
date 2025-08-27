@@ -176,7 +176,7 @@ const AdWithdrawList = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <Input
             type="text"
-            placeholder="Tìm kiếm theo mã yêu cầu/CMND"
+            placeholder="Tìm kiếm theo mã yêu cầu"
             className="pl-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 py-2 text-base"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {

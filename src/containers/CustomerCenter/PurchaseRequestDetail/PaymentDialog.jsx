@@ -191,7 +191,7 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
               onClick={() => setOpen(true)}
               disabled={expired}
             >
-              {expired ? 'Đã hết hạn thanh toán' : `Thanh toán`}
+              {expired ? 'Đã hết hạn thanh toán' : (subRequest?.status === "PAID" ? `Mua lại đơn hàng` : `Thanh toán`)}
             </button>
           ) : null}
       </DialogTrigger>

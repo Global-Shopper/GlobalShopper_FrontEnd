@@ -33,7 +33,7 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import gshopApi from "@/services/gshopApi";
+import gshopApi, { useLoginTokenQuery } from "@/services/gshopApi";
 
 // Menu items.
 const items = [
@@ -95,10 +95,8 @@ export function BusinessSidebar() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { data: userInfo, isLoading: infoLoading } = useLoginTokenQuery();
 	const [openSubmenu, setOpenSubmenu] = useState({});
-	const { avatar, name, email } = useSelector(
-		(state) => state.rootReducer.user
-	);
 
 	const isSubmenuActive = useCallback(
 		(submenuItems) => {
@@ -269,20 +267,20 @@ export function BusinessSidebar() {
 					<div className="flex flex-col items-center">
 						<div className="relative mb-2">
 							<img
-								src={avatar || defaultAvt}
+								src={userInfo?.user?.avatar || defaultAvt}
 								alt="Avatar"
 								className="w-10 h-10 rounded-full border-2 border-orange-200 object-cover shadow-sm"
 							/>
 							<div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
 						</div>
 						<div className="text-xs font-semibold text-gray-900 truncate w-full text-center">
-							{name || "Business Manager"}
+							{userInfo?.user?.name || "Business Manager"}
 						</div>
 						<div
 							className="text-xs text-gray-500 truncate w-full text-center mb-2"
-							title={email}
+							title={userInfo?.user?.email}
 						>
-							{email || ""}
+							{userInfo?.user?.email || ""}
 						</div>
 					</div>
 				</div>
