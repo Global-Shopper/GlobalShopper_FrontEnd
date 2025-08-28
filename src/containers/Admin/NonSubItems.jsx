@@ -26,13 +26,13 @@ export default function NonSubItems({
   };
   const platformIcon = (platform) => {
     switch (platform) {
-      case "AMAZON":
+      case "Amazon":
         return amazon;
-      case "ASOS":
+      case "Asos":
         return asos;
-      case "EBAY":
+      case "Ebay":
         return ebay;
-      case "GMARKET":
+      case "Gmarket":
         return gmarket;
       default:
         return amazon;
@@ -49,7 +49,7 @@ export default function NonSubItems({
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            {platform !== "Unknown" && <img src={platformIcon(platform)} alt={platform} className="w-16 h-6" />}
+            {platform !== "Unknown" && <img src={platformIcon(platform)} alt={platform} className="w-16 h-6 object-contain" />}
             {isGroupingMode && (
               <Checkbox
                 checked={isSelected}

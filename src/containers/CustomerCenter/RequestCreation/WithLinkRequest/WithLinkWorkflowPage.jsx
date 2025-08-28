@@ -57,15 +57,8 @@ const buildProductFromRaw = (rawData, link, index) => ({
   link,
   id: `product_${Date.now()}_${index}`,
   ecommercePlatform: rawData?.ecommercePlatform ?? null,
+  seller: rawData?.seller ?? null,
 });
-
-const makeEmptyProduct = (link, index) =>
-  buildProductFromRaw(
-    { name: "", description: "", variants: [], images: [], ecommercePlatform: null },
-    link,
-    index
-  );
-
 
 export default function WithLinkWorkflowPage() {
   const navigate = useNavigate();
@@ -109,11 +102,6 @@ export default function WithLinkWorkflowPage() {
         Object.keys(rawData).length === 0 ||
         (!rawData.name && !rawData.description && (!rawData.variants || rawData.variants.length === 0));
       if (isEmptyData) {
-        dispatch(updateProductField({
-          index,
-          field: "product",
-          value: makeEmptyProduct(itemLinks[index].link, index),
-        }));
         dispatch(updateProductField({ index, field: "status", value: "failed" }));
         toast.error("Không thể trích xuất thông tin từ link này. Vui lòng nhập thông tin thủ công.");
       } else {
@@ -124,7 +112,6 @@ export default function WithLinkWorkflowPage() {
         dispatch(updateProductField({ index, field: "status", value: "success" }));
       }
     } catch {
-      dispatch(updateProductFields({ index, fields: makeEmptyProduct(itemLinks[index].link, index) }));
       dispatch(updateProductField({ index, field: "status", value: "failed" }));
       toast.error("Trích xuất thất bại. Vui lòng nhập thông tin thủ công.");
     }
@@ -165,6 +152,7 @@ export default function WithLinkWorkflowPage() {
         quantity: item?.quantity,
         description: item?.description,
         ecommercePlatform: item?.ecommercePlatform,
+        seller: item?.seller,
       })),
     })
       .unwrap()

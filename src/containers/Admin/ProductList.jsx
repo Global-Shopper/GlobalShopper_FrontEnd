@@ -6,7 +6,7 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import { Package, ExternalLink, Users, X } from "lucide-react";
+import { Package, ExternalLink, Users, X, Layers } from "lucide-react";
 import { SubRequestDetails } from "./PurchaseRequest/SubRequestDetails";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -226,8 +226,6 @@ export function ProductList({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          Danh sách sản phẩm
           {isGroupingMode && (
             <span className="text-sm font-normal text-blue-600 bg-blue-100 px-2 py-1 rounded">
               Chế độ chọn nhóm
@@ -239,8 +237,7 @@ export function ProductList({
             ? "Chọn các sản phẩm bằng checkbox để tạo nhóm"
             : status === "SENT"
               ? "Xem thông tin sản phẩm trong yêu cầu mua hàng"
-              : 
-              <p className="text-sm text-red-500">Lưu ý: Chỉ có thể báo giá cho các sản phẩm đã được tạo nhóm</p>
+              : ""
               }
         </CardDescription>
         {isGroupingMode && (
@@ -261,7 +258,8 @@ export function ProductList({
         {/* Render main requestItemsGroupByPlatform if any */}
         {purchaseRequest?.requestItemsGroupByPlatform?.length > 0 && (
           <div>
-            <h3 className="font-semibold mb-3 text-md">
+            <h3 className="flex items-center gap-2 font-semibold mb-3 text-md">
+              <Package className="h-5 w-5" />
               Sản phẩm chưa được tạo nhóm
             </h3>
 
@@ -302,7 +300,10 @@ export function ProductList({
         {/* Consolidated SubRequests */}
         {purchaseRequest?.subRequests?.length > 0 &&
           <>
-            <p className="font-semibold mb-3 text-md">Các nhóm sản phẩm</p>
+            <div className="flex items-center gap-2">
+              <Layers className="h-5 w-5" />
+              <p className="font-semibold text-md self-center">Các nhóm sản phẩm</p>
+            </div>
             {purchaseRequest?.subRequests?.map((sub) => (
               <SubRequestDetails
                 key={sub.id}

@@ -7,6 +7,7 @@ import {
 	Users,
 	UserCog,
 	ChevronRight,
+	ArrowLeftRight,
 } from "lucide-react";
 
 import {
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signout } from "@/features/user";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useState, useEffect, useCallback } from "react";
 import BMLogo from "@/assets/logo_bm.png";
 import defaultAvt from "@/assets/defaultAvt.jpg";
@@ -69,6 +70,11 @@ const items = [
 		],
 	},
 	{
+		title: "Danh sách giao dịch",
+		url: "/business-manager/transaction-list",
+		icon: ArrowLeftRight,
+	},
+	{
 		title: "Quản lý người dùng",
 		icon: Users,
 		submenu: [
@@ -95,7 +101,7 @@ export function BusinessSidebar() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { data: userInfo, isLoading: infoLoading } = useLoginTokenQuery();
+	const { data: userInfo } = useLoginTokenQuery();
 	const [openSubmenu, setOpenSubmenu] = useState({});
 
 	const isSubmenuActive = useCallback(

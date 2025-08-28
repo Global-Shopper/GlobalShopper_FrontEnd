@@ -88,7 +88,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
     },
     recipient: {
       recipientStreetLine: addressLine,
-      recipientCity: location.split(",")[2],
+      recipientCity: location?.split(",")[2],
       recipientCountryCode: "VN",
       recipientPostalCode: "",
       recipientPhone: phoneNumber,
@@ -132,9 +132,12 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                 {getStatusText(subRequest.status)}
               </span>
             </div>
-            <Button variant="ghost" size="sm">
+            {
+              subRequest.contactInfo.length > 0 &&
+              <Button variant="ghost" size="sm">
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
+            }
           </div>
 
           {/* Contact Info - Only show when expanded */}
@@ -179,8 +182,6 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                   initialValues={initialValues}
                   validationSchema={validationSchema}
                   onSubmit={async (values, actions) => {
-                    // Build details from latest Redux state
-                    const expiredDate = Date.now() + 3 * 24 * 60 * 60 * 1000; // default 3 days
                     try {
                       if (requestType === "ONLINE") {
                         const details = quotationDetails.map((d) => ({
@@ -199,7 +200,6 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                         const payload = {
                           subRequestId: subRequest.id,
                           shippingEstimate: Number(values.shippingEstimate),
-                          expiredDate,
                           note: values.note,
                           totalPriceBeforeExchange: Number(values.totalPriceBeforeExchange),
                           fees,
@@ -223,7 +223,6 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                           note: values.note,
                           details,
                           shippingEstimate: Number(values.shippingEstimate),
-                          expiredDate,
                           totalWeightEstimate: Number(values.totalWeightEstimate || 0),
                           packageType: values.packageType,
                           shipper: { ...values.shipper, ...(values.region ? { shipmentCountryCode: values.region } : {}) },
