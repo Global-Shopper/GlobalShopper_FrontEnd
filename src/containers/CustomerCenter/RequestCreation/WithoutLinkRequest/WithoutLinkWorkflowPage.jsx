@@ -45,6 +45,7 @@ export default function WithoutLinkWorkflowPage() {
         images: item?.images,
         quantity: item?.quantity,
         description: item?.description,
+        seller: shopInfo?.name,
       })),
     })
       .unwrap()

@@ -286,6 +286,17 @@ export default function ItemExtractForm({ index }) {
               </SelectContent>
             </Select>
           </div>
+          <div className="mt-2">
+            <Label className="text-sm font-medium text-gray-700">
+              Người bán
+            </Label>
+            <Input
+              value={item.seller || ""}
+              onChange={(e) => handleFieldChange("seller", e.target.value)}
+              placeholder="Nhập người bán"
+              className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
         </div>
       </div>
     </div>

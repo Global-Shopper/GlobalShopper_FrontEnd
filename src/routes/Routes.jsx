@@ -47,6 +47,7 @@ import Pricing from "@/containers/Home/Pricing";
 import FAQ from "@/containers/Home/FAQ";
 import HsCodeDialogContent from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
 import PrivateRoleBasedRoute from "./PrivateRoleBasedRoute";
+import TransactionList from "@/containers/BusinessManager/Transaction/TransactionList";
 
 const AppRoutes = () => {
 	return (
@@ -73,18 +74,21 @@ const AppRoutes = () => {
 						<Route path="/faq" element={<FAQ />} />
 						<Route path="create-request" element={<CreateRequestLayout />}>
 							<Route index element={<CreateRequestSelection />} />
-							<Route
-								path="without-link"
-								element={<WithoutLinkWorkflowPage />}
-							/>
-							<Route
-								path="with-link"
-								element={<WithLinkWorkflowPage />}
-							/>
+							<Route element={<PrivateRoleBasedRoute requiredRoles={["CUSTOMER"]} />}>
+								<Route
+									path="without-link"
+									element={<WithoutLinkWorkflowPage />}
+								/>
+								<Route
+									path="with-link"
+									element={<WithLinkWorkflowPage />}
+								/>
+							</Route>
 						</Route>
 					</Route>
 
 					{/* Customer Account Center Routes */}
+					<Route element={<PrivateRoleBasedRoute requiredRoles={["CUSTOMER"]} />}>
 					<Route path="/account-center" element={<AccountCenterLayout />}>
 						<Route path="wallet" element={<WalletOverview />} />
 						<Route path="wallet/deposit" element={<WalletDeposit />} />
@@ -101,6 +105,7 @@ const AppRoutes = () => {
 						<Route path="orders/:id" element={<OrderDetail />} />
 						<Route path="refunds" element={<RefundList />} />
 					</Route>
+				</Route>
 
 					{/* Protected Admin Routes */}
 					<Route element={<PrivateRoleBasedRoute requiredRoles={["ADMIN"]} />}>
@@ -120,24 +125,25 @@ const AppRoutes = () => {
 
 					{/* Protected Business Manager Routes */}
 					<Route element={<PrivateRoleBasedRoute requiredRoles={["BUSINESS_MANAGER"]} />}>
-					<Route path="/business-manager" element={<BusinessManagerLayout />}>
-						<Route index element={<BMDashboard />} />
-						<Route path="overview" element={<BMDashboard />} />
-						<Route path="revenue" element={<RevenueDashboard />} />
-						<Route
-							path="user-management/admin"
-							element={<AdminManagement />}
-						/>
-						<Route
-							path="user-management/customer"
-							element={<CustomerManagement />}
-						/>
-						<Route path="config/hs-code" element={<HsCodeDialogContent />} />
-						<Route path="config/service" element={<ServiceConfig />} />
-						<Route path="config/variant" element={<VariantConfig />} />
+						<Route path="/business-manager" element={<BusinessManagerLayout />}>
+							<Route index element={<BMDashboard />} />
+							<Route path="overview" element={<BMDashboard />} />
+							<Route path="revenue" element={<RevenueDashboard />} />
+							<Route
+								path="user-management/admin"
+								element={<AdminManagement />}
+							/>
+							<Route
+								path="user-management/customer"
+								element={<CustomerManagement />}
+							/>
+							<Route path="config/hs-code" element={<HsCodeDialogContent />} />
+							<Route path="config/service" element={<ServiceConfig />} />
+							<Route path="config/variant" element={<VariantConfig />} />
+							<Route path="transaction-list" element={<TransactionList />} />
+						</Route>
 					</Route>
-				</Route>
-				<Route path="*" element={<Navigate to="/" replace />} />
+					<Route path="*" element={<Navigate to="/" replace />} />
 				</Routes>
 			</ScrollToTop>
 		</>

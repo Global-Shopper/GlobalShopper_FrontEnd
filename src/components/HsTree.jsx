@@ -115,12 +115,22 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
     if (visibleSet && !visibleSet.has(code)) return null;
     return (
       <div key={code} className="pl-2">
-        <div className={`flex items-center justify-between py-1 ${selectedCode === code ? "bg-blue-50" : ""}`}
-             role="treeitem" aria-expanded={isOpen}>
+        <div
+          className={`flex items-center justify-between py-1 cursor-pointer ${selectedCode === code ? "bg-blue-50" : ""}`}
+          role="treeitem"
+          aria-expanded={isOpen}
+          tabIndex={0}
+          onClick={() => toggleExpand(node)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              toggleExpand(node);
+            }
+          }}
+        >
           <div className="flex items-center gap-1" style={{ paddingLeft: level * 12 }}>
             <button
               type="button"
-              onClick={() => toggleExpand(node)}
               className="h-6 w-6 flex items-center justify-center text-gray-600 hover:text-gray-900"
               aria-label={isOpen ? `Collapse ${code}` : `Expand ${code}`}
             >
@@ -133,7 +143,7 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
           </div>
           {setHScode && node.level === 8 && (
             <div className="pr-2">
-              <Button size="sm" onClick={() => setHScode(code)}>Nhập</Button>
+              <Button size="sm" onClick={(e) => { e.stopPropagation(); setHScode(code); }}>Nhập</Button>
             </div>
           )}
         </div>

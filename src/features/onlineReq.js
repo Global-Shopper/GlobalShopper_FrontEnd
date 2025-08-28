@@ -31,16 +31,6 @@ const initialState = {
 // Helper function to generate a unique ID
 const generateId = () => `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-// Helper to extract the ecommerce platform/provider from a URL (hostname)
-const extractHost = (url) => {
-  try {
-    const u = new URL(url);
-    return u.hostname || '';
-  } catch {
-    return '';
-  }
-};
-
 // Map extension products to internal item structure
 const mapExtensionProductsToItems = (products = []) => {
   return products.map((p) => ({
@@ -57,6 +47,7 @@ const mapExtensionProductsToItems = (products = []) => {
       images: p?.mainImage ? [p.mainImage] : [],
       link: p?.url || '',
       ecommercePlatform: p?.platform || '',
+      seller: p?.seller || '',
     },
   }));
 };
@@ -82,6 +73,7 @@ const onlineReqSlice = createSlice({
           images: [],
           link: '',
           ecommercePlatform: '',
+          seller: '',
         },
       });
     },
