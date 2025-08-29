@@ -14,6 +14,7 @@ const gshopApi = createApi({
 		"WithdrawList",
 		"BMDashboard",
 		"Variants",
+		"Transactions",
 	],
 	baseQuery: axiosBaseQuery(),
 	endpoints: (builder) => ({
@@ -323,6 +324,14 @@ const gshopApi = createApi({
 				method: "GET",
 			}),
 			providesTags: ["TransactionHistory"],
+		}),
+		getTransactions: builder.query({
+			query: (params) => ({
+				params: params,
+				url: endpoints.TRANSACTION_FILTER,
+				method: "GET",
+			}),
+			providesTags: ["Transactions"],
 		}),
 		checkout: builder.mutation({
 			query: (data) => ({
@@ -706,6 +715,7 @@ export const {
 	useCheckingPurchaseRequestMutation,
 	useGetPurchaseRequestDetailQuery,
 	useTransactionHistoryQuery,
+	useGetTransactionsQuery,
 	useCreateGroupMutation,
 	useUpdateSubRequestMutation,
 	useAddItemToSubRequestMutation,
