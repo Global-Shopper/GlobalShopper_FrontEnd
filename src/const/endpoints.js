@@ -62,5 +62,6 @@ const endpoints = {
 	BM_REVENUE: "/business-manager/revenue",
 	VARIANTS: "/variant",
 	TOGGLE_VARIANT_ACTIVE: "/variant",
+	TRANSACTION_FILTER: "/filter",
 };
 export default endpoints;
