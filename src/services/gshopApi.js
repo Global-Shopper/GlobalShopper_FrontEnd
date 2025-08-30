@@ -580,6 +580,14 @@ const gshopApi = createApi({
 			}),
 			invalidatesTags: ["WithdrawList"],
 		}),
+		processWithdrawRequestNewPhase: builder.mutation({
+			query: ({ params, id }) => ({
+				params: params,
+				url: `${endpoints.WALLET}/${id}/process-new-phase`,
+				method: "POST",
+			}),
+			invalidatesTags: ["WithdrawList"],
+		}),
 		getWithdrawRequestAdmin: builder.query({
 			query: (params) => ({
 				params: params,
@@ -742,6 +750,7 @@ export const {
 	useUpdateBankAccountMutation,
 	useUploadBillMutation,
 	useProcessWithdrawRequestMutation,
+	useProcessWithdrawRequestNewPhaseMutation,
 	useGetWithdrawRequestAdminQuery,
 	useCreateWithdrawRequestMutation,
 	useGetWithdrawRequestCustomerQuery,

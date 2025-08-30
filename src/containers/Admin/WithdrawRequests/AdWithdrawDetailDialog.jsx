@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { useProcessWithdrawRequestMutation, useUploadBillMutation } from '@/services/gshopApi'
+import { useProcessWithdrawRequestNewPhaseMutation, useUploadBillMutation } from '@/services/gshopApi'
 import { getQRCodeUrl } from '@/services/bankService'
 
 const AdWithdrawDetailDialog = ({ open, setOpen, withdraw }) => {
-  const [processWithdrawRequest, { isLoading: isProcessLoading }] = useProcessWithdrawRequestMutation()
+  const [processWithdrawRequestNewPhase, { isLoading: isProcessNewPhaseLoading }] = useProcessWithdrawRequestNewPhaseMutation()
   const [uploadBill, { isLoading: isUploadLoading }] = useUploadBillMutation()
 
   const [reason, setReason] = useState('')
@@ -28,7 +28,7 @@ const AdWithdrawDetailDialog = ({ open, setOpen, withdraw }) => {
   const handleProcess = async (isApproved) => {
     if (!withdraw?.id) return
     try {
-      await processWithdrawRequest({
+      await processWithdrawRequestNewPhase({
         id: withdraw.id,
         params: { isApproved, reason: reason || undefined },
       }).unwrap()
@@ -145,16 +145,16 @@ const AdWithdrawDetailDialog = ({ open, setOpen, withdraw }) => {
             <Button
               variant="destructive"
               onClick={() => handleProcess(false)}
-              disabled={isProcessLoading || !withdraw}
+              disabled={isProcessNewPhaseLoading || !withdraw}
             >
-              {isProcessLoading ? 'Đang xử lý...' : 'Từ chối'}
+              {isProcessNewPhaseLoading ? 'Đang xử lý...' : 'Từ chối'}
             </Button>
             <Button
               className="bg-green-600 hover:bg-green-700"
               onClick={() => handleProcess(true)}
-              disabled={isProcessLoading || !withdraw}
+              disabled={isProcessNewPhaseLoading || !withdraw}
             >
-              {isProcessLoading ? 'Đang xử lý...' : 'Phê duyệt'}
+              {isProcessNewPhaseLoading ? 'Đang xử lý...' : 'Phê duyệt'}
             </Button>
           </>
           }

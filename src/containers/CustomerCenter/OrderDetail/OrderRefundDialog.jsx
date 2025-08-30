@@ -6,34 +6,50 @@ import { useCreateRefundMutation } from '@/services/gshopApi'
 import { toast } from 'sonner'
 import { Upload, X, Loader2 } from 'lucide-react'
 import { uploadToCloudinary } from '@/utils/uploadToCloudinary'
-
-function formatVND(value) {
-  if (typeof value !== 'number') return value
-  try {
-    return value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
-  } catch {
-    return value
-  }
-}
+import { refundReason } from '@/const/commonReason'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 
 const OrderRefundDialog = ({ order, open, onOpenChange }) => {
   const [createRefund] = useCreateRefundMutation()
-  const [rfContent, setRfContent] = useState('')
+  const [selectedReason, setSelectedReason] = useState('')
+  const [customReason, setCustomReason] = useState('')
   const [localImages, setLocalImages] = useState([]) // blob preview URLs
   const [uploadedUrls, setUploadedUrls] = useState([]) // Cloudinary URLs aligned by index
   const [isUploading, setIsUploading] = useState(false)
+  const [localVideos, setLocalVideos] = useState([])
+  const [uploadedVideoUrls, setUploadedVideoUrls] = useState([])
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
   const fileInputRef = useRef()
   const localImagesRef = useRef([])
+  const videoInputRef = useRef()
+  const localVideosRef = useRef([])
 
   // Track latest localImages in a ref for unmount cleanup
   useEffect(() => {
     localImagesRef.current = localImages
   }, [localImages])
 
+  // Track latest localVideos in a ref for unmount cleanup
+  useEffect(() => {
+    localVideosRef.current = localVideos
+  }, [localVideos])
+
   // Cleanup object URLs on unmount only
   useEffect(() => {
     return () => {
       localImagesRef.current.forEach((u) => {
+        if (u && typeof u === 'string' && u.startsWith('blob:')) {
+          try { URL.revokeObjectURL(u) } catch (e) { console.warn('revokeObjectURL failed', e) }
+        }
+      })
+    }
+  }, [])
+
+  // Cleanup video object URLs on unmount
+  useEffect(() => {
+    return () => {
+      localVideosRef.current.forEach((u) => {
         if (u && typeof u === 'string' && u.startsWith('blob:')) {
           try { URL.revokeObjectURL(u) } catch (e) { console.warn('revokeObjectURL failed', e) }
         }
@@ -79,6 +95,44 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
     }
   }
 
+  const handleVideoUpload = async (event) => {
+    const files = Array.from(event.target.files || [])
+    if (!files.length) return
+    // validations
+    for (const file of files) {
+      if (!file.type?.startsWith('video/')) {
+        toast.error('Vui lòng chọn file video')
+        return
+      }
+      if (file.size > 100 * 1024 * 1024) {
+        toast.error('Kích thước video không được vượt quá 100MB')
+        return
+      }
+    }
+    const newPreviews = files.map((f) => URL.createObjectURL(f))
+    const startIdx = localVideos.length
+    setLocalVideos((prev) => [...prev, ...newPreviews])
+    setUploadedVideoUrls((prev) => [...prev, ...new Array(files.length).fill(null)])
+    setIsUploadingVideo(true)
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const url = await uploadToCloudinary(files[i], 'video')
+        if (url) {
+          setUploadedVideoUrls((prev) => {
+            const copy = [...prev]
+            copy[startIdx + i] = url
+            return copy
+          })
+        }
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Có lỗi xảy ra khi tải video lên. Vui lòng thử lại.')
+    } finally {
+      setIsUploadingVideo(false)
+    }
+  }
+
   const handleRemoveImage = (idx) => {
     const revoke = localImages[idx]
     if (revoke?.startsWith('blob:')) {
@@ -88,14 +142,22 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
     setUploadedUrls((prev) => prev.filter((_, i) => i !== idx))
   }
 
-  // Guard: don't render dialog content without order
-  if (!order) return null
+  const handleRemoveVideo = (idx) => {
+    const revoke = localVideos[idx]
+    if (revoke?.startsWith('blob:')) {
+      try { URL.revokeObjectURL(revoke) } catch (e) { console.warn('revokeObjectURL failed', e) }
+    }
+    setLocalVideos((prev) => prev.filter((_, i) => i !== idx))
+    setUploadedVideoUrls((prev) => prev.filter((_, i) => i !== idx))
+  }
 
   const handleCreateRefund = () => {
-    const evidence = uploadedUrls.filter(Boolean)
+    const imageEvidence = uploadedUrls.filter(Boolean)
+    const videoEvidence = uploadedVideoUrls.filter(Boolean)
+    const evidence = [...imageEvidence, ...videoEvidence]
     createRefund({
       orderId: order.id,
-      reason: rfContent,
+      reason: selectedReason === 'Khác (tự nhập)' ? customReason.trim() : selectedReason,
       evidence,
     })
       .unwrap()
@@ -109,12 +171,15 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
       })
   }
 
+  // Guard: don't render dialog content without order
+  if (!order) return null
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger>
         <Button size="sm">Yêu cầu hoàn tiền</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="!max-w-2xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Yêu cầu hoàn tiền</DialogTitle>
           <DialogDescription className="sr-only">
@@ -124,12 +189,35 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
 
         <div className="space-y-2">
           <div className="text-sm font-medium">Nội dung yêu cầu</div>
-          <Textarea
-            placeholder="Mô tả lý do hoàn tiền…"
-            value={rfContent}
-            onChange={(e) => setRfContent(e.target.value)}
-            rows={5}
-          />
+          <div className="flex flex-wrap gap-3">
+            <RadioGroup
+              value={selectedReason}
+              onValueChange={(val) => {
+                setSelectedReason(val)
+                if (val !== 'Khác (tự nhập)') setCustomReason('')
+              }}
+            >
+              {refundReason.map((reason, idx) => {
+                const id = `refund-reason-${idx}`
+                return (
+                  <div className="flex items-center gap-2" key={id}>
+                    <RadioGroupItem id={id} value={reason} />
+                    <Label htmlFor={id} className="cursor-pointer">
+                      {reason}
+                    </Label>
+                  </div>
+                )
+              })}
+            </RadioGroup>
+          </div>
+          {selectedReason === 'Khác (tự nhập)' && (
+            <Textarea
+              placeholder="Mô tả lý do hoàn tiền…"
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              rows={5}
+            />
+          )}
         </div>
 
         {/* Image Upload Section */}
@@ -183,13 +271,55 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
           </div>
         </div>
 
-        <div>
-          <div className="text-gray-500">Phí vận chuyển</div>
-          <div className="font-medium">{formatVND(order.shippingFee)}</div>
-        </div>
-        <div>
-          <div className="text-gray-500">Tổng tiền</div>
-          <div className="font-semibold">{formatVND(order.totalPrice + order.shippingFee)}</div>
+        {/* Video Upload Section */}
+        <div className="space-y-2">
+          <div className="text-sm font-medium">Video minh chứng</div>
+          <div className="flex flex-wrap gap-3">
+            {localVideos.map((url, idx) => (
+              <div key={url} className="relative">
+                <video controls src={url} className="w-30 h-30 object-contain rounded-lg border" />
+                {(isUploadingVideo && !uploadedVideoUrls[idx]) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                  </div>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRemoveVideo(idx)}
+                  className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 text-white hover:bg-red-600"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+
+            <div>
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                multiple
+                onChange={handleVideoUpload}
+                className="hidden"
+                disabled={isUploadingVideo}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => videoInputRef.current?.click()}
+                disabled={isUploadingVideo}
+                className="w-20 h-20 border-dashed border-2 border-gray-300 hover:border-blue-400"
+              >
+                {isUploadingVideo ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
@@ -199,7 +329,7 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
             </Button>
           </DialogClose>
           <DialogClose>
-            <Button onClick={handleCreateRefund} disabled={!rfContent.trim() || isUploading}>
+            <Button onClick={handleCreateRefund} disabled={isUploading || isUploadingVideo}>
               Gửi yêu cầu
             </Button>
           </DialogClose>
