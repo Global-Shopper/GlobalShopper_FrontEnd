@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import ItemExtractForm from "./ItemExtractForm";
 import { useState } from "react";
 import ExtractPreviewModal from "@/components/ExtractPreviewModal";
+import { regex } from "@/const/regex";
 
 // ----- Constants & helpers -----
 const STEPS = ["linkInput", "confirmation", "success"];
@@ -133,7 +134,9 @@ export default function WithLinkWorkflowPage() {
 
   const canContinue =
     itemLinks?.length > 0 &&
-    itemLinks.every((p) => p.product && p.product.name?.trim());
+    itemLinks.every((p) => p.product && p.product.name?.trim())
+    && itemLinks.every((p) => p.product && p.product.link?.trim())
+    && itemLinks.every((p) => p.product.link?.trim().match(regex.eCommerceLink));
 
   // Handle success
   const handleSuccess = () => {
@@ -267,6 +270,11 @@ export default function WithLinkWorkflowPage() {
                   placeholder="https://amazon.com/product/... hoặc https://shopee.com/..."
                   className="h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
+                {item.link?.trim().match(regex.eCommerceLink) ? (
+                  <span className="text-xs text-green-600 font-medium">✅ Link hợp lệ</span>
+                ) : (
+                  item.link && <span className="text-xs text-red-600 font-medium">❌ Link không hợp lệ</span>
+                )}
               </div>
               {itemLinks.length > 1 && (
                 <Button

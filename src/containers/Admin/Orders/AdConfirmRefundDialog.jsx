@@ -15,12 +15,32 @@ import { useRejectRefundMutation } from "@/services/gshopApi"
 import { Formik, Form } from "formik"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
-import { Slider } from "@/components/ui/slider"
 import { formatCurrency } from "@/utils/formatCurrency"
+import _ from "lodash"
 
-export function AdConfirmRefundDialog({ type, refundId, totalPrice = 0, initialPercentage = 100 }) {
+export function AdConfirmRefundDialog({ type, refundId, totalPrice = 0, initialPercentage = 100, reason }) {
   const [approveRefund, { isLoading: isApproveLoading }] = useApproveRefundMutation()
   const [rejectRefund, { isLoading: isRejectLoading }] = useRejectRefundMutation()
+  const presetPercentages = [10, 20, 30, 50, 100]
+
+  const getSuggestedPercentage = (r) => {
+    switch (r) {
+      case "Giao nhầm sản phẩm (sai loại hàng).":
+        return 100
+      case "Sản phẩm bị vỡ, móp méo do vận chuyển.":
+        return 80
+      case "Sản phẩm bị lỗi kỹ thuật, hỏng hóc.":
+        return 70
+      case "Sản phẩm không đúng mẫu mã, màu sắc, kích thước.":
+        return 60
+      case "Sản phẩm nhận được khác biệt so với hình ảnh hoặc mô tả trên website/app.":
+        return 50
+      case "Thiếu phụ kiện đi kèm hoặc thiếu linh kiện.":
+        return 30
+      default:
+        return null
+    }
+  }
   const handleApproveRefund = async (values, { setSubmitting }) => {
     try {
       const percentage = Number(values.percentage ?? 0)
@@ -66,6 +86,37 @@ export function AdConfirmRefundDialog({ type, refundId, totalPrice = 0, initialP
                     Chọn phần trăm số tiền hoàn lại cho khách hàng
                   </AlertDialogDescription>
                 </AlertDialogHeader>
+                {/* Quick select percentages */}
+                <div className="space-y-2">
+                  {reason && (
+                    <div className="text-xs text-gray-600">
+                      Lý do: <span className="font-medium text-gray-800">{reason}</span>
+                      {getSuggestedPercentage(reason) != null && (
+                        <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-amber-700 text-[11px]">
+                          Khuyến nghị: {getSuggestedPercentage(reason)}%
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {_.sortBy(presetPercentages.concat(getSuggestedPercentage(reason))).map((pct) => (
+                      <Button
+                        key={pct}
+                        type="button"
+                        variant="outline"
+                        className={pct === getSuggestedPercentage(reason) ? "!text-amber-500" : ""}
+                        onClick={() => {
+                          setFieldValue('percentage', pct)
+                          const amt = Math.round(((Number(totalPrice) || 0) * pct) / 100)
+                          setFieldValue('amount', amt)
+                        }}
+                      >
+                        {console.log(values.percentage)}
+                        {pct}%
+                      </Button>
+                    ))}
+                  </div>
+                </div>
                 <div className="space-y-1">
                   <div className="text-sm font-medium text-gray-700">Số tiền xử lý</div>
                   <div className="flex items-center gap-2">
@@ -106,17 +157,6 @@ export function AdConfirmRefundDialog({ type, refundId, totalPrice = 0, initialP
                   />
                   <span className="text-sm text-gray-600">%</span>
                 </div>
-                <Slider
-                  value={[values.percentage]}
-                  onValueChange={(v) => {
-                    const v0 = v[0]
-                    setFieldValue('percentage', v0)
-                    const amt = Math.round(((Number(totalPrice) || 0) * v0) / 100)
-                    setFieldValue('amount', amt)
-                  }}
-                  max={100}
-                  step={1}
-                />
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={isSubmitting || isApproveLoading}>Đóng</AlertDialogCancel>
                   <Button type="submit" disabled={isSubmitting || isApproveLoading}>

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getStatusColor, getStatusText } from "@/utils/statusHandler"
 import { Button } from "@/components/ui/button"
@@ -18,9 +18,6 @@ const OrderInfo = ({ order }) => {
   const statusCls = getStatusColor(order.status)
   const statusText = getStatusText(order.status)
   const itemCount = order.orderItems?.length || 0
-
-  const [fbOpen, setFbOpen] = useState(false)
-  const [rfOpen, setRfOpen] = useState(false)
   if (!order) return null
 
 

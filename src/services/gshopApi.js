@@ -397,6 +397,19 @@ const gshopApi = createApi({
 				method: "GET",
 			}),
 		}),
+		getTaxRatesByHsCode: builder.query({
+			query: (hsCode) => ({
+				url: `${endpoints.TAX_RATES_BY_HSCODE}/${hsCode}`,
+				method: "GET",
+			}),
+		}),
+		importTaxRatesByList: builder.mutation({
+			query: (data) => ({
+				data: data,
+				url: endpoints.TAX_RATES_IMPORT_BY_LIST,
+				method: "POST",
+			}),
+		}),
 		getShipmentRate: builder.query({
 			query: (data) => ({
 				data: data,
@@ -589,6 +602,14 @@ const gshopApi = createApi({
 			}),
 			invalidatesTags: ["WithdrawList"],
 		}),
+		processWithdrawRequestNewPhase: builder.mutation({
+			query: ({ params, id }) => ({
+				params: params,
+				url: `${endpoints.WALLET}/${id}/process-new-phase`,
+				method: "POST",
+			}),
+			invalidatesTags: ["WithdrawList"],
+		}),
 		getWithdrawRequestAdmin: builder.query({
 			query: (params) => ({
 				params: params,
@@ -752,6 +773,7 @@ export const {
 	useUpdateBankAccountMutation,
 	useUploadBillMutation,
 	useProcessWithdrawRequestMutation,
+	useProcessWithdrawRequestNewPhaseMutation,
 	useGetWithdrawRequestAdminQuery,
 	useCreateWithdrawRequestMutation,
 	useGetWithdrawRequestCustomerQuery,
@@ -765,6 +787,8 @@ export const {
 	useDeleteVariantMutation,
 	useToggleVariantActiveMutation,
 	useGetVariantOnlyNameQuery,
+	useImportTaxRatesByListMutation,
+	useGetTaxRatesByHsCodeQuery,
 } = gshopApi;
 
 export default gshopApi;

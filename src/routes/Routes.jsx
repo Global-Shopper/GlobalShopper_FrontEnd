@@ -22,7 +22,6 @@ import BusinessManagerLayout from "@/containers/BusinessManager/BusinessManagerL
 import BMDashboard from "@/containers/BusinessManager/Dashboard/BMDashboard";
 import RevenueDashboard from "@/containers/BusinessManager/Dashboard/RevenueDashboard";
 import AdOrderList from "@/containers/Admin/Orders/AdOrderList";
-import HsCodeConfig from "@/containers/BusinessManager/SystemConfig/HsCodeConfig";
 import ServiceConfig from "@/containers/BusinessManager/SystemConfig/ServiceConfig";
 import VariantConfig from "@/containers/BusinessManager/SystemConfig/VariantConfig";
 import AdminManagement from "@/containers/BusinessManager/UserManagement/AdminManagement";
@@ -45,7 +44,7 @@ import ReturnExchangePolicy from "@/containers/Home/Policy/ReturnExchangePolicy"
 import TermOfService from "@/containers/Home/Policy/TermOfService";
 import Pricing from "@/containers/Home/Pricing";
 import FAQ from "@/containers/Home/FAQ";
-import HsCodeDialogContent from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
+import HsCodeConfig from "@/containers/BusinessManager/SystemConfig/HsCodeConfig";
 import PrivateRoleBasedRoute from "./PrivateRoleBasedRoute";
 import TransactionList from "@/containers/BusinessManager/Transaction/TransactionList";
 
@@ -137,7 +136,7 @@ const AppRoutes = () => {
 								path="user-management/customer"
 								element={<CustomerManagement />}
 							/>
-							<Route path="config/hs-code" element={<HsCodeDialogContent />} />
+							<Route path="config/hs-code" element={<HsCodeConfig />} />
 							<Route path="config/service" element={<ServiceConfig />} />
 							<Route path="config/variant" element={<VariantConfig />} />
 							<Route path="transaction-list" element={<TransactionList />} />

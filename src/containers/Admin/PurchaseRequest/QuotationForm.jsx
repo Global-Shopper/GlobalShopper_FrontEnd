@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import HsCodeDialogContent from "@/containers/BusinessManager/SystemConfig/HsCodeDialogContent";
+import HsCodeDialogContent from "@/components/HsCodeDialogContent";
 
 export function QuotationForm({ purchaseRequest, product, errors = {}, onChange }) {
   const [hsOpen, setHsOpen] = useState(false);
