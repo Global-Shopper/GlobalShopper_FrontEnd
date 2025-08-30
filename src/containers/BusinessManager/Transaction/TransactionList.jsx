@@ -728,6 +728,9 @@ const TransactionList = () => {
 											Mã GD
 										</th>
 										<th className="text-left py-3 px-4 font-semibold text-gray-700">
+											Khách hàng
+										</th>
+										<th className="text-left py-3 px-4 font-semibold text-gray-700">
 											Loại
 										</th>
 										<th className="text-left py-3 px-4 font-semibold text-gray-700">
@@ -753,6 +756,11 @@ const TransactionList = () => {
 											<td className="py-3 px-4">
 												<span className="font-medium text-gray-900">
 													#{transaction.id}
+												</span>
+											</td>
+											<td className="py-3 px-4">
+												<span className="font-medium text-gray-900">
+													{transaction.customer.name}
 												</span>
 											</td>
 											<td className="py-3 px-4">
