@@ -48,28 +48,44 @@ const AdRefundDialog = ({ order }) => {
                 <p className="text-sm text-gray-800 whitespace-pre-line">{refundOrder.reason || '-'}</p>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-700 mb-1">Hình ảnh</div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Minh chứng</div>
                 {Array.isArray(refundOrder.evidence) && refundOrder.evidence.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {refundOrder.evidence.map((url, idx) => (
-                      <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="block">
-                        <img src={url} alt={`evidence-${idx + 1}`} className="w-full h-24 object-contain rounded-lg border" />
-                      </a>
-                    ))}
+                    {refundOrder.evidence.map((url, idx) => {
+                      const isVideo = /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
+                      const isImage = /\.(png|jpe?g|gif|bmp|webp|svg)(\?.*)?$/i.test(url)
+                      return (
+                        <div key={idx} className="relative">
+                          {isVideo ? (
+                            <video controls className="w-full h-24 object-contain rounded-lg border bg-black">
+                              <source src={url} type={`video/${url.toLowerCase().includes('webm') ? 'webm' : url.toLowerCase().includes('ogg') ? 'ogg' : 'mp4'}`} />
+                              Trình duyệt không hỗ trợ phát video.
+                            </video>
+                          ) : isImage ? (
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                              <img src={url} alt={`evidence-${idx + 1}`} className="w-full h-24 object-contain rounded-lg border" />
+                            </a>
+                          ) : (
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="block text-blue-600 underline text-xs break-all">
+                              {url}
+                            </a>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500">Không có minh chứng</div>
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <div className="text-sm font-medium text-gray-700">Số tiền yêu cầu hoàn:</div>
+                <div className="text-sm font-medium text-gray-700">Số tiền đã hoàn trả:</div>
                 <div className="text-sm text-gray-900">{formatCurrency(refundOrder.amount || 0, "VND", "vn")}</div>
               </div>
               <div className="flex items-center gap-2">
                 <div className="text-sm font-medium text-gray-700">Tổng tiền:</div>
                 <div className="text-sm text-gray-900">{formatCurrency(totalPrice, "VND", "vn")}</div>
               </div>
-              
             </div>
           )}
         </div>
@@ -80,7 +96,7 @@ const AdRefundDialog = ({ order }) => {
           {/* Approve/Reject actions - only when refundable and not loading */}
           {canProcess && !isRefundLoading && (
             <>
-              <AdConfirmRefundDialog type="approve" refundId={refundOrder?.id} totalPrice={totalPrice} initialPercentage={initialPercentage}/>
+              <AdConfirmRefundDialog type="approve" refundId={refundOrder?.id} totalPrice={totalPrice} initialPercentage={initialPercentage} reason={refundOrder?.reason}/>
               <AdConfirmRefundDialog type="reject" refundId={refundOrder?.id}/>
             </>
           )}

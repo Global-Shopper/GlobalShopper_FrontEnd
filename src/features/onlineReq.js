@@ -43,7 +43,10 @@ const mapExtensionProductsToItems = (products = []) => {
       description: '',
       quantity: 1,
       variants: [],
-      variantRows: [],
+      variantRows: p?.variants?.map((v) => ({
+        attributeName: v.split(":")[0],
+        fieldValue: v.split(":")[1],
+      })),
       images: p?.mainImage ? [p.mainImage] : [],
       link: p?.url || '',
       ecommercePlatform: p?.platform || '',
