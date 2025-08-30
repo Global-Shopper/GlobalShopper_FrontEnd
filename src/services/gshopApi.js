@@ -388,6 +388,19 @@ const gshopApi = createApi({
 				method: "GET",
 			}),
 		}),
+		getTaxRatesByHsCode: builder.query({
+			query: (hsCode) => ({
+				url: `${endpoints.TAX_RATES_BY_HSCODE}/${hsCode}`,
+				method: "GET",
+			}),
+		}),
+		importTaxRatesByList: builder.mutation({
+			query: (data) => ({
+				data: data,
+				url: endpoints.TAX_RATES_IMPORT_BY_LIST,
+				method: "POST",
+			}),
+		}),
 		getShipmentRate: builder.query({
 			query: (data) => ({
 				data: data,
@@ -764,6 +777,8 @@ export const {
 	useDeleteVariantMutation,
 	useToggleVariantActiveMutation,
 	useGetVariantOnlyNameQuery,
+	useImportTaxRatesByListMutation,
+	useGetTaxRatesByHsCodeQuery,
 } = gshopApi;
 
 export default gshopApi;

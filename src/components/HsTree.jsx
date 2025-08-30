@@ -1,13 +1,28 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronDown, Search } from "lucide-react";
+import { ChevronRight, ChevronDown, Search, MoreVertical } from "lucide-react";
 import { debounce } from "lodash";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import TaxRateByHSDialog from "./TaxRateByHSDialog";
 
 // A simple tree node renderer with lazy children loading via backend API
 export default function HsTree({ treeData, selectedCode, setHScode, showSearch = true }) {
+  const [openMenuCode, setOpenMenuCode] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogHSCode, setDialogHSCode] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [expanded, setExpanded] = useState(() => new Set());
+
+  const handleDialogOpen = (code) => {
+    setOpenMenuCode(null);
+    setDialogHSCode(code);
+    setDialogOpen(true);
+  }
 
   // Normalize incoming nodes: support either `code` or `hsCode`, and various children keys
   const roots = useMemo(() => {
@@ -116,15 +131,15 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
     return (
       <div key={code} className="pl-2">
         <div
-          className={`flex items-center justify-between py-1 cursor-pointer ${selectedCode === code ? "bg-blue-50" : ""}`}
+          className={`group flex items-center justify-between py-1 cursor-pointer ${selectedCode === code ? "bg-blue-50" : ""}`}
           role="treeitem"
           aria-expanded={isOpen}
           tabIndex={0}
-          onClick={() => toggleExpand(node)}
+          onClick={() => node.level === 8 ? setHScode(node.code) : toggleExpand(node)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              toggleExpand(node);
+              node.level === 8 ? setHScode(node.code) : toggleExpand(node);
             }
           }}
         >
@@ -134,18 +149,38 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
               className="h-6 w-6 flex items-center justify-center text-gray-600 hover:text-gray-900"
               aria-label={isOpen ? `Collapse ${code}` : `Expand ${code}`}
             >
-              {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {node.level !== 8 && (isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />)}
             </button>
             <div className="text-sm">
               <span className="font-mono text-xs mr-2 text-gray-700">{code}</span>
               <span className="text-gray-800">{node.description}</span>
             </div>
+            {node.level === 8 && !setHScode && (
+                <DropdownMenu
+                  open={openMenuCode === code}
+                  onOpenChange={(o) => setOpenMenuCode((prev) => (o ? code : prev === code ? null : prev))}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="ml-2 h-8 w-8 inline-flex items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 transition-opacity opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto focus:opacity-100 focus:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
+                      aria-label="Actions"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={6} onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setHScode(code); }}>
+                      Nhập
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDialogOpen(code); }}>
+                      Xem
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+            )}
           </div>
-          {setHScode && node.level === 8 && (
-            <div className="pr-2">
-              <Button size="sm" onClick={(e) => { e.stopPropagation(); setHScode(code); }}>Nhập</Button>
-            </div>
-          )}
         </div>
         {isOpen && (
           <div className="ml-6 border-l border-gray-200 pl-2">
@@ -181,6 +216,7 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
           {roots.map((n) => renderNode(n, n.level ?? 0))}
         </div>
       )}
+      <TaxRateByHSDialog hsCode={dialogHSCode} open={dialogOpen} onOpenChange={setDialogOpen}/>
     </div>
   );
 }

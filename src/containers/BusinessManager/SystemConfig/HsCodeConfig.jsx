@@ -1,204 +1,179 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useGetHsCodesQuery } from "@/services/gshopApi";
-import {
-	Table,
-	TableHeader,
-	TableBody,
-	TableRow,
-	TableHead,
-	TableCell,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectTrigger,
-	SelectContent,
-	SelectItem,
-	SelectValue,
-} from "@/components/ui/select";
-import PageLoading from "@/components/PageLoading";
-import PageError from "@/components/PageError";
-import { PaginationBar } from "@/utils/Pagination";
-import { useSearchParams } from "react-router-dom";
-import { useURLSync } from "@/hooks/useURLSync";
-import { debounce } from "lodash";
+import React from 'react'
 
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+import { useMemo, useRef, useState, useEffect } from 'react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { useSearchParams } from 'react-router-dom'
+import { useURLSync } from '@/hooks/useURLSync'
+import { debounce } from 'lodash'
+import HsTree from '@/components/HsTree'
+import PageLoading from '@/components/PageLoading'
+import PageError from '@/components/PageError'
+import { useGetHsCodesQuery } from '@/services/gshopApi'
+import HsCodeUploadPreviewDialog from '@/components/HsCodeUploadPreviewDialog'
+import { toast } from 'sonner'
 
-export default function HsCodeConfig() {
-	const [searchParams, setSearchParams] = useSearchParams();
-	const [searchInput, setSearchInput] = useState("");
-	const [search] = useURLSync(
-		searchParams,
-		setSearchParams,
-		"search",
-		"string",
-		""
-	);
-	const [page, setPage] = useURLSync(
-		searchParams,
-		setSearchParams,
-		"page",
-		"number",
-		1
-	);
-	const [size] = useURLSync(
-		searchParams,
-		setSearchParams,
-		"size",
-		"number",
-		10
-	);
+const REQUIRED_COLUMNS = ["id", "rate", "region", "taxName", "taxType", "hsCode"]
 
-	const {
-		data: hsCodesData,
-		isLoading,
-		isError,
-	} = useGetHsCodesQuery({
-		page: page - 1,
-		size,
-		...(search && { description: search }),
-	});
+const HsCodeConfig = () => {
+  const fileInputRef = useRef(null)
+  const [uploadOpen, setUploadOpen] = useState(false)
+  const [uploadRows, setUploadRows] = useState([])
 
-	const hsCodes = hsCodesData?.content || [];
-	const totalPages = hsCodesData?.totalPages || 1;
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [search] = useURLSync(searchParams, setSearchParams, 'search', 'string', '')
+  const [hsCode] = useURLSync(searchParams, setSearchParams, 'hsCode', 'string', '')
 
-	const debounceSearch = useMemo(
-		() =>
-			debounce((e) => {
-				setSearchParams((searchParams) => {
-					searchParams.set("search", e.target.value);
-					searchParams.set("page", 1);
-					return searchParams;
-				});
-			}, 1000),
-		[setSearchParams]
-	);
+  const [searchInput, setSearchInput] = useState(search || '')
+  const [hsCodeInput, setHsCodeInput] = useState(hsCode || '')
 
-	const handlePageSizeChange = (value) => {
-		setSearchParams((searchParams) => {
-			searchParams.set("size", value);
-			searchParams.set("page", "1");
-			return searchParams;
-		});
-	};
+  const { data: hsCodesData, isLoading, isError, isUninitialized } = useGetHsCodesQuery({
+    ...(search && { description: search }),
+    ...(hsCode && { hsCode }),
+  })
 
-	const handlePageChange = (newPage) => {
-		setPage(newPage);
-	};
+  const debounceSearch = useMemo(
+    () =>
+      debounce((event) => {
+        setSearchParams((params) => {
+          params.set('search', event.target.value)
+          return params
+        })
+      }, 1000),
+    [setSearchParams]
+  )
 
-	useEffect(() => {
-		return () => {
-			debounceSearch.cancel();
-		};
-	}, [debounceSearch]);
+  const debounceHSCode = useMemo(
+    () =>
+      debounce((event) => {
+        setSearchParams((params) => {
+          params.set('hsCode', event.target.value)
+          return params
+        })
+      }, 1000),
+    [setSearchParams]
+  )
 
-	if (isLoading) return <PageLoading />;
-	if (isError) return <PageError />;
+  useEffect(() => {
+    return () => {
+      debounceSearch.cancel()
+      debounceHSCode.cancel()
+    }
+  }, [debounceSearch, debounceHSCode])
 
-	return (
-		<div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
-			<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white rounded-xl shadow p-4 mb-6">
-				<div className="flex items-center gap-2">
-					<Input
-						type="text"
-						placeholder="Tìm kiếm HS code hoặc mô tả"
-						value={searchInput}
-						onChange={(e) => {
-							setSearchInput(e.target.value);
-							debounceSearch(e);
-						}}
-						className="w-64"
-					/>
-				</div>
-				<div className="flex items-center gap-2">
-					<label
-						htmlFor="pageSize"
-						className="text-sm text-gray-600 font-medium"
-					>
-						Số dòng/trang:
-					</label>
-					<Select
-						value={String(size)}
-						onValueChange={handlePageSizeChange}
-					>
-						<SelectTrigger
-							id="pageSize"
-							className="w-24 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500"
-						>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent className="rounded-lg shadow">
-							{PAGE_SIZE_OPTIONS.map((size) => (
-								<SelectItem
-									key={size}
-									value={String(size)}
-									className="rounded-lg"
-								>
-									{size}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-			</div>
-			<div className="bg-white rounded-xl shadow-md p-4">
-				<Table className="w-full border border-gray-200">
-					<TableHeader>
-						<TableRow className="bg-blue-100 rounded-t-2xl">
-							<TableHead className="text-gray-700 font-semibold text-sm">
-								HS Code
-							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm">
-								Mô tả
-							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm">
-								Đơn vị
-							</TableHead>
-							<TableHead className="text-gray-700 font-semibold text-sm">
-								Danh mục sản phẩm
-							</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{hsCodes.length === 0 ? (
-							<TableRow>
-								<TableCell
-									colSpan={5}
-									className="text-center py-8 text-gray-500"
-								>
-									Không có dữ liệu HS Code
-								</TableCell>
-							</TableRow>
-						) : (
-							hsCodes.map((row) => (
-								<TableRow
-									key={row.hsCode}
-									className="hover:bg-blue-50/70 group"
-								>
-									<TableCell className="font-medium text-xs py-3">
-										{row.hsCode}
-									</TableCell>
-									<TableCell className="py-3 max-w-xl whitespace-normal">
-										{row.description}
-									</TableCell>
-									<TableCell className="py-3">
-										{row.unit}
-									</TableCell>
-									<TableCell className="py-3">
-										{row.parentCode}
-									</TableCell>
-								</TableRow>
-							))
-						)}
-					</TableBody>
-				</Table>
-				<PaginationBar
-					totalPages={totalPages}
-					page={page}
-					setPage={handlePageChange}
-				/>
-			</div>
-		</div>
-	);
+  const onChooseFile = () => fileInputRef.current?.click()
+
+  const parseAndOpenPreview = async (file) => {
+    if (!file) return
+    const fileExtension = (file.name.split('.').pop() || '').toLowerCase()
+    try {
+      // Lazy import to avoid adding to initial bundle
+      const xlsxModule = await import('xlsx')
+
+      if (fileExtension === 'csv') {
+        const csvText = await file.text()
+        const workbook = xlsxModule.read(csvText, { type: 'string' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+        const rowsFromSheet = xlsxModule.utils.sheet_to_json(worksheet, { defval: '' })
+        setUploadRows(normalizeRows(rowsFromSheet))
+        setUploadOpen(true)
+      } else {
+        const arrayBuffer = await file.arrayBuffer()
+        const workbook = xlsxModule.read(arrayBuffer, { type: 'array' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+        const rowsFromSheet = xlsxModule.utils.sheet_to_json(worksheet, { defval: '' })
+        setUploadRows(normalizeRows(rowsFromSheet))
+        setUploadOpen(true)
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Không thể đọc tệp. Vui lòng kiểm tra định dạng CSV/XLSX.')
+    }
+  }
+
+  const normalizeRows = (rows) => {
+    if (!Array.isArray(rows)) return []
+    return rows
+      .map((row) => {
+        const normalizedRow = {}
+        Object.entries(row || {}).forEach(([key, value]) => {
+          const trimmedKey = String(key).trim()
+          normalizedRow[trimmedKey] = value
+        })
+        return normalizedRow
+      })
+      .filter((row) => Object.values(row).some((value) => value !== '' && value != null))
+  }
+
+  const onConfirmImport = async (rows) => {
+    // TODO: integrate API import once backend is available
+    const missing = REQUIRED_COLUMNS.filter((c) => !rows.some((r) => c in r))
+    if (missing.length) {
+      toast.error(`Thiếu cột bắt buộc: ${missing.join(', ')}`)
+      return
+    }
+    toast.success(`Đã đọc ${rows.length} dòng. Vui lòng xác nhận lưu (chưa có API).`)
+    setUploadOpen(false)
+  }
+
+  return (
+    <div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white rounded-xl shadow p-4 mb-6">
+        <div className="flex items-center gap-2">
+          <Input
+            type="text"
+            placeholder="Tìm kiếm theo mô tả"
+            value={searchInput}
+            onChange={(event) => {
+              setSearchInput(event.target.value)
+              debounceSearch(event)
+            }}
+            className="w-64"
+          />
+          <Input
+            type="text"
+            placeholder="Tìm kiếm theo code"
+            value={hsCodeInput}
+            onChange={(event) => {
+              setHsCodeInput(event.target.value)
+              debounceHSCode(event)
+            }}
+            className="w-64"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            className="hidden"
+            onChange={(e) => parseAndOpenPreview(e.target.files?.[0])}
+          />
+          <Button onClick={onChooseFile}>Tải lên CSV/XLSX</Button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-md p-4">
+        {isError ? (
+          <PageError />
+        ) : isLoading || isUninitialized ? (
+          <PageLoading />
+        ) : !hsCodesData ? (
+          <div className="text-sm text-gray-500">Không có dữ liệu.</div>
+        ) : (
+          <HsTree treeData={hsCodesData.content} selectedCode={hsCode} showSearch={false} />
+        )}
+      </div>
+
+      <HsCodeUploadPreviewDialog
+        open={uploadOpen}
+        onOpenChange={setUploadOpen}
+        rows={uploadRows}
+        setRows={setUploadRows}
+        onConfirm={onConfirmImport}
+      />
+    </div>
+  )
 }
+
+export default HsCodeConfig
