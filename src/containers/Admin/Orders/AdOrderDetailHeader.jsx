@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { AdUpdateShipDialog } from './AdUpdateShipDialog'
 import AdRefundDialog from './AdRefundDialog'
 import { formatCurrency } from '@/utils/formatCurrency'
+import AdminOffTrackingDialog from '@/components/AdminOffTrackingDialog'
+import AdminOnlTrackingDialog from '@/components/AdminOnlTrackingDialog'
 
 const AdOrderDetailHeader = ({ order }) => {
   const [cancelOrder, { isLoading: isCancelLoading }] = useCancelOrderMutation()
@@ -89,6 +91,10 @@ const AdOrderDetailHeader = ({ order }) => {
             </>
           )}
           <HistoryDialog history={order.history} />
+          {/* Admin Tracking dialogs */}
+          {console.log(order)}
+          {order?.shipmentTrackingEvents?.length > 0 ? <AdminOffTrackingDialog order={order} /> : null}
+          {order?.trackingNumber && order?.shippingCarrier !== "fedex" ? <AdminOnlTrackingDialog order={order} /> : null}
           {order.status === "ORDER_REQUESTED" && <AdUpdateShipDialog orderId={order.id} />}
           {order.status === "DELIVERED" && <AdRefundDialog order={order} />}
         </div>
