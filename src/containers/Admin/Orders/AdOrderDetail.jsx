@@ -40,7 +40,7 @@ const AdOrderDetail = () => {
               <AdOrderItemDetail item={selectedItem} currency={order?.currency} />
             </div>
             <div className="sticky top-4 self-start col-span-2">
-              <CustomerInfoCard customer={order.customer} shippingAddress={order.shippingAddress}/>
+              <CustomerInfoCard customer={order?.customer} shippingAddress={order?.shippingAddress}/>
             </div>
           </div>
 
