@@ -155,7 +155,7 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
               <span className="font-mono text-xs mr-2 text-gray-700">{code}</span>
               <span className="text-gray-800">{node.description}</span>
             </div>
-            {node.level === 8 && !setHScode && (
+            {node.level === 8 && (
                 <DropdownMenu
                   open={openMenuCode === code}
                   onOpenChange={(o) => setOpenMenuCode((prev) => (o ? code : prev === code ? null : prev))}

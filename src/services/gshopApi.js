@@ -401,6 +401,13 @@ const gshopApi = createApi({
 				method: "POST",
 			}),
 		}),
+		importHSCodeByList: builder.mutation({
+			query: (data) => ({
+				data: data,
+				url: endpoints.HS_CODES_IMPORT_BY_LIST,
+				method: "POST",
+			}),
+		}),
 		getShipmentRate: builder.query({
 			query: (data) => ({
 				data: data,
@@ -779,6 +786,7 @@ export const {
 	useGetVariantOnlyNameQuery,
 	useImportTaxRatesByListMutation,
 	useGetTaxRatesByHsCodeQuery,
+	useImportHSCodeByListMutation,
 } = gshopApi;
 
 export default gshopApi;

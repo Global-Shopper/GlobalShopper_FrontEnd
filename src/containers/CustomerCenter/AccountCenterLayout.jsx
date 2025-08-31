@@ -11,7 +11,7 @@ const AccountCenterLayout = () => {
 			<Header />
 			<div className="flex flex-1 relative">
 				<SidebarProvider>
-					<div className="w-56 flex-shrink-0">
+					<div className="w-60 flex-shrink-0 border-slate-200/60 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/30 backdrop-blur-md shadow-sm">
 						<CustomerSidebar />
 					</div>
 					<main className="flex-1 p-6 overflow-y-auto">

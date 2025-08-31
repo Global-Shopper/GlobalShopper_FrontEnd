@@ -185,6 +185,12 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                       <TableCell className="font-medium">Quốc gia</TableCell>
                       <TableCell className="break-words">{quotation?.shipper?.shipmentCountryCode || "-"}</TableCell>
                     </TableRow>
+                    {quotation?.shipper?.shipmentCountryCode === "US" && (
+                      <TableRow>
+                        <TableCell className="font-medium">Tiểu bang</TableCell>
+                        <TableCell className="break-words">{quotation?.shipper?.shipmentStateOrProvinceCode || "-"}</TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -217,6 +223,12 @@ export default function QuotationPreviewDialog({ subRequest, values, quotationDe
                       <TableCell className="font-medium">Quốc gia</TableCell>
                       <TableCell className="break-words">{quotation?.recipient?.recipientCountryCode || "-"}</TableCell>
                     </TableRow>
+                    {quotation?.recipient?.recipientCountryCode === "US" && (
+                      <TableRow>
+                        <TableCell className="font-medium">Tiểu bang</TableCell>
+                        <TableCell className="break-words">{quotation?.recipient?.recipientStateOrProvinceCode || "-"}</TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>

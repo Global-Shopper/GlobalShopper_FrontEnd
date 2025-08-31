@@ -10,15 +10,21 @@ import HsTree from '@/components/HsTree'
 import PageLoading from '@/components/PageLoading'
 import PageError from '@/components/PageError'
 import { useGetHsCodesQuery } from '@/services/gshopApi'
-import HsCodeUploadPreviewDialog from '@/components/HsCodeUploadPreviewDialog'
+import HSCodeUploadDialog from '@/HSCodeUploadDialog'
+import TaxRateUploadPreviewDialog from '@/components/TaxRateUploadPreviewDialog'
+import { useImportHSCodeByListMutation, useImportTaxRatesByListMutation } from '@/services/gshopApi'
 import { toast } from 'sonner'
 
-const REQUIRED_COLUMNS = ["id", "rate", "region", "taxName", "taxType", "hsCode"]
+const HS_REQUIRED_COLUMNS = ["hsCode", "description", "unit", "parentCode"]
+const TAX_REQUIRED_COLUMNS = ["id", "rate", "region", "taxName", "taxType", "hsCode"]
 
 const HsCodeConfig = () => {
-  const fileInputRef = useRef(null)
+  const fileInputRefHS = useRef(null)
+  const fileInputRefTax = useRef(null)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [uploadRows, setUploadRows] = useState([])
+  const [taxUploadOpen, setTaxUploadOpen] = useState(false)
+  const [taxUploadRows, setTaxUploadRows] = useState([])
 
   const [searchParams, setSearchParams] = useSearchParams()
   const [search] = useURLSync(searchParams, setSearchParams, 'search', 'string', '')
@@ -27,10 +33,13 @@ const HsCodeConfig = () => {
   const [searchInput, setSearchInput] = useState(search || '')
   const [hsCodeInput, setHsCodeInput] = useState(hsCode || '')
 
-  const { data: hsCodesData, isLoading, isError, isUninitialized } = useGetHsCodesQuery({
+  const { data: hsCodesData, isLoading, isError, isUninitialized, refetch } = useGetHsCodesQuery({
     ...(search && { description: search }),
     ...(hsCode && { hsCode }),
   })
+
+  const [importHSCodeByList] = useImportHSCodeByListMutation()
+  const [importTaxRatesByList] = useImportTaxRatesByListMutation()
 
   const debounceSearch = useMemo(
     () =>
@@ -61,7 +70,8 @@ const HsCodeConfig = () => {
     }
   }, [debounceSearch, debounceHSCode])
 
-  const onChooseFile = () => fileInputRef.current?.click()
+  const onChooseFileHS = () => fileInputRefHS.current?.click()
+  const onChooseFileTax = () => fileInputRefTax.current?.click()
 
   const parseAndOpenPreview = async (file) => {
     if (!file) return
@@ -91,6 +101,32 @@ const HsCodeConfig = () => {
     }
   }
 
+  const parseAndOpenPreviewTax = async (file) => {
+    if (!file) return
+    const fileExtension = (file.name.split('.').pop() || '').toLowerCase()
+    try {
+      const xlsxModule = await import('xlsx')
+      if (fileExtension === 'csv') {
+        const csvText = await file.text()
+        const workbook = xlsxModule.read(csvText, { type: 'string' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+        const rowsFromSheet = xlsxModule.utils.sheet_to_json(worksheet, { defval: '' })
+        setTaxUploadRows(normalizeRows(rowsFromSheet))
+        setTaxUploadOpen(true)
+      } else {
+        const arrayBuffer = await file.arrayBuffer()
+        const workbook = xlsxModule.read(arrayBuffer, { type: 'array' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+        const rowsFromSheet = xlsxModule.utils.sheet_to_json(worksheet, { defval: '' })
+        setTaxUploadRows(normalizeRows(rowsFromSheet))
+        setTaxUploadOpen(true)
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Không thể đọc tệp. Vui lòng kiểm tra định dạng CSV/XLSX.')
+    }
+  }
+
   const normalizeRows = (rows) => {
     if (!Array.isArray(rows)) return []
     return rows
@@ -106,14 +142,56 @@ const HsCodeConfig = () => {
   }
 
   const onConfirmImport = async (rows) => {
-    // TODO: integrate API import once backend is available
-    const missing = REQUIRED_COLUMNS.filter((c) => !rows.some((r) => c in r))
-    if (missing.length) {
-      toast.error(`Thiếu cột bắt buộc: ${missing.join(', ')}`)
-      return
+    try {
+      const missing = HS_REQUIRED_COLUMNS.filter((c) => !rows.some((r) => c in r))
+      if (missing.length) {
+        toast.error(`Thiếu cột bắt buộc: ${missing.join(', ')}`)
+        return
+      }
+
+      const payload = (rows || []).map((r) => ({
+        hsCode: r?.hsCode ?? '',
+        description: r?.description ?? '',
+        unit: r?.unit ?? '',
+        parentCode: r?.parentCode ?? '',
+      }))
+
+      await importHSCodeByList(payload).unwrap()
+      toast.success(`Đã nhập ${payload.length} dòng HS Code.`)
+      setUploadOpen(false)
+      setUploadRows([])
+      refetch?.()
+    } catch (err) {
+      console.error(err)
+      toast.error('Nhập HS Code thất bại.')
     }
-    toast.success(`Đã đọc ${rows.length} dòng. Vui lòng xác nhận lưu (chưa có API).`)
-    setUploadOpen(false)
+  }
+
+  const onConfirmImportTax = async (rows) => {
+    try {
+      const missing = TAX_REQUIRED_COLUMNS.filter((c) => !rows.some((r) => c in r))
+      if (missing.length) {
+        toast.error(`Thiếu cột bắt buộc: ${missing.join(', ')}`)
+        return
+      }
+
+      const payload = (rows || []).map((r) => ({
+        id: r?.id ?? '',
+        rate: r?.rate ?? '',
+        region: r?.region ?? '',
+        taxName: r?.taxName ?? '',
+        taxType: r?.taxType ?? '',
+        hsCode: r?.hsCode ?? '',
+      }))
+
+      await importTaxRatesByList(payload).unwrap()
+      toast.success(`Đã nhập ${payload.length} dòng Thuế.`)
+      setTaxUploadOpen(false)
+      setTaxUploadRows([])
+    } catch (err) {
+      console.error(err)
+      toast.error('Nhập Thuế thất bại.')
+    }
   }
 
   return (
@@ -143,13 +221,21 @@ const HsCodeConfig = () => {
         </div>
         <div className="flex items-center gap-2">
           <input
-            ref={fileInputRef}
+            ref={fileInputRefHS}
             type="file"
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             className="hidden"
             onChange={(e) => parseAndOpenPreview(e.target.files?.[0])}
           />
-          <Button onClick={onChooseFile}>Tải lên CSV/XLSX</Button>
+          <input
+            ref={fileInputRefTax}
+            type="file"
+            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            className="hidden"
+            onChange={(e) => parseAndOpenPreviewTax(e.target.files?.[0])}
+          />
+          <Button onClick={onChooseFileHS}>Tải HS Code</Button>
+          <Button variant="secondary" onClick={onChooseFileTax}>Tải Thuế</Button>
         </div>
       </div>
 
@@ -165,12 +251,20 @@ const HsCodeConfig = () => {
         )}
       </div>
 
-      <HsCodeUploadPreviewDialog
+      <HSCodeUploadDialog
         open={uploadOpen}
         onOpenChange={setUploadOpen}
         rows={uploadRows}
         setRows={setUploadRows}
         onConfirm={onConfirmImport}
+      />
+
+      <TaxRateUploadPreviewDialog
+        open={taxUploadOpen}
+        onOpenChange={setTaxUploadOpen}
+        rows={taxUploadRows}
+        setRows={setTaxUploadRows}
+        onConfirm={onConfirmImportTax}
       />
     </div>
   )

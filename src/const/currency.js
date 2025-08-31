@@ -5,5 +5,4 @@ export const CURRENCY = [
     { value: "JPY", label: "JPY" },
     { value: "KRW", label: "KRW" },
     { value: "GBP", label: "GBP" },
-    { value: "VND", label: "VND" },
 ]

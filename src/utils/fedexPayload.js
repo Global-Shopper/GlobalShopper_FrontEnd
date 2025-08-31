@@ -66,7 +66,7 @@ export const sampleRate = {
 export const getFedexCreateShipPayload = (weightValue, shipper, recipient, preferredCurrency = "VND", selectedRateType, packagingType) => {
   return {
     accountNumber: {
-      value: "740561073"
+      value: "740561073" // TODO: Change to real account number
     },
     requestedShipment: {
       shipper: {
@@ -75,7 +75,7 @@ export const getFedexCreateShipPayload = (weightValue, shipper, recipient, prefe
           streetLines: [shipper?.shipmentStreetLine],
           city: shipper?.shipmentCity,
           countryCode: shipper?.shipmentCountryCode,
-          stateOrProvinceCode: "GA"
+          stateOrProvinceCode: shipper?.shipmentStateOrProvinceCode
         },
         contact: {
           personName: shipper?.shipmentName,
@@ -98,7 +98,7 @@ export const getFedexCreateShipPayload = (weightValue, shipper, recipient, prefe
       ],
       pickupType: "CONTACT_FEDEX_TO_SCHEDULE",
       serviceType: selectedRateType,
-      customsClearanceDetail: {
+      customsClearanceDetail: { // TODO: Change to real customs clearance detail
         totalCustomsValue: {
           amount: 100,
           currency: "USD"
@@ -131,7 +131,7 @@ export const getFedexCreateShipPayload = (weightValue, shipper, recipient, prefe
       },
       packagingType: packagingType,
       totalWeight: weightValue,
-      shippingChargesPayment: {
+      shippingChargesPayment: { // TODO: Change to real shipping charges payment
         paymentType: "SENDER",
       },
       labelSpecification: {
