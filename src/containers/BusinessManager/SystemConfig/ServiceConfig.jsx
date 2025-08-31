@@ -2,59 +2,77 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUpdateServiceFeeMutation } from "@/services/gshopApi";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+	useUpdateServiceFeeMutation,
+	useGetRefundReasonsQuery,
+	useCreateRefundReasonMutation,
+	useEditRefundReasonMutation,
+	useActivateRefundReasonMutation,
+	useDeleteRefundReasonMutation,
+} from "@/services/gshopApi";
 import { toast } from "sonner";
 import {
 	DollarSign,
 	Settings,
-	Save,
 	RefreshCw,
 	Edit3,
 	X,
 	Check,
+	Plus,
+	Trash2,
 } from "lucide-react";
 
 export default function ServiceConfig() {
 	const [activeTab, setActiveTab] = useState("service");
-	const [serviceFeePercentage, setServiceFeePercentage] = useState(10); // Display as percentage (10%)
-	const [refundFeePercentage, setRefundFeePercentage] = useState(3); // Display as percentage (3%)
+	const [serviceFeePercentage, setServiceFeePercentage] = useState(10);
 	const [isLoading, setIsLoading] = useState(false);
+	const [showCreateDialog, setShowCreateDialog] = useState(false);
+	const [newReasonText, setNewReasonText] = useState("");
+	const [newReasonRate, setNewReasonRate] = useState("");
+	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+	const [reasonToDelete, setReasonToDelete] = useState(null);
 
-	// RTK Query hooks
+	// Edit states for refund reasons
+	const [editingReasonId, setEditingReasonId] = useState(null);
+	const [tempReasonText, setTempReasonText] = useState("");
+	const [tempReasonRate, setTempReasonRate] = useState("");
+
 	const [updateServiceFee] = useUpdateServiceFeeMutation();
+	const {
+		data: refundReasons,
+		isLoading: loadingReasons,
+		refetch: refetchReasons,
+	} = useGetRefundReasonsQuery();
+	const [createRefundReason] = useCreateRefundReasonMutation();
+	const [editRefundReason] = useEditRefundReasonMutation();
+	const [activateRefundReason] = useActivateRefundReasonMutation();
+	const [deleteRefundReason] = useDeleteRefundReasonMutation();
 
-	// Edit states for each tab
 	const [isEditingService, setIsEditingService] = useState(false);
-	const [isEditingRefund, setIsEditingRefund] = useState(false);
 
-	// Temp values for editing
 	const [tempServiceFee, setTempServiceFee] = useState(10);
-	const [tempRefundFee, setTempRefundFee] = useState(3);
 
-	// Convert percentage to decimal for API (10% -> 0.1)
 	const convertToDecimal = (percentage) => {
 		return percentage / 100;
 	};
 
-	// Handle edit mode
 	const handleEditService = () => {
 		setTempServiceFee(serviceFeePercentage);
 		setIsEditingService(true);
 	};
 
-	const handleEditRefund = () => {
-		setTempRefundFee(refundFeePercentage);
-		setIsEditingRefund(true);
-	};
-
 	const handleCancelService = () => {
 		setTempServiceFee(serviceFeePercentage);
 		setIsEditingService(false);
-	};
-
-	const handleCancelRefund = () => {
-		setTempRefundFee(refundFeePercentage);
-		setIsEditingRefund(false);
 	};
 
 	// Handle input change for temp values
@@ -68,31 +86,13 @@ export default function ServiceConfig() {
 		}
 
 		const value = parseFloat(inputValue);
-		// Check if it's a valid number and within range
 		if (!isNaN(value) && value >= 0 && value <= 100) {
 			setTempServiceFee(value);
 		}
 	};
 
-	const handleTempRefundFeeChange = (e) => {
-		const inputValue = e.target.value;
-
-		// Allow empty string
-		if (inputValue === "") {
-			setTempRefundFee("");
-			return;
-		}
-
-		const value = parseFloat(inputValue);
-		// Check if it's a valid number and within range
-		if (!isNaN(value) && value >= 0 && value <= 100) {
-			setTempRefundFee(value);
-		}
-	};
-
 	// Save functions
 	const handleSaveService = async () => {
-		// Validate input before saving
 		if (
 			tempServiceFee === "" ||
 			tempServiceFee < 0 ||
@@ -107,14 +107,12 @@ export default function ServiceConfig() {
 			const serviceDecimal = convertToDecimal(tempServiceFee);
 			console.log("Service Fee (decimal):", serviceDecimal);
 
-			// Call API to update service fee
 			const response = await updateServiceFee(serviceDecimal);
 
 			if (response.error) {
 				throw new Error(response.error.data?.message || "API Error");
 			}
 
-			// Update actual value and exit edit mode
 			setServiceFeePercentage(tempServiceFee);
 			setIsEditingService(false);
 			toast.success("Cập nhật phí dịch vụ thành công!");
@@ -125,30 +123,119 @@ export default function ServiceConfig() {
 			setIsLoading(false);
 		}
 	};
-	const handleSaveRefund = async () => {
-		// Validate input before saving
-		if (tempRefundFee === "" || tempRefundFee < 0 || tempRefundFee > 100) {
-			toast.error("Vui lòng nhập phí hoàn tiền hợp lệ (0-100%)");
+
+	// Refund Reasons handlers
+	const handleCreateReason = async () => {
+		if (!newReasonText.trim()) {
+			toast.error("Vui lòng nhập nội dung lý do hoàn tiền");
 			return;
 		}
 
-		setIsLoading(true);
+		if (
+			newReasonRate &&
+			(isNaN(newReasonRate) || newReasonRate < 0 || newReasonRate > 100)
+		) {
+			toast.error("Tỷ lệ phí phải là số từ 0 đến 100");
+			return;
+		}
+
 		try {
-			const refundDecimal = convertToDecimal(tempRefundFee);
-			console.log("Refund Fee (decimal):", refundDecimal);
-
-			// TODO: Call API to update refund fee when available
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
-			// Update actual value and exit edit mode
-			setRefundFeePercentage(tempRefundFee);
-			setIsEditingRefund(false);
-			toast.success("Cập nhật phí hoàn tiền thành công!");
+			const payload = {
+				reason: newReasonText.trim(),
+				...(newReasonRate && { rate: parseFloat(newReasonRate) / 100 }),
+			};
+			await createRefundReason(payload).unwrap();
+			toast.success("Tạo lý do hoàn tiền thành công!");
+			setNewReasonText("");
+			setNewReasonRate("");
+			setShowCreateDialog(false);
+			refetchReasons();
 		} catch (error) {
-			console.error("Error updating refund fee:", error);
-			toast.error("Có lỗi xảy ra khi cập nhật phí hoàn tiền!");
-		} finally {
-			setIsLoading(false);
+			console.error("Error creating refund reason:", error);
+			toast.error("Có lỗi xảy ra khi tạo lý do hoàn tiền");
+		}
+	};
+
+	const handleToggleReason = async (reasonId, currentStatus) => {
+		try {
+			await activateRefundReason({
+				id: reasonId,
+				active: !currentStatus,
+			}).unwrap();
+			toast.success("Cập nhật trạng thái thành công!");
+			refetchReasons();
+		} catch (error) {
+			console.error("Error toggling refund reason:", error);
+			toast.error("Có lỗi xảy ra khi cập nhật trạng thái");
+		}
+	};
+
+	const handleDeleteReason = (reasonId) => {
+		const reason = refundReasons?.find((r) => r.id === reasonId);
+		setReasonToDelete(reason);
+		setShowDeleteDialog(true);
+	};
+
+	const confirmDeleteReason = async () => {
+		if (!reasonToDelete) return;
+
+		try {
+			await deleteRefundReason(reasonToDelete.id).unwrap();
+			toast.success("Xóa lý do hoàn tiền thành công!");
+			refetchReasons();
+			setShowDeleteDialog(false);
+			setReasonToDelete(null);
+		} catch (error) {
+			console.error("Error deleting refund reason:", error);
+			toast.error("Có lỗi xảy ra khi xóa lý do hoàn tiền");
+		}
+	};
+
+	// Edit reason handlers
+	const handleEditReason = (reason) => {
+		setEditingReasonId(reason.id);
+		setTempReasonText(reason.reason);
+		setTempReasonRate(reason.rate ? (reason.rate * 100).toString() : "");
+	};
+
+	const handleCancelEditReason = () => {
+		setEditingReasonId(null);
+		setTempReasonText("");
+		setTempReasonRate("");
+	};
+
+	const handleSaveEditReason = async () => {
+		if (!tempReasonText.trim()) {
+			toast.error("Tên lý do không được để trống!");
+			return;
+		}
+
+		// Validate rate if provided
+		if (
+			tempReasonRate &&
+			(isNaN(tempReasonRate) ||
+				tempReasonRate < 0 ||
+				tempReasonRate > 100)
+		) {
+			toast.error("Tỷ lệ phí phải là số từ 0 đến 100");
+			return;
+		}
+
+		try {
+			const payload = {
+				id: editingReasonId,
+				reason: tempReasonText.trim(),
+				...(tempReasonRate && {
+					rate: parseFloat(tempReasonRate) / 100,
+				}),
+			};
+			await editRefundReason(payload).unwrap();
+			toast.success("Cập nhật lý do hoàn tiền thành công!");
+			handleCancelEditReason();
+			refetchReasons();
+		} catch (error) {
+			console.error("Error editing refund reason:", error);
+			toast.error("Có lỗi xảy ra khi cập nhật lý do hoàn tiền");
 		}
 	};
 
@@ -162,7 +249,7 @@ export default function ServiceConfig() {
 					</div>
 					<div>
 						<h1 className="text-2xl font-bold text-gray-900">
-							Cấu hình phí dịch vụ
+							Cấu hình phí
 						</h1>
 						<p className="text-gray-600 text-sm">
 							Quản lý các loại phí trong hệ thống mua hộ hàng nước
@@ -293,103 +380,339 @@ export default function ServiceConfig() {
 						</div>
 					</TabsContent>
 
-					{/* Refund Fees Tab */}
+					{/* Refund Reasons Tab */}
 					<TabsContent value="refund" className="space-y-6">
-						<div className="pb-4">
-							<h3 className="text-xl font-semibold text-gray-900">
-								Cấu hình phí hoàn tiền
-							</h3>
-						</div>
-
-						<div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-6 shadow-sm">
-							<div className="flex items-center justify-between">
-								<div className="flex-1">
-									<div className="flex items-center gap-3">
-										<div className="p-2 bg-orange-500 rounded-lg">
-											<RefreshCw className="h-4 w-4 text-white" />
+						<div className="flex items-center justify-between pb-4">
+							<div>
+								<h3 className="text-xl font-semibold text-gray-900">
+									Cấu hình lý do hoàn tiền
+								</h3>
+								<p className="text-gray-600 text-sm">
+									Quản lý các lý do hoàn tiền có sẵn trong hệ
+									thống
+								</p>
+							</div>
+							<Dialog
+								open={showCreateDialog}
+								onOpenChange={setShowCreateDialog}
+							>
+								<DialogTrigger asChild>
+									<Button className="bg-blue-600 hover:bg-blue-700 text-white">
+										<Plus className="h-4 w-4 mr-2" />
+										Thêm lý do
+									</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>
+											Thêm lý do hoàn tiền mới
+										</DialogTitle>
+									</DialogHeader>
+									<div className="space-y-4">
+										<div>
+											<Label htmlFor="reason">
+												Nội dung lý do
+											</Label>
+											<Input
+												id="reason"
+												value={newReasonText}
+												onChange={(e) =>
+													setNewReasonText(
+														e.target.value
+													)
+												}
+												placeholder="Nhập lý do hoàn tiền..."
+												className="mt-1"
+											/>
 										</div>
 										<div>
-											<h4 className="text-lg font-semibold text-gray-900">
-												Phí hoàn tiền
-											</h4>
-											<p className="text-gray-600 text-xs">
-												Tỷ lệ phần trăm áp dụng cho phí
-												hoàn tiền
+											<Label htmlFor="rate">
+												Tỷ lệ phí (%)
+											</Label>
+											<Input
+												id="rate"
+												type="number"
+												value={newReasonRate}
+												onChange={(e) =>
+													setNewReasonRate(
+														e.target.value
+													)
+												}
+												placeholder="Nhập tỷ lệ phí (0-100)..."
+												className="mt-1"
+												min="0"
+												max="100"
+												step="0.1"
+											/>
+											<p className="text-xs text-gray-500 mt-1">
+												Tùy chọn. Ví dụ: 70 = 70%
 											</p>
 										</div>
-									</div>
-								</div>
-
-								<div className="flex items-center gap-6">
-									{/* Display/Edit Value */}
-									<div className="text-center">
-										{isEditingRefund ? (
-											<div className="flex items-center gap-2">
-												<Input
-													type="number"
-													value={tempRefundFee}
-													onChange={
-														handleTempRefundFeeChange
-													}
-													className="w-20 text-center text-lg font-semibold border-2 border-orange-300 focus:border-orange-500"
-													min="0"
-													max="100"
-													step="0.1"
-													disabled={isLoading}
-												/>
-												<span className="text-xl font-semibold text-orange-600">
-													%
-												</span>
-											</div>
-										) : (
-											<div className="flex items-center gap-2">
-												<span className="text-2xl font-semibold text-orange-700">
-													{refundFeePercentage}
-												</span>
-												<span className="text-xl font-semibold text-orange-600">
-													%
-												</span>
-											</div>
-										)}
-									</div>
-
-									{/* Action Buttons */}
-									<div className="flex gap-2">
-										{isEditingRefund ? (
-											<>
-												<Button
-													onClick={handleSaveRefund}
-													disabled={isLoading}
-													className="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
-													size="sm"
-												>
-													<Check className="h-4 w-4 mr-1" />
-													{isLoading
-														? "Đang lưu..."
-														: "Lưu"}
-												</Button>
-												<Button
-													onClick={handleCancelRefund}
-													disabled={isLoading}
-													variant="outline"
-													className="border-gray-300 hover:bg-gray-50 px-4 py-2"
-													size="sm"
-												>
-													<X className="h-4 w-4 mr-1" />
-													Hủy
-												</Button>
-											</>
-										) : (
+										<div className="flex gap-2 justify-end">
 											<Button
-												onClick={handleEditRefund}
-												className="bg-orange-600 hover:bg-orange-700 text-white"
-												size="sm"
+												variant="outline"
+												onClick={() => {
+													setShowCreateDialog(false);
+													setNewReasonText("");
+													setNewReasonRate("");
+												}}
 											>
-												<Edit3 className="h-4 w-4" />
+												Hủy
 											</Button>
-										)}
+											<Button
+												onClick={handleCreateReason}
+											>
+												Tạo lý do
+											</Button>
+										</div>
+									</div>
+								</DialogContent>
+							</Dialog>
+						</div>
+
+						{/* Delete Confirmation Dialog */}
+						<Dialog
+							open={showDeleteDialog}
+							onOpenChange={setShowDeleteDialog}
+						>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>
+										Xác nhận xóa lý do hoàn tiền
+									</DialogTitle>
+								</DialogHeader>
+								<div className="space-y-4">
+									<p className="text-gray-600">
+										Bạn có chắc chắn muốn xóa lý do hoàn
+										tiền này không?
+									</p>
+									{reasonToDelete && (
+										<div className="p-3 bg-gray-50 rounded-lg">
+											<p className="font-medium">
+												{reasonToDelete.reason}
+											</p>
+											{reasonToDelete.rate !==
+												undefined &&
+												reasonToDelete.rate !==
+													null && (
+													<p className="text-sm text-blue-600">
+														Phí:{" "}
+														{Math.round(
+															reasonToDelete.rate *
+																100
+														)}
+														%
+													</p>
+												)}
+										</div>
+									)}
+									<div className="flex gap-2 justify-end">
+										<Button
+											variant="outline"
+											onClick={() => {
+												setShowDeleteDialog(false);
+												setReasonToDelete(null);
+											}}
+										>
+											Hủy
+										</Button>
+										<Button
+											variant="destructive"
+											onClick={confirmDeleteReason}
+										>
+											Xóa
+										</Button>
 									</div>
 								</div>
+							</DialogContent>
+						</Dialog>
+
+						{/* Refund Reasons List */}
+						<div className="bg-white rounded-xl shadow-sm border border-gray-200">
+							<div className="p-4 border-b border-gray-200">
+								<h3 className="text-lg font-semibold text-gray-900">
+									Danh sách lý do hoàn tiền (
+									{refundReasons?.length || 0})
+								</h3>
+							</div>
+
+							<div className="p-4">
+								{loadingReasons ? (
+									<div className="text-center py-8">
+										<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+										<p className="text-gray-500 mt-2">
+											Đang tải...
+										</p>
+									</div>
+								) : refundReasons &&
+								  refundReasons.length > 0 ? (
+									<div className="space-y-2">
+										{refundReasons.map((reason) => (
+											<div
+												key={reason.id}
+												className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg hover:shadow-md transition-all"
+											>
+												<div className="flex items-center gap-3 flex-1">
+													<RefreshCw className="h-5 w-5 text-blue-600" />
+													<div className="flex-1">
+														{editingReasonId ===
+														reason.id ? (
+															<div className="space-y-2">
+																<Input
+																	value={
+																		tempReasonText
+																	}
+																	onChange={(
+																		e
+																	) =>
+																		setTempReasonText(
+																			e
+																				.target
+																				.value
+																		)
+																	}
+																	className="border-blue-300 focus:border-blue-500"
+																	onKeyPress={(
+																		e
+																	) => {
+																		if (
+																			e.key ===
+																			"Enter"
+																		) {
+																			handleSaveEditReason();
+																		}
+																	}}
+																/>
+																<Input
+																	type="number"
+																	placeholder="Tỷ lệ phí (0-100)..."
+																	value={
+																		tempReasonRate
+																	}
+																	onChange={(
+																		e
+																	) =>
+																		setTempReasonRate(
+																			e
+																				.target
+																				.value
+																		)
+																	}
+																	className="border-blue-300 focus:border-blue-500"
+																	min="0"
+																	max="100"
+																	step="0.1"
+																/>
+															</div>
+														) : (
+															<>
+																<span className="text-gray-900 font-medium">
+																	{
+																		reason.reason
+																	}
+																</span>
+																{reason.rate !==
+																	undefined &&
+																	reason.rate !==
+																		null && (
+																		<div className="text-sm text-blue-600 font-medium mt-1">
+																			Phí:{" "}
+																			{Math.round(
+																				reason.rate *
+																					100
+																			)}
+																			%
+																		</div>
+																	)}
+															</>
+														)}
+													</div>
+												</div>
+
+												{/* Action Buttons */}
+												<div className="flex items-center gap-4 ml-4">
+													{editingReasonId ===
+													reason.id ? (
+														<div className="flex gap-2">
+															<Button
+																onClick={
+																	handleSaveEditReason
+																}
+																size="sm"
+																className="bg-green-600 hover:bg-green-700"
+															>
+																<Check className="h-4 w-4" />
+															</Button>
+															<Button
+																onClick={
+																	handleCancelEditReason
+																}
+																variant="outline"
+																size="sm"
+															>
+																<X className="h-4 w-4" />
+															</Button>
+														</div>
+													) : (
+														<>
+															<div className="flex items-center gap-2">
+																<span className="text-sm text-gray-600">
+																	{reason.active
+																		? "Hoạt động"
+																		: "Vô hiệu"}
+																</span>
+																<Switch
+																	checked={
+																		reason.active
+																	}
+																	onCheckedChange={() =>
+																		handleToggleReason(
+																			reason.id,
+																			reason.active
+																		)
+																	}
+																	className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300"
+																/>
+															</div>
+															<div className="flex gap-2">
+																<Button
+																	onClick={() =>
+																		handleEditReason(
+																			reason
+																		)
+																	}
+																	size="sm"
+																	className="bg-blue-600 hover:bg-blue-700"
+																>
+																	<Edit3 className="h-4 w-4" />
+																</Button>
+																<Button
+																	onClick={() =>
+																		handleDeleteReason(
+																			reason.id
+																		)
+																	}
+																	size="sm"
+																	variant="outline"
+																	className="text-red-600 hover:text-red-700 hover:bg-red-50"
+																>
+																	<Trash2 className="h-4 w-4" />
+																</Button>
+															</div>
+														</>
+													)}
+												</div>
+											</div>
+										))}
+									</div>
+								) : (
+									<div className="text-center py-12">
+										<RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+										<p className="text-gray-500">
+											Chưa có lý do hoàn tiền nào
+										</p>
+									</div>
+								)}
 							</div>
 						</div>
 					</TabsContent>

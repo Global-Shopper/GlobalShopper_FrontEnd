@@ -15,6 +15,7 @@ const gshopApi = createApi({
 		"BMDashboard",
 		"Variants",
 		"Transactions",
+		"RefundReasons",
 	],
 	baseQuery: axiosBaseQuery(),
 	endpoints: (builder) => ({
@@ -332,6 +333,45 @@ const gshopApi = createApi({
 				method: "GET",
 			}),
 			providesTags: ["Transactions"],
+		}),
+		// Refund Reasons endpoints
+		getRefundReasons: builder.query({
+			query: () => ({
+				url: endpoints.REFUND_REASONS,
+				method: "GET",
+			}),
+			providesTags: ["RefundReasons"],
+		}),
+		createRefundReason: builder.mutation({
+			query: (data) => ({
+				data: data,
+				url: endpoints.CREATE_REFUND_REASON,
+				method: "POST",
+			}),
+			invalidatesTags: ["RefundReasons"],
+		}),
+		editRefundReason: builder.mutation({
+			query: ({ id, ...data }) => ({
+				data: data,
+				url: `${endpoints.EDIT_REFUND_REASON}/${id}`,
+				method: "PUT",
+			}),
+			invalidatesTags: ["RefundReasons"],
+		}),
+		activateRefundReason: builder.mutation({
+			query: ({ id, ...data }) => ({
+				data: data,
+				url: `${endpoints.ACTIVATE_REFUND_REASON}/${id}/activate`,
+				method: "PATCH",
+			}),
+			invalidatesTags: ["RefundReasons"],
+		}),
+		deleteRefundReason: builder.mutation({
+			query: (id) => ({
+				url: `${endpoints.DELETE_REFUND_REASON}/${id}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["RefundReasons"],
 		}),
 		checkout: builder.mutation({
 			query: (data) => ({
@@ -744,6 +784,11 @@ export const {
 	useGetPurchaseRequestDetailQuery,
 	useTransactionHistoryQuery,
 	useGetTransactionsQuery,
+	useGetRefundReasonsQuery,
+	useCreateRefundReasonMutation,
+	useEditRefundReasonMutation,
+	useActivateRefundReasonMutation,
+	useDeleteRefundReasonMutation,
 	useCreateGroupMutation,
 	useUpdateSubRequestMutation,
 	useAddItemToSubRequestMutation,
