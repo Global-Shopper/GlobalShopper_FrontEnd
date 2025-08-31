@@ -39,7 +39,7 @@ export function CustomerSidebar() {
 	const location = useLocation();
 
 	return (
-		<div className="sticky top-20 h-auto w-60 border-r border-slate-200/60 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/30 backdrop-blur-md shadow-sm">
+		<div className="sticky top-20 h-auto w-60 ">
 			<div className="px-3 py-4 h-full flex flex-col overflow-y-auto">
 				<div className="sticky top-0 space-y-1">
 					{items.map((item) => (

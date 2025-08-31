@@ -68,7 +68,7 @@ export default function RequestSuccess({onClose, purchaseData}) {
                 <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
                   1
                 </div>
-                <span>Chúng tôi sẽ xem xét và xử lý yêu cầu của bạn trong vòng 24 giờ</span>
+                <span>Chúng tôi sẽ xem xét và xử lý yêu cầu của bạn trong vòng 72 giờ</span>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
@@ -80,7 +80,7 @@ export default function RequestSuccess({onClose, purchaseData}) {
                 <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
                   3
                 </div>
-                <span>Chúng tôi sẽ liên hệ để báo giá và hỗ trợ đặt hàng</span>
+                <span>Chúng tôi sẽ cập nhật mã vận đơn khi có thông tin từ bên vận chuyển</span>
               </div>
             </div>
           </div>

@@ -11,7 +11,7 @@ import { getFedexCreateShipPayload, getFedexRatePayload } from '@/utils/fedexPay
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Info } from 'lucide-react';
+import { Info, RefreshCwIcon } from 'lucide-react';
 import { SHIPMENT_TYPE } from '@/const/shippingType';
 
 // Generate a mock 12-digit tracking number similar to '794902636718'
@@ -29,7 +29,7 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
   const [directCheckout, { isLoading: isDirectCheckoutLoading }] = useDirectCheckoutMutation();
   const shouldFetchRate = requestType === 'OFFLINE' && !!quotationForPurchase;
-  const { data: rate, isLoading: isRateLoading } = useGetShipmentRateQuery(
+  const { data: rate, isLoading: isRateLoading, refetch } = useGetShipmentRateQuery(
     shouldFetchRate
       ? {
         inputJson: getFedexRatePayload(
@@ -235,7 +235,7 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
                   <Info className="w-4 h-4" />
                 </TooltipTrigger>
                 <TooltipContent className="w-64 break-words">
-                    {requestType === 'OFFLINE' ? (SHIPMENT_TYPE.find((item) => item.type === selectedService?.serviceType)?.value) : "Phí vận chuyển do bên TMĐT cung cấp"}
+                  {requestType === 'OFFLINE' ? (SHIPMENT_TYPE.find((item) => item.type === selectedService?.serviceType)?.value) : "Phí vận chuyển do bên TMĐT cung cấp"}
                 </TooltipContent>
               </Tooltip>
             </span>
@@ -244,9 +244,17 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
         )}
         {
           requestType === "OFFLINE" && <Select value={selectedRateType} onValueChange={setSelectedRateType} disabled={isRateLoading || isProcessingPayment}>
-            <SelectTrigger className={!selectedRateType && !isRateLoading ? 'border border-amber-500' : undefined}>
-              <SelectValue placeholder={isRateLoading ? "Đang tải biểu phí..." : "Chọn loại phí"} >{selectedRateType ? `${selectedRateType} - ${formatCurrency(rateReplyDetails.find((rate) => rate.serviceType === selectedRateType)?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}` : (isRateLoading ? 'Đang tải biểu phí...' : "Chọn loại vận chuyển")}</SelectValue>
-            </SelectTrigger>
+            <div className="flex items-center gap-2">
+              <SelectTrigger className={!selectedRateType && !isRateLoading ? 'border border-amber-500' : undefined}>
+                <SelectValue placeholder={isRateLoading ? "Đang tải biểu phí..." : "Chọn loại phí"} >{selectedRateType ? `${selectedRateType} - ${formatCurrency(rateReplyDetails.find((rate) => rate.serviceType === selectedRateType)?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}` : (isRateLoading ? 'Đang tải biểu phí...' : "Chọn loại vận chuyển")}</SelectValue>
+              </SelectTrigger>
+              {rate?.errors?.length > 0 && (
+                <>
+                  <span className="text-red-500">Xảy ra lỗi từ bên FedEx</span>
+                  <RefreshCwIcon className="w-4 h-4 cursor-pointer" onClick={refetch} />
+                </>
+              )}
+            </div>
             <SelectContent>
               {rateReplyDetails?.map((rate, index) => (
                 <SelectItem key={index} value={rate?.serviceType}>{rate?.serviceName} - {formatCurrency(rate?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}</SelectItem>

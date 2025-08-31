@@ -34,6 +34,7 @@ const endpoints = {
 	HS_CODES: "/hs-code/search",
 	TAX_RATES_BY_HSCODE: "/tax-rates/by-hscode",
 	TAX_RATES_IMPORT_BY_LIST: "/tax-rates/import-by-list",
+	HS_CODES_IMPORT_BY_LIST: "/hs-code/import-with-list",
 	DIRECT_CHECKOUT: "/orders/direct-checkout",
 	SHIPMENT_RATE: "/shipping/rate",
 	CREATE_SHIPMENT: "/shipping/ship",

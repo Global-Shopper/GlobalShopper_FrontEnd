@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,8 +15,11 @@ const COLUMN_WIDTHS = {
   taxType: 160,
   hsCode: 160,
 };
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
-export default function HsCodeUploadPreviewDialog({ open, onOpenChange, rows = [], setRows, onConfirm }) {
+export default function TaxRateUploadPreviewDialog({ open, onOpenChange, rows = [], setRows, onConfirm }) {
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
   const columnKeys = useMemo(() => {
     const keySet = new Set();
     (rows || []).forEach((row) => Object.keys(row || {}).forEach((key) => keySet.add(key)));
@@ -35,6 +38,22 @@ export default function HsCodeUploadPreviewDialog({ open, onOpenChange, rows = [
     const headers = new Set(columnKeys);
     return REQUIRED_COLUMNS.filter((requiredKey) => !headers.has(requiredKey));
   }, [columnKeys, rows]);
+
+  const totalRows = rows?.length ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalRows);
+  const displayedRows = useMemo(() => rows.slice(startIndex, endIndex), [rows, startIndex, endIndex]);
+
+  useEffect(() => {
+    if (open) setPage(1);
+  }, [open]);
+
+  useEffect(() => {
+    const newTotalPages = Math.max(1, Math.ceil((rows?.length ?? 0) / pageSize));
+    setPage((p) => (p > newTotalPages ? newTotalPages : p));
+  }, [rows, pageSize]);
 
   const updateCell = (rowIndex, columnKey, value) => {
     setRows((prev) => {
@@ -67,9 +86,9 @@ export default function HsCodeUploadPreviewDialog({ open, onOpenChange, rows = [
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-8xl">
+      <DialogContent className="sm:max-w-8xl h-[98vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Tải lên HS Code / Thuế - Xem trước và chỉnh sửa</DialogTitle>
+          <DialogTitle>Tải lên Thuế - Xem trước và chỉnh sửa</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -103,7 +122,7 @@ export default function HsCodeUploadPreviewDialog({ open, onOpenChange, rows = [
                     </TableCell>
                   </TableRow>
                 ) : (
-                  rows.map((rowData, rowIndex) => (
+                  displayedRows.map((rowData, rowIndex) => (
                     <TableRow key={rowIndex}>
                       {displayColumnKeys.map((columnKey) => (
                         <TableCell
@@ -112,12 +131,12 @@ export default function HsCodeUploadPreviewDialog({ open, onOpenChange, rows = [
                         >
                           <Input
                             value={rowData?.[columnKey] ?? ""}
-                            onChange={(event) => updateCell(rowIndex, columnKey, event.target.value)}
+                            onChange={(event) => updateCell(startIndex + rowIndex, columnKey, event.target.value)}
                           />
                         </TableCell>
                       ))}
                       <TableCell>
-                        <Button variant="destructive" size="sm" onClick={() => removeRow(rowIndex)}>
+                        <Button variant="destructive" size="sm" onClick={() => removeRow(startIndex + rowIndex)}>
                           Xóa
                         </Button>
                       </TableCell>
@@ -130,6 +149,52 @@ export default function HsCodeUploadPreviewDialog({ open, onOpenChange, rows = [
 
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={addEmptyRow}>Thêm dòng</Button>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="text-sm text-gray-600">
+              Hiển thị {totalRows === 0 ? 0 : startIndex + 1}–{endIndex} trên {totalRows} dòng
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Số dòng/trang:</span>
+                <select
+                  className="border rounded px-2 py-1 text-sm"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPage(1);
+                  }}
+                >
+                  {PAGE_SIZE_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Trang trước
+                </Button>
+                <div className="text-sm">
+                  Trang {currentPage} / {totalPages}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Trang sau
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
