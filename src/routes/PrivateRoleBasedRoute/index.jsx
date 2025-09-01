@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const PrivateRoleBasedRoute = ({ requiredRoles }) => {
     // Read current location to save the path user attempted to access
@@ -13,7 +14,10 @@ const PrivateRoleBasedRoute = ({ requiredRoles }) => {
         requestedPath: location.pathname + location.search,
         rejectAccess: !canAccessWithRoles
     };
-
+    if (!userRole) {
+        toast.error('Vui lòng đăng nhập để tiếp tục');
+        return <Navigate to='/login' state={routingState} replace />;
+    }
     return canAccessWithRoles ? <Outlet /> : <Navigate to='/' state={routingState} replace />;
 };
 

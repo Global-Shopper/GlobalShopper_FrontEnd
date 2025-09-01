@@ -44,6 +44,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useLocation, useNavigate } from "react-router-dom";
+import defaultAvt from "@/assets/defaultAvt.jpg";
 
 const ProfileInfoCard = () => {
 	const navigate = useNavigate();
@@ -390,7 +391,7 @@ const ProfileInfoCard = () => {
 									<img
 										src={
 											customerInfo?.avatar ||
-											"/default-avatar.png"
+											defaultAvt
 										}
 										alt="Avatar"
 										className="w-full h-full object-contain"

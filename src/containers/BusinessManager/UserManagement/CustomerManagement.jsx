@@ -32,6 +32,7 @@ import {
 } from "@/services/gshopApi";
 import { PaginationBar } from "@/utils/Pagination";
 import PageLoading from "@/components/PageLoading";
+import defaultAvt from "@/assets/defaultAvt.jpg";
 import { toast } from "sonner";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -410,7 +411,7 @@ const CustomerManagement = () => {
 									<img
 										src={
 											customer.avatar ||
-											"/src/assets/defaultAvt.jpg"
+											defaultAvt
 										}
 										alt="Avatar"
 										className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"

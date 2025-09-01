@@ -457,7 +457,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                         </>
                       )}
                       <div>
-                        <label className="block font-medium mb-1">Ghi chú cho đơn hàng</label>
+                        <label className="block font-medium mb-1">Ghi chú cho báo giá</label>
                         <Textarea
                           name="note"
                           placeholder="Nhập ghi chú cho nhóm này (nếu có)..."
