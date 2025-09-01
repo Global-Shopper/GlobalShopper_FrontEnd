@@ -387,12 +387,14 @@ const gshopApi = createApi({
 				url: endpoints.HS_CODES,
 				method: "GET",
 			}),
+			providesTags: ["HSCodeList"],
 		}),
 		getTaxRatesByHsCode: builder.query({
 			query: (hsCode) => ({
 				url: `${endpoints.TAX_RATES_BY_HSCODE}/${hsCode}`,
 				method: "GET",
 			}),
+			providesTags: ["TaxRateList"],
 		}),
 		importTaxRatesByList: builder.mutation({
 			query: (data) => ({
@@ -400,6 +402,7 @@ const gshopApi = createApi({
 				url: endpoints.TAX_RATES_IMPORT_BY_LIST,
 				method: "POST",
 			}),
+			invalidatesTags: ["TaxRateList"],
 		}),
 		importHSCodeByList: builder.mutation({
 			query: (data) => ({
@@ -407,6 +410,7 @@ const gshopApi = createApi({
 				url: endpoints.HS_CODES_IMPORT_BY_LIST,
 				method: "POST",
 			}),
+			invalidatesTags: ["HSCodeList"],
 		}),
 		getShipmentRate: builder.query({
 			query: (data) => ({
@@ -428,6 +432,13 @@ const gshopApi = createApi({
 				url: endpoints.FEEDBACK,
 				method: "POST",
 			}),
+		}),
+		getRefundReasons: builder.query({
+			query: () => ({
+				url: endpoints.REFUND_REASONS,
+				method: "GET",
+			}),
+			providesTags: ["RefundReasons"],
 		}),
 		createRefund: builder.mutation({
 			query: (data) => ({
@@ -751,6 +762,7 @@ export const {
 	useGetShipmentRateQuery,
 	useCreateShipmentMutation,
 	useCreateFeedbackMutation,
+	useGetRefundReasonsQuery,
 	useCreateRefundMutation,
 	useGetRefundListQuery,
 	useGetRefundByOrderIdQuery,

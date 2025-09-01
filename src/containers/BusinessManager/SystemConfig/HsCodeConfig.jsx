@@ -10,13 +10,11 @@ import HsTree from '@/components/HsTree'
 import PageLoading from '@/components/PageLoading'
 import PageError from '@/components/PageError'
 import { useGetHsCodesQuery } from '@/services/gshopApi'
-import HSCodeUploadDialog from '@/HSCodeUploadDialog'
+import HSCodeUploadDialog from '@/components/HSCodeUploadDialog'
 import TaxRateUploadPreviewDialog from '@/components/TaxRateUploadPreviewDialog'
-import { useImportHSCodeByListMutation, useImportTaxRatesByListMutation } from '@/services/gshopApi'
 import { toast } from 'sonner'
 
-const HS_REQUIRED_COLUMNS = ["hsCode", "description", "unit", "parentCode"]
-const TAX_REQUIRED_COLUMNS = ["id", "rate", "region", "taxName", "taxType", "hsCode"]
+
 
 const HsCodeConfig = () => {
   const fileInputRefHS = useRef(null)
@@ -33,13 +31,11 @@ const HsCodeConfig = () => {
   const [searchInput, setSearchInput] = useState(search || '')
   const [hsCodeInput, setHsCodeInput] = useState(hsCode || '')
 
-  const { data: hsCodesData, isLoading, isError, isUninitialized, refetch } = useGetHsCodesQuery({
+  const { data: hsCodesData, isLoading, isError, isUninitialized } = useGetHsCodesQuery({
     ...(search && { description: search }),
     ...(hsCode && { hsCode }),
   })
 
-  const [importHSCodeByList] = useImportHSCodeByListMutation()
-  const [importTaxRatesByList] = useImportTaxRatesByListMutation()
 
   const debounceSearch = useMemo(
     () =>
@@ -70,8 +66,20 @@ const HsCodeConfig = () => {
     }
   }, [debounceSearch, debounceHSCode])
 
-  const onChooseFileHS = () => fileInputRefHS.current?.click()
-  const onChooseFileTax = () => fileInputRefTax.current?.click()
+  const onChooseFileHS = () => {
+    if (fileInputRefHS.current) {
+      // Reset value so choosing the same file consecutively still triggers onChange
+      fileInputRefHS.current.value = ''
+      fileInputRefHS.current.click()
+    }
+  }
+  const onChooseFileTax = () => {
+    if (fileInputRefTax.current) {
+      // Reset value so choosing the same file consecutively still triggers onChange
+      fileInputRefTax.current.value = ''
+      fileInputRefTax.current.click()
+    }
+  }
 
   const parseAndOpenPreview = async (file) => {
     if (!file) return
@@ -141,58 +149,8 @@ const HsCodeConfig = () => {
       .filter((row) => Object.values(row).some((value) => value !== '' && value != null))
   }
 
-  const onConfirmImport = async (rows) => {
-    try {
-      const missing = HS_REQUIRED_COLUMNS.filter((c) => !rows.some((r) => c in r))
-      if (missing.length) {
-        toast.error(`Thiếu cột bắt buộc: ${missing.join(', ')}`)
-        return
-      }
 
-      const payload = (rows || []).map((r) => ({
-        hsCode: r?.hsCode ?? '',
-        description: r?.description ?? '',
-        unit: r?.unit ?? '',
-        parentCode: r?.parentCode ?? '',
-      }))
-
-      await importHSCodeByList(payload).unwrap()
-      toast.success(`Đã nhập ${payload.length} dòng HS Code.`)
-      setUploadOpen(false)
-      setUploadRows([])
-      refetch?.()
-    } catch (err) {
-      console.error(err)
-      toast.error('Nhập HS Code thất bại.')
-    }
-  }
-
-  const onConfirmImportTax = async (rows) => {
-    try {
-      const missing = TAX_REQUIRED_COLUMNS.filter((c) => !rows.some((r) => c in r))
-      if (missing.length) {
-        toast.error(`Thiếu cột bắt buộc: ${missing.join(', ')}`)
-        return
-      }
-
-      const payload = (rows || []).map((r) => ({
-        id: r?.id ?? '',
-        rate: r?.rate ?? '',
-        region: r?.region ?? '',
-        taxName: r?.taxName ?? '',
-        taxType: r?.taxType ?? '',
-        hsCode: r?.hsCode ?? '',
-      }))
-
-      await importTaxRatesByList(payload).unwrap()
-      toast.success(`Đã nhập ${payload.length} dòng Thuế.`)
-      setTaxUploadOpen(false)
-      setTaxUploadRows([])
-    } catch (err) {
-      console.error(err)
-      toast.error('Nhập Thuế thất bại.')
-    }
-  }
+  
 
   return (
     <div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
@@ -225,14 +183,24 @@ const HsCodeConfig = () => {
             type="file"
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             className="hidden"
-            onChange={(e) => parseAndOpenPreview(e.target.files?.[0])}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              parseAndOpenPreview(file)
+              // Clear value after handling so the same file can be picked again
+              e.target.value = ''
+            }}
           />
           <input
             ref={fileInputRefTax}
             type="file"
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             className="hidden"
-            onChange={(e) => parseAndOpenPreviewTax(e.target.files?.[0])}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              parseAndOpenPreviewTax(file)
+              // Clear value after handling so the same file can be picked again
+              e.target.value = ''
+            }}
           />
           <Button onClick={onChooseFileHS}>Tải HS Code</Button>
           <Button variant="secondary" onClick={onChooseFileTax}>Tải Thuế</Button>
@@ -256,7 +224,6 @@ const HsCodeConfig = () => {
         onOpenChange={setUploadOpen}
         rows={uploadRows}
         setRows={setUploadRows}
-        onConfirm={onConfirmImport}
       />
 
       <TaxRateUploadPreviewDialog
@@ -264,7 +231,6 @@ const HsCodeConfig = () => {
         onOpenChange={setTaxUploadOpen}
         rows={taxUploadRows}
         setRows={setTaxUploadRows}
-        onConfirm={onConfirmImportTax}
       />
     </div>
   )

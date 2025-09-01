@@ -6,14 +6,14 @@ import { useCreateRefundMutation } from '@/services/gshopApi'
 import { toast } from 'sonner'
 import { Upload, X, Loader2 } from 'lucide-react'
 import { uploadToCloudinary } from '@/utils/uploadToCloudinary'
-import { refundReason } from '@/const/commonReason'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
+import { useGetRefundReasonsQuery } from '@/services/gshopApi'
 
 const OrderRefundDialog = ({ order, open, onOpenChange }) => {
   const [createRefund] = useCreateRefundMutation()
+  const { data: refundReasons } = useGetRefundReasonsQuery()
   const [selectedReason, setSelectedReason] = useState('')
-  const [customReason, setCustomReason] = useState('')
   const [localImages, setLocalImages] = useState([]) // blob preview URLs
   const [uploadedUrls, setUploadedUrls] = useState([]) // Cloudinary URLs aligned by index
   const [isUploading, setIsUploading] = useState(false)
@@ -157,8 +157,9 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
     const evidence = [...imageEvidence, ...videoEvidence]
     createRefund({
       orderId: order.id,
-      reason: selectedReason === 'Khác (tự nhập)' ? customReason.trim() : selectedReason,
+      reason: selectedReason.reason,
       evidence,
+      rate: selectedReason.rate,
     })
       .unwrap()
       .then(() => {
@@ -194,30 +195,22 @@ const OrderRefundDialog = ({ order, open, onOpenChange }) => {
               value={selectedReason}
               onValueChange={(val) => {
                 setSelectedReason(val)
-                if (val !== 'Khác (tự nhập)') setCustomReason('')
               }}
             >
-              {refundReason.map((reason, idx) => {
+              {refundReasons?.map((option, idx) => {
                 const id = `refund-reason-${idx}`
                 return (
                   <div className="flex items-center gap-2" key={id}>
-                    <RadioGroupItem id={id} value={reason} />
+                    <RadioGroupItem id={id} value={option} />
                     <Label htmlFor={id} className="cursor-pointer">
-                      {reason}
+                      {option.reason}
                     </Label>
+                    <span className="text-xs text-muted-foreground">({option.rate * 100}%)</span>
                   </div>
                 )
               })}
             </RadioGroup>
           </div>
-          {selectedReason === 'Khác (tự nhập)' && (
-            <Textarea
-              placeholder="Mô tả lý do hoàn tiền…"
-              value={customReason}
-              onChange={(e) => setCustomReason(e.target.value)}
-              rows={5}
-            />
-          )}
         </div>
 
         {/* Image Upload Section */}

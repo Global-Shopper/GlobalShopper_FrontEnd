@@ -5,39 +5,41 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Trash2 } from 'lucide-react';
+import { useImportHSCodeByListMutation } from "@/services/gshopApi";
+import ImportHSCodeError from "@/components/ImportHSCodeError";
 
-const REQUIRED_COLUMNS = ["hsCode", "description", "unit", "parentCode"]; // values allowed empty
-const DEFAULT_COLUMN_WIDTH = 180; // px
-const COLUMN_WIDTHS = {
-  hsCode: 140,
-  description: 820,
-  unit: 160,
-  parentCode: 160,
-  action: 20,
-};
+// Fixed column config (follow TaxRate dialog structure)
+const REQUIRED_COLUMNS = [{
+  name: "hsCode",
+  label: "HS code",
+  width: 140,
+}, {
+  name: "description",
+  label: "Mô tả",
+  width: 820,
+}, {
+  name: "unit",
+  label: "Đơn vị",
+  width: 160,
+}, {
+  name: "parentCode",
+  label: "Mã cha",
+  width: 160,
+}];
+const ACTION_COL_WIDTH = 20;
+const COL = REQUIRED_COLUMNS.reduce((acc, c) => {
+  acc[c.name] = c;
+  return acc;
+}, {});
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
-export default function HSCodeUploadDialog({ open, onOpenChange, rows = [], setRows, onConfirm }) {
+export default function HSCodeUploadDialog({ open, onOpenChange, rows = [], setRows }) {
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
-
-  const columnKeys = useMemo(() => {
-    const keySet = new Set();
-    (rows || []).forEach((row) => Object.keys(row || {}).forEach((key) => keySet.add(key)));
-    REQUIRED_COLUMNS.forEach((requiredKey) => keySet.add(requiredKey));
-    return Array.from(keySet);
-  }, [rows]);
-
-  const displayColumnKeys = useMemo(() => {
-    const additional = columnKeys.filter((key) => !REQUIRED_COLUMNS.includes(key)).sort();
-    return [...REQUIRED_COLUMNS, ...additional];
-  }, [columnKeys]);
-
-  const missingRequired = useMemo(() => {
-    if (!rows || rows.length === 0) return [];
-    const headers = new Set(columnKeys);
-    return REQUIRED_COLUMNS.filter((requiredKey) => !headers.has(requiredKey));
-  }, [columnKeys, rows]);
+  const [importResult, setImportResult] = useState(null);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [importHSCodeByList] = useImportHSCodeByListMutation();
 
   const totalRows = rows?.length ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
@@ -66,7 +68,7 @@ export default function HSCodeUploadDialog({ open, onOpenChange, rows = [], setR
   };
 
   const addEmptyRow = () => {
-    const emptyRow = displayColumnKeys.reduce((acc, columnKey) => ({ ...acc, [columnKey]: "" }), {});
+    const emptyRow = REQUIRED_COLUMNS.reduce((acc, col) => ({ ...acc, [col.name]: "" }), {});
     setRows((prev) => [...(prev || []), emptyRow]);
   };
 
@@ -74,68 +76,98 @@ export default function HSCodeUploadDialog({ open, onOpenChange, rows = [], setR
     setRows((prev) => prev.filter((_, index) => index !== rowIndex));
   };
 
-  const handleConfirm = () => {
-    if (missingRequired.length > 0) {
-      toast.error(`Thiếu cột bắt buộc: ${missingRequired.join(", ")}`);
-      return;
-    }
+  const handleConfirm = async () => {
     if (!rows || rows.length === 0) {
       toast.error("Không có dữ liệu để tải lên.");
       return;
     }
-    onConfirm?.(rows);
+    const payload = (rows || []).map((r) => ({
+      hsCode: r?.hsCode ?? "",
+      description: r?.description ?? "",
+      unit: r?.unit ?? "",
+      parentCode: r?.parentCode ?? "",
+    }));
+
+    try {
+      setSubmitting(true);
+      const res = await importHSCodeByList(payload).unwrap();
+      setImportResult(res);
+      const { message, errors = [], imported = 0, updated = 0, duplicated = 0 } = res || {};
+      if ((errors || []).length > 0) {
+        toast.error(`${message || "Có lỗi khi nhập"}. Lỗi: ${errors.length}.`);
+        setErrorOpen(true);
+      } else {
+        toast.success(message || `Nhập thành công. Imported: ${imported}, Updated: ${updated}, Duplicated: ${duplicated}`);
+        setRows([]);
+        onOpenChange?.(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Nhập HS Code thất bại.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-7xl h-[98vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-7xl h-auto max-h-[98vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Tải lên HS Code - Xem trước và chỉnh sửa</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
-          {missingRequired.length > 0 && (
-            <div className="text-sm text-amber-600">Thiếu cột bắt buộc: {missingRequired.join(", ")}</div>
-          )}
-
           <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {displayColumnKeys.map((columnKey) => (
+                  {REQUIRED_COLUMNS.map((col) => (
                     <TableHead
-                      key={columnKey}
+                      key={col.name}
                       className="bg-primary/90 text-primary-foreground"
-                      style={{ width: `${COLUMN_WIDTHS[columnKey] ?? DEFAULT_COLUMN_WIDTH}px` }}
+                      style={{ width: `${col.width}px` }}
                     >
-                      {columnKey}
+                      {col.label}
                     </TableHead>
                   ))}
-                  <TableHead style={{ width: `${COLUMN_WIDTHS.action}px` }} className="bg-primary/90 text-primary-foreground">Hành động</TableHead>
+                  <TableHead style={{ width: `${ACTION_COL_WIDTH}px` }} className="bg-primary/90 text-primary-foreground">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(rows || []).length === 0 ? (
                   <TableRow>
-                    <TableCell className="py-6 text-center" colSpan={displayColumnKeys.length + 1}>
+                    <TableCell className="py-6 text-center" colSpan={REQUIRED_COLUMNS.length + 1}>
                       Không có dữ liệu.
                     </TableCell>
                   </TableRow>
                 ) : (
                   displayedRows.map((rowData, rowIndex) => (
                     <TableRow key={rowIndex}>
-                      {displayColumnKeys.map((columnKey) => (
-                        <TableCell
-                          key={columnKey}
-                          style={{ width: `${COLUMN_WIDTHS[columnKey] ?? DEFAULT_COLUMN_WIDTH}px` }}
-                        >
-                          <Input
-                            value={rowData?.[columnKey] ?? ""}
-                            onChange={(event) => updateCell(startIndex + rowIndex, columnKey, event.target.value)}
-                          />
-                        </TableCell>
-                      ))}
-                      <TableCell style={{ width: `${COLUMN_WIDTHS.action}px` }}>
+                      <TableCell style={{ width: `${COL.hsCode.width}px` }}>
+                        <Input
+                          value={rowData?.hsCode ?? ""}
+                          onChange={(event) => updateCell(startIndex + rowIndex, "hsCode", event.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell style={{ width: `${COL.description.width}px` }}>
+                        <Input
+                          value={rowData?.description ?? ""}
+                          onChange={(event) => updateCell(startIndex + rowIndex, "description", event.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell style={{ width: `${COL.unit.width}px` }}>
+                        <Input
+                          value={rowData?.unit ?? ""}
+                          onChange={(event) => updateCell(startIndex + rowIndex, "unit", event.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell style={{ width: `${COL.parentCode.width}px` }}>
+                        <Input
+                          value={rowData?.parentCode ?? ""}
+                          onChange={(event) => updateCell(startIndex + rowIndex, "parentCode", event.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell style={{ width: `${ACTION_COL_WIDTH}px` }}>
                         <Button variant="destructive" size="sm" onClick={() => removeRow(startIndex + rowIndex)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -201,10 +233,15 @@ export default function HSCodeUploadDialog({ open, onOpenChange, rows = [], setR
         </div>
 
         <DialogFooter>
+          {importResult?.errors?.length > 0 && (
+            <ImportHSCodeError open={errorOpen} onOpenChange={setErrorOpen} result={importResult} />
+          )}
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Hủy
           </Button>
-          <Button onClick={handleConfirm}>Xác nhận</Button>
+          <Button onClick={handleConfirm} disabled={submitting}>
+            {submitting ? "Đang xử lý..." : "Xác nhận"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
