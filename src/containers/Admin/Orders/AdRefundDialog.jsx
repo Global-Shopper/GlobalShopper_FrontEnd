@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-binary-expression */
 import React from 'react'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -11,7 +12,6 @@ const AdRefundDialog = ({ order }) => {
   console.log(order)
   const { data: refundOrder, isLoading: isRefundLoading } = useGetRefundByOrderIdQuery(order.id)
   const totalPrice = Number(order.totalPrice || 0) + Number(order.shippingFee || 0)
-  const initialPercentage = totalPrice > 0 ? Math.round(((Number(refundOrder?.amount) || 0) / totalPrice) * 100) : 0
 
   const canProcess = !!refundOrder && refundOrder.status === 'PENDING';
   return (
@@ -48,6 +48,10 @@ const AdRefundDialog = ({ order }) => {
                 <p className="text-sm text-gray-800 whitespace-pre-line">{refundOrder.reason || '-'}</p>
               </div>
               <div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Tỷ lệ hoàn tiền</div>
+                <p className="text-sm text-gray-800 whitespace-pre-line">{`${refundOrder.refundRate * 100}%` || '-'}</p>
+              </div>
+              <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Minh chứng</div>
                 {Array.isArray(refundOrder.evidence) && refundOrder.evidence.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -78,9 +82,10 @@ const AdRefundDialog = ({ order }) => {
                   <div className="text-sm text-gray-500">Không có minh chứng</div>
                 )}
               </div>
+              {console.log(totalPrice)}
               <div className="flex items-center gap-2">
                 <div className="text-sm font-medium text-gray-700">Số tiền đã hoàn trả:</div>
-                <div className="text-sm text-gray-900">{formatCurrency(refundOrder.amount || 0, "VND", "vn")}</div>
+                <div className="text-sm text-gray-900">{formatCurrency(totalPrice * refundOrder?.refundRate || 0, "VND", "vn")}</div>
               </div>
               <div className="flex items-center gap-2">
                 <div className="text-sm font-medium text-gray-700">Tổng tiền:</div>
@@ -96,8 +101,8 @@ const AdRefundDialog = ({ order }) => {
           {/* Approve/Reject actions - only when refundable and not loading */}
           {canProcess && !isRefundLoading && (
             <>
-              <AdConfirmRefundDialog type="approve" refundId={refundOrder?.id} totalPrice={totalPrice} initialPercentage={initialPercentage} reason={refundOrder?.reason}/>
-              <AdConfirmRefundDialog type="reject" refundId={refundOrder?.id}/>
+              <AdConfirmRefundDialog type="approve" totalPrice={totalPrice} refundOrder={refundOrder}/>
+              <AdConfirmRefundDialog type="reject" refundOrder={refundOrder}/>
             </>
           )}
         </DialogFooter>

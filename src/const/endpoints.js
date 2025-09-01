@@ -40,6 +40,7 @@ const endpoints = {
 	CREATE_SHIPMENT: "/shipping/ship",
 	SHIPMENT_TRACKING: "/shipping/tracking",
 	FEEDBACK: "/feedback",
+	REFUND_REASONS: "/refund-ticket/reasons",
 	REFUND: "/refund-ticket",
 	REFUND_ORDER: "/refund-ticket/order",
 	REFUND_PROCESS: "/refund-ticket/process",

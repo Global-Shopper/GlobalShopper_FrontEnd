@@ -16,9 +16,9 @@ const TaxRateByHSDialog = ({ hsCode, open, onOpenChange }) => {
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl h-[calc(100vh-100px)] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl h-auto max-h-[98vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Tax Rates thuộc HS code {hsCode}</DialogTitle>
+          <DialogTitle>Thuế thuộc HS code {hsCode}</DialogTitle>
         </DialogHeader>
         <div className="mt-2 overflow-y-auto">
           <Table className="table-fixed">
@@ -33,7 +33,7 @@ const TaxRateByHSDialog = ({ hsCode, open, onOpenChange }) => {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">Loading...</TableCell>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">Đang tải...</TableCell>
                 </TableRow>
               ) : (taxRates && taxRates.length > 0) ? (
                 taxRates.map((t) => (
@@ -46,7 +46,7 @@ const TaxRateByHSDialog = ({ hsCode, open, onOpenChange }) => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">No tax rates found</TableCell>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">Không tìm thấy thuế cho HS code {hsCode}</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -54,7 +54,7 @@ const TaxRateByHSDialog = ({ hsCode, open, onOpenChange }) => {
         </div>
         <DialogFooter>
           <DialogClose>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline">Đóng</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
