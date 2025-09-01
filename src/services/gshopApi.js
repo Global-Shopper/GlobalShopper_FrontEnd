@@ -482,13 +482,6 @@ const gshopApi = createApi({
 				method: "POST",
 			}),
 		}),
-		getRefundReasons: builder.query({
-			query: () => ({
-				url: endpoints.REFUND_REASONS,
-				method: "GET",
-			}),
-			providesTags: ["RefundReasons"],
-		}),
 		createRefund: builder.mutation({
 			query: (data) => ({
 				data: data,
@@ -817,7 +810,6 @@ export const {
 	useGetShipmentRateQuery,
 	useCreateShipmentMutation,
 	useCreateFeedbackMutation,
-	useGetRefundReasonsQuery,
 	useCreateRefundMutation,
 	useGetRefundListQuery,
 	useGetRefundByOrderIdQuery,

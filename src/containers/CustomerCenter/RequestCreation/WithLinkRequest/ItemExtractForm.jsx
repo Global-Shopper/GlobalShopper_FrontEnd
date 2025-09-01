@@ -288,6 +288,17 @@ export default function ItemExtractForm({ index }) {
           </div>
           <div className="mt-2">
             <Label className="text-sm font-medium text-gray-700">
+              Nền tảng e-commerce
+            </Label>
+            <Input
+              value={item.ecommercePlatform || ""}
+              onChange={(e) => handleFieldChange("ecommercePlatform", e.target.value)}
+              placeholder="Nhập nền tảng e-commerce"
+              className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div className="mt-2">
+            <Label className="text-sm font-medium text-gray-700">
               Người bán
             </Label>
             <Input
