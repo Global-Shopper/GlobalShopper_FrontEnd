@@ -63,6 +63,7 @@ const endpoints = {
 	BM_DASHBOARD: "/business-manager/dashboard",
 	BM_CUSTOMER: "/business-manager/customer",
 	BM_SERVICE_FEE: "/business-manager/servicefee",
+	BM_CONFIG: "/business-manager/config",
 	BM_REVENUE: "/business-manager/revenue",
 	VARIANTS: "/variant",
 	TOGGLE_VARIANT_ACTIVE: "/variant",

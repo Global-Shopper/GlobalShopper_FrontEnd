@@ -706,6 +706,13 @@ const gshopApi = createApi({
 			}),
 			invalidatesTags: ["BMDashboard"],
 		}),
+		getBusinessManagerConfig: builder.query({
+			query: () => ({
+				url: endpoints.BM_CONFIG,
+				method: "GET",
+			}),
+			providesTags: ["BMDashboard"],
+		}),
 		getRevenue: builder.query({
 			query: ({ startDate, endDate }) => ({
 				params: { startDate, endDate },
@@ -873,6 +880,7 @@ export const {
 	useGetBMDashboardQuery,
 	useGetBMCustomerQuery,
 	useUpdateServiceFeeMutation,
+	useGetBusinessManagerConfigQuery,
 	useGetRevenueQuery,
 	useGetAllVariantsQuery,
 	useCreateVariantMutation,
