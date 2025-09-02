@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
 	useUpdateServiceFeeMutation,
+	useGetBusinessManagerConfigQuery,
 	useGetRefundReasonsQuery,
 	useCreateRefundReasonMutation,
 	useEditRefundReasonMutation,
@@ -48,6 +49,11 @@ export default function ServiceConfig() {
 
 	const [updateServiceFee] = useUpdateServiceFeeMutation();
 	const {
+		data: bmConfig,
+		isLoading: loadingConfig,
+		refetch: refetchConfig,
+	} = useGetBusinessManagerConfigQuery();
+	const {
 		data: refundReasons,
 		isLoading: loadingReasons,
 		refetch: refetchReasons,
@@ -60,6 +66,15 @@ export default function ServiceConfig() {
 	const [isEditingService, setIsEditingService] = useState(false);
 
 	const [tempServiceFee, setTempServiceFee] = useState(10);
+
+	// Update serviceFeePercentage when bmConfig is loaded
+	React.useEffect(() => {
+		if (bmConfig?.serviceFee) {
+			const percentage = bmConfig.serviceFee * 100;
+			setServiceFeePercentage(percentage);
+			setTempServiceFee(percentage);
+		}
+	}, [bmConfig]);
 
 	const convertToDecimal = (percentage) => {
 		return percentage / 100;
@@ -113,7 +128,8 @@ export default function ServiceConfig() {
 				throw new Error(response.error.data?.message || "API Error");
 			}
 
-			setServiceFeePercentage(tempServiceFee);
+			// Refetch config to get updated service fee
+			await refetchConfig();
 			setIsEditingService(false);
 			toast.success("Cập nhật phí dịch vụ thành công!");
 		} catch (error) {
@@ -327,12 +343,25 @@ export default function ServiceConfig() {
 											</div>
 										) : (
 											<div className="flex items-center gap-2">
-												<span className="text-2xl font-semibold text-blue-700">
-													{serviceFeePercentage}
-												</span>
-												<span className="text-xl font-semibold text-blue-600">
-													%
-												</span>
+												{loadingConfig ? (
+													<div className="flex items-center gap-2">
+														<div className="w-8 h-8 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+														<span className="text-sm text-gray-500">
+															Đang tải...
+														</span>
+													</div>
+												) : (
+													<>
+														<span className="text-2xl font-semibold text-blue-700">
+															{
+																serviceFeePercentage
+															}
+														</span>
+														<span className="text-xl font-semibold text-blue-600">
+															%
+														</span>
+													</>
+												)}
 											</div>
 										)}
 									</div>
