@@ -84,7 +84,7 @@ export const AdUpdateShipDialog = ({ orderId }) => {
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
             <Ship className="h-4 w-4 mr-2" />
             Cập nhật thông tin giao hàng
           </Button>

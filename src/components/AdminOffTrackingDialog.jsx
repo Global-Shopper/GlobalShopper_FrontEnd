@@ -9,7 +9,7 @@ const AdminOffTrackingDialog = ({ order }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Xem thông tin vận chuyển</Button>
+        <Button variant="outline" size="sm">Thông tin vận chuyển</Button>
       </DialogTrigger>
       <DialogContent className="!max-w-3xl max-h-[98vh] h-auto overflow-y-auto">
         <DialogHeader>

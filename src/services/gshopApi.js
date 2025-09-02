@@ -420,6 +420,14 @@ const gshopApi = createApi({
 			}),
 			providesTags: ["Orders"],
 		}),
+		repayOrder: builder.mutation({
+			query: (payload) => ({
+				data: payload,
+				url: `${endpoints.ORDER}/repay-order`,
+				method: "POST",
+			}),
+			invalidatesTags: ["Orders", "OrderDetail"],
+		}),
 		updateShipping: builder.mutation({
 			query: ({ orderId, payload }) => ({
 				data: payload,
@@ -844,6 +852,7 @@ export const {
 	useCalculateQuotationMutation,
 	useLazyGetRawDataQuery,
 	useCheckoutMutation,
+	useRepayOrderMutation,
 	useGetAllOrdersQuery,
 	useDirectCheckoutMutation,
 	useGetOrderByIDQuery,

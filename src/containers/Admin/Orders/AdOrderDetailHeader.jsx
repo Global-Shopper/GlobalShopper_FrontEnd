@@ -1,33 +1,20 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, DollarSign } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { formatDate } from '@/utils/parseDateTime'
-import { toast } from 'sonner'
 import { getStatusColor, getStatusText } from '@/utils/statusHandler'
 import { Calendar, Truck } from 'lucide-react'
 import HistoryDialog from '@/components/HistoryDialog'
-import { useCancelOrderMutation } from '@/services/gshopApi'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { AdUpdateShipDialog } from './AdUpdateShipDialog'
 import AdRefundDialog from './AdRefundDialog'
 import { formatCurrency } from '@/utils/formatCurrency'
 import AdminOffTrackingDialog from '@/components/AdminOffTrackingDialog'
 import AdminOnlTrackingDialog from '@/components/AdminOnlTrackingDialog'
+import AdCancelOrderDialog from '@/components/AdCancelOrderDialog'
 
 const AdOrderDetailHeader = ({ order }) => {
-  const [cancelOrder, { isLoading: isCancelLoading }] = useCancelOrderMutation()
-  const handleCancelOrder = async () => {
-    try {
-      await cancelOrder(order.id)
-        .unwrap()
-        .then(() => {
-          toast.success("Đơn hàng đã được hủy thành công.");
-        });
-    } catch (error) {
-      toast.error(`Lỗi khi hủy đơn hàng: ${error.message}`);
-    }
-  };
+
   return (
     <div className="space-y-4">
       {/* Breadcrumb */}
@@ -78,28 +65,21 @@ const AdOrderDetailHeader = ({ order }) => {
           </div>
         </div>
 
-        <div className="flex gap-2">
-          {order.status === "ORDER_REQUESTED" && (
+        <div className="grid grid-cols-2 gap-2">
+          {order.status === "ORDER_REQUESTED" && order.shippingCarrier !== "fedex" && (
             <>
-              <Button
-                onClick={handleCancelOrder}
-                disabled={isCancelLoading}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isCancelLoading ? "Đang hủy..." : "Hủy đơn hàng"}
-              </Button>
+              <AdCancelOrderDialog order={order} />
             </>
           )}
           <HistoryDialog history={order.history} />
           {/* Admin Tracking dialogs */}
-          {console.log(order)}
           {
             order?.shippingCarrier === "fedex" ? <AdminOffTrackingDialog order={order} /> : 
             <AdminOnlTrackingDialog order={order} />
           }
           {/* {order?.trackingNumber ? <AdminOffTrackingDialog order={order} /> : null}
           {order?.trackingNumber && order?.shippingCarrier !== "fedex" ? <AdminOnlTrackingDialog order={order} /> : null} */}
-          {order.status === "ORDER_REQUESTED" && <AdUpdateShipDialog orderId={order.id} />}
+          {order.status === "ORDER_REQUESTED" && order.shippingCarrier !== "fedex" && <AdUpdateShipDialog orderId={order.id} />}
           {order.status === "DELIVERED" && <AdRefundDialog order={order} />}
         </div>
       </div>
