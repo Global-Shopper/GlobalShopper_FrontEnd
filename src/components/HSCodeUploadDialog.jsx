@@ -23,7 +23,7 @@ const REQUIRED_COLUMNS = [{
   width: 160,
 }, {
   name: "parentCode",
-  label: "Mã cha",
+  label: "Parent Code",
   width: 160,
 }];
 const ACTION_COL_WIDTH = 20;

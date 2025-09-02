@@ -42,8 +42,6 @@ const AddressValidationSchema = Yup.object().shape({
 		.max(50, "Họ và tên không được quá 50 ký tự")
 		.required("Họ và tên là bắt buộc"),
 	streetAddress: Yup.string()
-		.min(5, "Địa chỉ đường phải có ít nhất 5 ký tự")
-		.max(100, "Địa chỉ đường không được quá 100 ký tự")
 		.required("Địa chỉ đường là bắt buộc"),
 	ward: Yup.string()
 		.min(2, "Phường/Xã phải có ít nhất 2 ký tự")

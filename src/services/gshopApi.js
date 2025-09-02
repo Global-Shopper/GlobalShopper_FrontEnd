@@ -494,6 +494,7 @@ const gshopApi = createApi({
 				url: endpoints.FEEDBACK,
 				method: "POST",
 			}),
+			invalidatesTags: ["OrderList"],
 		}),
 		createRefund: builder.mutation({
 			query: (data) => ({
