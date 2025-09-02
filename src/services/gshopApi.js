@@ -242,6 +242,12 @@ const gshopApi = createApi({
 				method: "GET",
 			}),
 		}),
+		cancelPurchaseRequest: builder.mutation({
+			query: (purchaseRequestId) => ({
+				url: `${endpoints.PURCHASE_REQUEST}/${purchaseRequestId}/cancel`,
+				method: "PUT",
+			}),
+		}),
 		updatePurchaseRequest: builder.mutation({
 			query: ({ id, payload }) => ({
 				data: payload,
@@ -880,6 +886,7 @@ export const {
 	useDeleteHSCodeMutation,
 	useDeleteTaxRateMutation,
 	useExportRevenueMutation,
+	useCancelPurchaseRequestMutation,
 } = gshopApi;
 
 export default gshopApi;

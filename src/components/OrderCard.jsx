@@ -56,7 +56,7 @@ export default function OrderCard({ order, onCancel, cancelling }) {
               </div>
               <div className="flex items-center gap-1">
                 <Package className="h-4 w-4 text-gray-400" />
-                <span className="text-xs text-gray-500">{order.itemsCount || 1} sản phẩm</span>
+                <span className="text-xs text-gray-500">{order.orderItems.length} sản phẩm</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500 font-medium">Trạng thái:</span>

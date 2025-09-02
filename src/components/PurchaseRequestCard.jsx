@@ -1,30 +1,12 @@
-import { useState } from "react";
 import {
 	Calendar,
 	MapPin,
 	User,
 	Package,
 	ExternalLink,
-	MoreVertical,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getRequestTypeText } from "@/utils/reqTypeHandler";
 import { getStatusBadgeVariant, getStatusColor, getStatusText } from "@/utils/statusHandler";
@@ -32,7 +14,6 @@ import { formatDate } from "@/utils/parseDateTime";
 
 const PurchaseRequestCard = ({ request, listView = false }) => {
 	console.log(request);
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const allItems = [
 		...(request?.requestItems || [])
 	];
@@ -43,10 +24,6 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 	const maxThumbs = 2;
 	const displayedImages = (allImages || []).slice(0, maxThumbs);
 	const remainingImages = Math.max(0, (allImages?.length || 0) - maxThumbs);
-	const handleCancelRequest = () => {
-		// TODO: Implement cancel request functionality
-		setIsDialogOpen(false);
-	};
 
 	if (listView) {
 		return (
@@ -87,68 +64,6 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 							<div className="text-sm text-gray-500 font-medium">
 								{formatDate(request.createdAt)}
 							</div>
-							{/* Three dots menu */}
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										variant="ghost"
-										size="sm"
-										className="h-8 w-8 p-0 hover:bg-gray-100"
-									>
-										<MoreVertical className="h-4 w-4 text-gray-500" />
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent
-									align="end"
-									className="w-30"
-								>
-									<Dialog
-										open={isDialogOpen}
-										onOpenChange={setIsDialogOpen}
-									>
-										<DialogTrigger asChild>
-											<DropdownMenuItem
-												onSelect={(e) =>
-													e.preventDefault()
-												}
-												className="text-red-600 cursor-pointer"
-											>
-												Hủy yêu cầu
-											</DropdownMenuItem>
-										</DialogTrigger>
-										<DialogContent>
-											<DialogHeader>
-												<DialogTitle>
-													Xác nhận hủy yêu cầu
-												</DialogTitle>
-												<DialogDescription>
-													Bạn có chắc chắn muốn hủy
-													yêu cầu #{request.id}? Hành
-													động này không thể hoàn tác.
-												</DialogDescription>
-											</DialogHeader>
-											<DialogFooter>
-												<Button
-													variant="outline"
-													onClick={() =>
-														setIsDialogOpen(false)
-													}
-												>
-													Hủy
-												</Button>
-												<Button
-													variant="destructive"
-													onClick={
-														handleCancelRequest
-													}
-												>
-													Xác nhận
-												</Button>
-											</DialogFooter>
-										</DialogContent>
-									</Dialog>
-								</DropdownMenuContent>
-							</DropdownMenu>
 						</div>
 					</div>
 

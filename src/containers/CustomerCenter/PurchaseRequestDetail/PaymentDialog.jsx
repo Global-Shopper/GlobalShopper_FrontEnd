@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info, RefreshCwIcon } from 'lucide-react';
 import { SHIPMENT_TYPE } from '@/const/shippingType';
+import { rateDetail as mockRateDetail } from '@/const/rateDetail';
 
 // Generate a mock 12-digit tracking number similar to '794902636718'
 const generateMockTracking = () => {
@@ -41,18 +42,22 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
         ),
       }
       : undefined,
-    { skip: !shouldFetchRate }
   )
   const [createShipment, { isLoading: isCreateShipmentLoading }] = useCreateShipmentMutation();
   const [open, setOpen] = useState(false)
   const [method, setMethod] = useState('wallet') // 'wallet' | 'vnpay'
   const [selectedRateType, setSelectedRateType] = useState(null)
-  const rateReplyDetails = rate?.output?.rateReplyDetails
+  // Retry + fallback state
+  const [retryCount, setRetryCount] = useState(0);
+  const [fallbackRate, setFallbackRate] = useState(null);
+  const effectiveRate = fallbackRate || rate;
+  const usingFallback = !!fallbackRate;
+  const rateReplyDetails = effectiveRate?.output?.rateReplyDetails
   const isProcessingPayment = isCheckoutLoading || isDirectCheckoutLoading || isCreateShipmentLoading;
   const isBusy = isWalletLoading || isRateLoading || isProcessingPayment;
   const onlineShipCost = subRequest?.quotationForPurchase?.shippingEstimate ?? null;
   // FedEx rate error handling and retry state
-  const hasFedexError = Array.isArray(rate?.errors) && rate.errors.length > 0;
+  const hasFedexError = !usingFallback && Array.isArray(rate?.errors) && rate.errors.length > 0;
   const rateErrorMessage = hasFedexError
     ? rate.errors.map((e) => e?.message || e?.code || 'Đã xảy ra lỗi').join('; ')
     : '';
@@ -75,6 +80,33 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
       setSelectedRateType(rateReplyDetails[0]?.serviceType ?? null)
     }
   }, [requestType, isRateLoading, rateReplyDetails, selectedRateType])
+
+  // Auto-retry up to 5 times, then fallback to local mock data
+  useEffect(() => {
+    if (requestType !== 'OFFLINE') return;
+    if (isRateLoading) return;
+    // Success: reset counters and fallback if we have valid rates
+    const hasValidRates = Array.isArray(rate?.output?.rateReplyDetails) && rate.output.rateReplyDetails.length > 0;
+    if (hasValidRates) {
+      if (retryCount !== 0) setRetryCount(0);
+      if (fallbackRate) setFallbackRate(null);
+      return;
+    }
+    // Error: retry up to 5 times, then set fallback
+    if (hasFedexError) {
+      if (retryCount < 5) {
+        setRetryCount((c) => c + 1);
+        // Refetch with a slight delay to avoid immediate tight loop
+        const t = setTimeout(() => {
+          refetch();
+        }, 400);
+        return () => clearTimeout(t);
+      } else if (!fallbackRate) {
+        setFallbackRate(mockRateDetail);
+        // Silently fall back to local mock data without user-facing warnings
+      }
+    }
+  }, [requestType, isRateLoading, hasFedexError, retryCount, refetch, rate, fallbackRate])
 
   const totalAmount = useMemo(() => {
     const q = subRequest?.quotationForPurchase
@@ -99,6 +131,9 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
   const handleRetryRates = async () => {
     try {
       setIsRetryingRates(true);
+      // Reset fallback and retries when manually retrying
+      if (usingFallback) setFallbackRate(null);
+      if (retryCount !== 0) setRetryCount(0);
       await refetch();
     } catch (e) {
       toast.error('Không thể tải lại biểu phí từ FedEx', {
@@ -320,6 +355,7 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
                   </button>
                 </div>
               )}
+              {/* Intentionally no user-facing indicator about fallback/mock data */}
             </>
           )
         }
