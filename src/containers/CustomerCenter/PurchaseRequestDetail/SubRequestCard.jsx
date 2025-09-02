@@ -181,7 +181,7 @@ function SubRequestCard({ subRequest, expired, requestType }) {
             )}
           </div>
         ) : (
-          !expired && <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
+          !expired && subRequest?.status === "CHECKING" && <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
             Đang chờ báo giá
           </div>
         )}

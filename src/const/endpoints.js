@@ -67,10 +67,10 @@ const endpoints = {
 	VARIANTS: "/variant",
 	TOGGLE_VARIANT_ACTIVE: "/variant",
 	TRANSACTION_FILTER: "/filter",
-	REFUND_REASONS: "/refund-ticket/reasons",
 	CREATE_REFUND_REASON: "/refund-ticket/reasons",
 	EDIT_REFUND_REASON: "/refund-ticket/reasons",
 	ACTIVATE_REFUND_REASON: "/refund-ticket/reasons",
 	DELETE_REFUND_REASON: "/refund-ticket/reasons",
+	BM_EXPORT_REPORT: "/business-manager/export-report",
 };
 export default endpoints;

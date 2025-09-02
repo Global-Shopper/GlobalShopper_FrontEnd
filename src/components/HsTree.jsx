@@ -9,19 +9,27 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import TaxRateByHSDialog from "./TaxRateByHSDialog";
+import DeleteHSCodeConfirmDIalog from "./DeleteHSCodeConfirmDIalog";
 
 // A simple tree node renderer with lazy children loading via backend API
 export default function HsTree({ treeData, selectedCode, setHScode, showSearch = true }) {
   const [openMenuCode, setOpenMenuCode] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogTaxOpen, setDialogTaxOpen] = useState(false);
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false);
   const [dialogHSCode, setDialogHSCode] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [expanded, setExpanded] = useState(() => new Set());
 
-  const handleDialogOpen = (code) => {
+  const handleTaxDialogOpen = (code) => {
     setOpenMenuCode(null);
     setDialogHSCode(code);
-    setDialogOpen(true);
+    setDialogTaxOpen(true);
+  }
+
+  const handleDeleteDialogOpen = (code) => {
+    setOpenMenuCode(null);
+    setDialogHSCode(code);
+    setDialogDeleteOpen(true);
   }
 
   // Normalize incoming nodes: support either `code` or `hsCode`, and various children keys
@@ -171,12 +179,19 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" sideOffset={6} onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setHScode(code); }}>
-                      Nhập
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDialogOpen(code); }}>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleTaxDialogOpen(code); }}>
                       Xem
                     </DropdownMenuItem>
+                    {
+                      setHScode ? (
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setHScode(code); }}>
+                          Nhập
+                        </DropdownMenuItem>
+                      ) :
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDeleteDialogOpen(code); }}>
+                          Xóa
+                        </DropdownMenuItem>
+                      }
                   </DropdownMenuContent>
                 </DropdownMenu>
             )}
@@ -216,7 +231,8 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
           {roots.map((n) => renderNode(n, n.level ?? 0))}
         </div>
       )}
-      <TaxRateByHSDialog hsCode={dialogHSCode} open={dialogOpen} onOpenChange={setDialogOpen}/>
+      <TaxRateByHSDialog hsCode={dialogHSCode} open={dialogTaxOpen} onOpenChange={setDialogTaxOpen}/>
+      <DeleteHSCodeConfirmDIalog node={dialogHSCode} open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}/>
     </div>
   );
 }

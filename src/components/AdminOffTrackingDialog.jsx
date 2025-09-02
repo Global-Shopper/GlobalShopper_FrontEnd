@@ -9,9 +9,9 @@ const AdminOffTrackingDialog = ({ order }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" disabled={!hasEvents}>Xem thông tin vận chuyển</Button>
+        <Button variant="outline" size="sm">Xem thông tin vận chuyển</Button>
       </DialogTrigger>
-      <DialogContent className="!max-w-3xl">
+      <DialogContent className="!max-w-3xl max-h-[98vh] h-auto overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Chi tiết vận đơn</DialogTitle>
         </DialogHeader>
@@ -20,7 +20,7 @@ const AdminOffTrackingDialog = ({ order }) => {
             <OffShippingTrackingCard data={order.shipmentTrackingEvents} />
           </div>
         ) : (
-          <div className="text-sm text-slate-500">Không có dữ liệu vận đơn nội bộ.</div>
+          <div className="text-sm text-slate-500">Chưa có thông tin vận chuyển.</div>
         )}
         <DialogFooter>
           <DialogClose asChild>

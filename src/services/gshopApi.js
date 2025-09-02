@@ -461,6 +461,13 @@ const gshopApi = createApi({
 			}),
 			invalidatesTags: ["HSCodeList"],
 		}),
+		getHSCodeByCode: builder.query({
+			query: (code) => ({
+				url: `hs-code/${code}`,
+				method: "GET",
+			}),
+			providesTags: ["HSCodeList"],
+		}),
 		getShipmentRate: builder.query({
 			query: (data) => ({
 				data: data,
@@ -748,6 +755,29 @@ const gshopApi = createApi({
 			}),
 			invalidatesTags: ["Variants"],
 		}),
+		deleteHSCode: builder.mutation({
+			query: (hsCode) => ({
+				url: `hs-code/${hsCode}/prefix`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["HSCodeList"],
+		}),
+		deleteTaxRate: builder.mutation({
+			query: (id) => ({
+				url: `tax-rates/${id}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["TaxRateList"],
+		}),
+		exportRevenue: builder.mutation({
+			query: (params) => ({
+				params: params,
+				url: endpoints.BM_EXPORT_REPORT,
+				method: "GET",
+				responseType: "blob",
+			}),
+			invalidatesTags: ["BMDashboard"],
+		}),
 	}),
 });
 
@@ -806,6 +836,7 @@ export const {
 	useCancelOrderMutation,
 	useUpdateShippingMutation,
 	useGetHsCodesQuery,
+	useGetHSCodeByCodeQuery,
 	useLazyGetHsCodesQuery,
 	useGetShipmentRateQuery,
 	useCreateShipmentMutation,
@@ -846,6 +877,9 @@ export const {
 	useImportTaxRatesByListMutation,
 	useGetTaxRatesByHsCodeQuery,
 	useImportHSCodeByListMutation,
+	useDeleteHSCodeMutation,
+	useDeleteTaxRateMutation,
+	useExportRevenueMutation,
 } = gshopApi;
 
 export default gshopApi;

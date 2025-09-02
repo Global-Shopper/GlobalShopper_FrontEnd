@@ -4,6 +4,7 @@ import { getStatusColor, getStatusText } from "@/utils/statusHandler"
 import { Button } from "@/components/ui/button"
 import OrderFeedbackDialog from "./OrderFeedbackDialog"
 import OrderRefundDialog from "./OrderRefundDialog"
+import { Copy } from "lucide-react"
 
 function formatVND(value) {
   if (typeof value !== "number") return value
@@ -50,7 +51,7 @@ const OrderInfo = ({ order }) => {
         </CardHeader>
 
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-sm">
             <div>
               <div className="text-gray-500">Ngày tạo</div>
               <div className="font-medium">{formatDateTime(order.createdAt)}</div>
@@ -58,6 +59,25 @@ const OrderInfo = ({ order }) => {
             <div>
               <div className="text-gray-500">Số lượng sản phẩm</div>
               <div className="font-medium">{itemCount}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Mã vận đơn</div>
+              <div className="font-medium flex items-center gap-2">
+                <span className="font-mono">{order.trackingNumber || "—"}</span>
+                {order.trackingNumber && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(order.trackingNumber)
+                        .catch(() => console.warn("Failed to copy tracking number"))
+                    }}
+                  >
+                    <Copy/>
+                  </Button>
+                )}
+              </div>
             </div>
             <div>
               <div className="text-gray-500">Phí vận chuyển</div>

@@ -125,7 +125,7 @@ export default function ItemExtractForm({ index }) {
           </Label>
           <div className="flex flex-wrap gap-3">
             {/* Show previews for images not yet uploaded (local only) */}
-            {item.localImages.concat(item.images.filter((url) => !url.startsWith("http://res.cloudinary.com"))).map((url, idx) => (
+            {item.localImages.concat(item.images.filter((url) => !url.includes("cloudinary"))).map((url, idx) => (
               <div key={url} className="relative">
                 <img
                   src={url}
@@ -173,6 +173,28 @@ export default function ItemExtractForm({ index }) {
               </Button>
             </div>
           </div>
+        </div>
+        <div className="mt-2">
+          <Label className="text-sm font-medium text-gray-700">
+            Nền tảng e-commerce
+          </Label>
+          <Input
+            value={item.ecommercePlatform || ""}
+            onChange={(e) => handleFieldChange("ecommercePlatform", e.target.value)}
+            placeholder="Nhập nền tảng e-commerce"
+            className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <div className="mt-2">
+          <Label className="text-sm font-medium text-gray-700">
+            Người bán
+          </Label>
+          <Input
+            value={item.seller || ""}
+            onChange={(e) => handleFieldChange("seller", e.target.value)}
+            placeholder="Nhập người bán"
+            className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
         </div>
 
         {/* Quantity */}
@@ -285,28 +307,6 @@ export default function ItemExtractForm({ index }) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="mt-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Nền tảng e-commerce
-            </Label>
-            <Input
-              value={item.ecommercePlatform || ""}
-              onChange={(e) => handleFieldChange("ecommercePlatform", e.target.value)}
-              placeholder="Nhập nền tảng e-commerce"
-              className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mt-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Người bán
-            </Label>
-            <Input
-              value={item.seller || ""}
-              onChange={(e) => handleFieldChange("seller", e.target.value)}
-              placeholder="Nhập người bán"
-              className="mt-1 h-10 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
           </div>
         </div>
       </div>

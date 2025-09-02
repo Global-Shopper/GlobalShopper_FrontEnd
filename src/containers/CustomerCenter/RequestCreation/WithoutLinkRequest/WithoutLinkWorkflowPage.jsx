@@ -59,6 +59,7 @@ export default function WithoutLinkWorkflowPage() {
         );
       });
     dispatch(setCurrentStep("success"));
+    window.scrollTo(0, 0);
   };
 
   const handleBackToSelection = () => {

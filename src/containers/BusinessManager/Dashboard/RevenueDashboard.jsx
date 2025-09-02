@@ -37,10 +37,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useGetRevenueQuery } from "@/services/gshopApi";
+import { useExportRevenueMutation, useGetRevenueQuery } from "@/services/gshopApi";
 
 const RevenueDashboard = () => {
 	// State cho year filter
+	const [exportRevenue, { isLoading: isExporting }] = useExportRevenueMutation()
 	const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
 	// Helper functions để tạo date ranges
@@ -325,6 +326,23 @@ const RevenueDashboard = () => {
 		window.location.reload();
 	};
 
+	const handleExport = async () => {
+		try {
+			const blob = await exportRevenue({ year: selectedYear }).unwrap();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `revenue-report-${selectedYear}.xlsx`;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			window.URL.revokeObjectURL(url);
+		} catch (e) {
+			// Optional: surface error to user
+			console.warn("Export revenue failed", e);
+		}
+	};
+
 	const getGrowthColor = (growth) => {
 		return growth >= 0 ? "text-green-600" : "text-red-600";
 	};
@@ -354,9 +372,9 @@ const RevenueDashboard = () => {
 						<RefreshCcw className="h-4 w-4 mr-2" />
 						Làm mới
 					</Button>
-					<Button>
+					<Button onClick={handleExport} disabled={isExporting}>
 						<Download className="h-4 w-4 mr-2" />
-						Xuất báo cáo
+						{isExporting ? "Đang xuất..." : "Xuất báo cáo"}
 					</Button>
 				</div>
 			</div>

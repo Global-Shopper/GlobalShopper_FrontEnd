@@ -170,6 +170,7 @@ export default function WithLinkWorkflowPage() {
       })
       .finally(() => {
         dispatch(setCurrentStep("success"));
+        window.scrollTo(0, 0);
       });
   };
 

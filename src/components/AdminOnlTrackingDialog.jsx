@@ -25,7 +25,7 @@ const AdminOnlTrackingDialog = ({ order }) => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" disabled={!eligible}>Xem thông tin vận chuyển</Button>
       </DialogTrigger>
-      <DialogContent className="!max-w-3xl h-[98vh]">
+      <DialogContent className="!max-w-3xl max-h-[98vh] h-auto overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Chi tiết vận đơn</DialogTitle>
         </DialogHeader>

@@ -21,13 +21,15 @@ export const axiosInstance = axios.create({
 
 export const axiosBaseQuery =
   ({ baseUrl } = { baseUrl: "" }) =>
-  async ({ url, method, data, params }) => {
+  async ({ url, method, data, params, responseType }) => {
     try {
       const result = await axiosInstance({
         url: baseUrl + url,
         method,
         data,
         params,
+        // Allow overriding responseType for binary downloads
+        ...(responseType ? { responseType } : {}),
       });
       return { data: result.data };
     } catch (axiosError) {

@@ -275,7 +275,7 @@ export function BusinessSidebar() {
 							<img
 								src={userInfo?.user?.avatar || defaultAvt}
 								alt="Avatar"
-								className="w-10 h-10 rounded-full border-2 border-orange-200 object-cover shadow-sm"
+								className="w-10 h-10 rounded-full border-2 border-orange-200 object-contain shadow-sm"
 							/>
 							<div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
 						</div>

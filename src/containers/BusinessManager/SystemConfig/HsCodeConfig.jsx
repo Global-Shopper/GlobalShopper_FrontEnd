@@ -202,8 +202,8 @@ const HsCodeConfig = () => {
               e.target.value = ''
             }}
           />
-          <Button onClick={onChooseFileHS}>Tải HS Code</Button>
-          <Button variant="secondary" onClick={onChooseFileTax}>Tải Thuế</Button>
+          <Button variant="outline" onClick={onChooseFileHS}>Tải dữ liệu HS Code</Button>
+          <Button variant="outline" onClick={onChooseFileTax}>Tải dữ liệu Thuế</Button>
         </div>
       </div>
 

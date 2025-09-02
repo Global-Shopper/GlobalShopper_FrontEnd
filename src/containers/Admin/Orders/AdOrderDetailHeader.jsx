@@ -93,8 +93,12 @@ const AdOrderDetailHeader = ({ order }) => {
           <HistoryDialog history={order.history} />
           {/* Admin Tracking dialogs */}
           {console.log(order)}
-          {order?.shipmentTrackingEvents?.length > 0 ? <AdminOffTrackingDialog order={order} /> : null}
-          {order?.trackingNumber && order?.shippingCarrier !== "fedex" ? <AdminOnlTrackingDialog order={order} /> : null}
+          {
+            order?.shippingCarrier === "fedex" ? <AdminOffTrackingDialog order={order} /> : 
+            <AdminOnlTrackingDialog order={order} />
+          }
+          {/* {order?.trackingNumber ? <AdminOffTrackingDialog order={order} /> : null}
+          {order?.trackingNumber && order?.shippingCarrier !== "fedex" ? <AdminOnlTrackingDialog order={order} /> : null} */}
           {order.status === "ORDER_REQUESTED" && <AdUpdateShipDialog orderId={order.id} />}
           {order.status === "DELIVERED" && <AdRefundDialog order={order} />}
         </div>

@@ -278,7 +278,7 @@ const CreateAdminForm = ({
 												avatarPreview || formData.avatar
 											}
 											alt="Avatar preview"
-											className="w-full h-full object-cover"
+											className="w-full h-full object-contain"
 										/>
 									) : (
 										<User className="w-6 h-6 text-gray-400" />
