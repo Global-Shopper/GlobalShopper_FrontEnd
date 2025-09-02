@@ -18,7 +18,9 @@ const RepaymentDialog = ({ order }) => {
     }).unwrap()
       .then((res) => {
         toast.success('Thanh toán lại đơn hàng thành công')
-        window.location.href = res?.url
+        if (paymentMethod === 'vnpay') {
+          window.location.href = res?.url
+        }
       })
       .catch(() => {
         toast.error('Thanh toán lại đơn hàng thất bại')
