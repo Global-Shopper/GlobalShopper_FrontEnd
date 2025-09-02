@@ -1,195 +1,191 @@
-import React from 'react'
-
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import React, { useState } from "react";
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardDescription,
+	CardContent,
+} from "@/components/ui/card";
+import {
+	Collapsible,
+	CollapsibleTrigger,
+	CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { HelpCircle, ChevronDown, ChevronRight } from "lucide-react";
 
 const FAQ = () => {
-  return (
-    <div className="container mx-auto py-8 px-20">
-      <Card>
-        <CardHeader className="flex flex-col items-center justify-center gap-2">
-          <CardTitle className="text-2xl">Câu hỏi thường gặp (FAQ)</CardTitle>
-          <CardDescription>Những thắc mắc phổ biến về dịch vụ mua hộ quốc tế của GShop.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 1 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>1. Dịch vụ mua hộ của Global Shopper là gì?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>
-                Chúng tôi hỗ trợ mua sản phẩm từ các trang TMĐT quốc tế (Amazon, eBay, …) hoặc cửa hàng nước ngoài và vận chuyển về Việt Nam. Bạn gửi link hoặc thông tin sản phẩm, chúng tôi sẽ báo giá và xử lý toàn bộ quy trình.
-              </p>
-            </CollapsibleContent>
-          </Collapsible>
+	const [openItems, setOpenItems] = useState({});
 
-          {/* 2 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>2. Tôi cần chuẩn bị gì để sử dụng dịch vụ mua hộ?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Link sản phẩm hoặc thông tin chi tiết (tên, màu, size, hình ảnh).</li>
-                <li>Địa chỉ nhận hàng tại Việt Nam.</li>
-                <li>Phương thức thanh toán (chuyển khoản ngân hàng, ví điện tử, …).</li>
-              </ul>
-            </CollapsibleContent>
-          </Collapsible>
+	const toggleItem = (index) => {
+		setOpenItems((prev) => ({
+			...prev,
+			[index]: !prev[index],
+		}));
+	};
 
-          {/* 3 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>3. Phí dịch vụ được tính như thế nào?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>Phí dịch vụ là 10% trên giá trị sản phẩm (không tính thuế/phí vận chuyển).</p>
-              <p>Ví dụ: Sản phẩm 100 USD → phí dịch vụ 10 USD.</p>
-            </CollapsibleContent>
-          </Collapsible>
+	const faqData = [
+		{
+			question: "Dịch vụ mua hộ của Global Shopper là gì?",
+			answer: "Chúng tôi hỗ trợ mua sản phẩm từ các trang TMĐT quốc tế (Amazon, eBay, …) hoặc cửa hàng nước ngoài và vận chuyển về Việt Nam. Bạn gửi link hoặc thông tin sản phẩm, chúng tôi sẽ báo giá và xử lý toàn bộ quy trình.",
+		},
+		{
+			question: "Tôi cần chuẩn bị gì để sử dụng dịch vụ mua hộ?",
+			answer: [
+				"Link sản phẩm hoặc thông tin chi tiết (tên, màu, size, hình ảnh).",
+				"Địa chỉ nhận hàng tại Việt Nam.",
+				"Phương thức thanh toán (chuyển khoản ngân hàng, ví điện tử, …).",
+			],
+		},
+		{
+			question: "Phí dịch vụ được tính như thế nào?",
+			answer: "Phí dịch vụ là 10% trên giá trị sản phẩm (không tính thuế/phí vận chuyển). Ví dụ: Sản phẩm 100 USD → phí dịch vụ 10 USD.",
+		},
+		{
+			question: "Ngoài phí dịch vụ còn chi phí nào khác?",
+			answer: [
+				"Thuế nhập khẩu/VAT (nếu có).",
+				"Phí vận chuyển quốc tế (FedEx, UPS, …).",
+				"Phí vận chuyển nội địa tại Việt Nam.",
+			],
+		},
+		{
+			question: "Tôi có thể chọn hãng vận chuyển quốc tế không?",
+			answer: "Có. Hỗ trợ nhiều đối tác: FedEx, UPS, DHL, … Khách hàng có thể chọn theo tốc độ/chi phí.",
+		},
+		{
+			question: "Tôi có thể biết trước tổng chi phí không?",
+			answer: "Hệ thống báo giá hiển thị: Giá sản phẩm + Phí dịch vụ + Phí vận chuyển + Thuế (nếu có).",
+		},
+		{
+			question: "Nếu sản phẩm bị mất hoặc hư hỏng khi vận chuyển?",
+			answer: "Chúng tôi phối hợp đơn vị vận chuyển để bồi thường theo chính sách bảo hiểm hàng hóa của đối tác.",
+		},
+		{
+			question: "Thời gian nhận hàng mất bao lâu?",
+			answer: [
+				"Mỹ/Châu Âu: 7–15 ngày làm việc.",
+				"Nhật/Hàn/Trung Quốc: 5–10 ngày làm việc.",
+				"Thời gian có thể thay đổi theo hãng vận chuyển và hải quan.",
+			],
+		},
+		{
+			question: "Tôi có thể hủy đơn hàng sau khi đã đặt?",
+			answer: "Có thể hủy trước khi chúng tôi mua hàng từ nhà cung cấp. Sau khi đã thanh toán cho người bán quốc tế, đơn không thể hủy.",
+		},
+		{
+			question: "Tôi phải thanh toán khi nào?",
+			answer: "Thanh toán 100% giá sản phẩm + phí dịch vụ trước khi mua hàng. Phí vận chuyển quốc tế thanh toán trước khi giao hàng tại Việt Nam.",
+		},
+		{
+			question: "Tôi có thể mua nhiều sản phẩm trong cùng một đơn?",
+			answer: "Có. Có thể gộp nhiều sản phẩm/nhà bán. Hệ thống tự động tính phí dịch vụ và vận chuyển theo tổng đơn.",
+		},
+		{
+			question: "Làm sao theo dõi đơn hàng?",
+			answer: [
+				"Mã tracking quốc tế (FedEx, UPS, …).",
+				"Cập nhật trạng thái đơn hàng qua hệ thống.",
+			],
+		},
+		{
+			question: "Có giới hạn sản phẩm được mua hộ không?",
+			answer: "Không hỗ trợ mua hàng bị cấm nhập khẩu vào Việt Nam. Với hàng đặc thù (mỹ phẩm, thực phẩm, pin, …) hãy liên hệ để được tư vấn.",
+		},
+		{
+			question: "Liên hệ hỗ trợ?",
+			answer: ["Hotline: 1900-xxxx", "Email: support@gshop.vn"],
+		},
+	];
 
-          {/* 4 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>4. Ngoài phí dịch vụ còn chi phí nào khác?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Thuế nhập khẩu/VAT (nếu có).</li>
-                <li>Phí vận chuyển quốc tế (FedEx, UPS, …).</li>
-                <li>Phí vận chuyển nội địa tại Việt Nam.</li>
-              </ul>
-            </CollapsibleContent>
-          </Collapsible>
+	return (
+		<div className="min-h-screen bg-white">
+			<div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8 max-w-4xl">
+				{/* Header Section */}
+				<div className="text-center mb-12">
+					<div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-2xl shadow-lg mb-6">
+						<HelpCircle className="h-8 w-8 text-white" />
+					</div>
+					<h1 className="text-4xl font-bold text-gray-900 mb-4">
+						Câu hỏi thường gặp (FAQ)
+					</h1>
+					<p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+						Những thắc mắc phổ biến về dịch vụ mua hộ quốc tế của
+						GShop. Tìm câu trả lời nhanh chóng cho mọi thắc mắc của
+						bạn.
+					</p>
+				</div>
+				{/* FAQ Items */}
+				<div className="space-y-4">
+					{faqData.map((item, index) => (
+						<Card
+							key={index}
+							className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm"
+						>
+							<Collapsible
+								open={openItems[index]}
+								onOpenChange={() => toggleItem(index)}
+							>
+								<CollapsibleTrigger className="w-full p-6 text-left hover:bg-gray-50 transition-colors rounded-lg">
+									<div className="flex items-center justify-between gap-4">
+										<div className="flex items-start gap-4">
+											<div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-lg flex items-center justify-center">
+												<span className="text-cyan-600 font-semibold text-sm">
+													{index + 1}
+												</span>
+											</div>
+											<h3 className="text-lg font-semibold text-gray-900 leading-relaxed">
+												{item.question}
+											</h3>
+										</div>
+										<div className="flex-shrink-0">
+											{openItems[index] ? (
+												<ChevronDown className="h-5 w-5 text-cyan-600 transition-transform" />
+											) : (
+												<ChevronRight className="h-5 w-5 text-gray-400 transition-transform" />
+											)}
+										</div>
+									</div>
+								</CollapsibleTrigger>
+								<CollapsibleContent className="px-6 pb-6">
+									<div className="ml-12 space-y-3">
+										{Array.isArray(item.answer) ? (
+											<ul className="space-y-2">
+												{item.answer.map(
+													(point, pointIndex) => (
+														<li
+															key={pointIndex}
+															className="flex items-start gap-3 text-gray-700"
+														>
+															<div className="flex-shrink-0 w-2 h-2 bg-cyan-500 rounded-full mt-2"></div>
+															<span className="leading-relaxed">
+																{point}
+															</span>
+														</li>
+													)
+												)}
+											</ul>
+										) : (
+											<p className="text-gray-700 leading-relaxed">
+												{item.answer}
+											</p>
+										)}
+									</div>
+								</CollapsibleContent>
+							</Collapsible>
+						</Card>
+					))}
+				</div>
 
-          {/* 5 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>5. Tôi có thể chọn hãng vận chuyển quốc tế không?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p> Có. Hỗ trợ nhiều đối tác: FedEx, UPS, DHL, … Khách hàng có thể chọn theo tốc độ/chi phí.</p>
-            </CollapsibleContent>
-          </Collapsible>
+				{/* Footer Notice */}
+				<div className="mt-12 text-center">
+					<p className="text-sm text-gray-500 italic">
+						Cần hỗ trợ thêm? Liên hệ với chúng tôi qua Hotline:
+						1900-xxxx hoặc Email: support@gshop.vn
+					</p>
+				</div>
+			</div>
+		</div>
+	);
+};
 
-          {/* 6 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>6. Tôi có thể biết trước tổng chi phí không?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>Hệ thống báo giá hiển thị: Giá sản phẩm + Phí dịch vụ + Phí vận chuyển + Thuế (nếu có).</p>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 7 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>7. Nếu sản phẩm bị mất hoặc hư hỏng khi vận chuyển?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>Chúng tôi phối hợp đơn vị vận chuyển để bồi thường theo chính sách bảo hiểm hàng hóa của đối tác.</p>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 8 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>8. Thời gian nhận hàng mất bao lâu?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Mỹ/Châu Âu: 7–15 ngày làm việc.</li>
-                <li>Nhật/Hàn/Trung Quốc: 5–10 ngày làm việc.</li>
-              </ul>
-              <p>Thời gian có thể thay đổi theo hãng vận chuyển và hải quan.</p>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 9 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>9. Tôi có thể hủy đơn hàng sau khi đã đặt?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>Có thể hủy trước khi chúng tôi mua hàng từ nhà cung cấp. Sau khi đã thanh toán cho người bán quốc tế, đơn không thể hủy.</p>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 10 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>10. Tôi phải thanh toán khi nào?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>Thanh toán 100% giá sản phẩm + phí dịch vụ trước khi mua hàng. Phí vận chuyển quốc tế thanh toán trước khi giao hàng tại Việt Nam.</p>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 11 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>11. Tôi có thể mua nhiều sản phẩm trong cùng một đơn?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>Có. Có thể gộp nhiều sản phẩm/nhà bán. Hệ thống tự động tính phí dịch vụ và vận chuyển theo tổng đơn.</p>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 12 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>12. Làm sao theo dõi đơn hàng?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Mã tracking quốc tế (FedEx, UPS, …).</li>
-                <li>Cập nhật trạng thái đơn hàng qua hệ thống.</li>
-              </ul>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 13 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>13. Có giới hạn sản phẩm được mua hộ không?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <p>Không hỗ trợ mua hàng bị cấm nhập khẩu vào Việt Nam. Với hàng đặc thù (mỹ phẩm, thực phẩm, pin, …) hãy liên hệ để được tư vấn.</p>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* 14 */}
-          <Collapsible>
-            <CollapsibleTrigger className="w-full text-left font-medium py-3 px-4 rounded-md hover:bg-muted flex items-center justify-between">
-              <span>14. Liên hệ hỗ trợ?</span>
-              <span className="ml-2">▾</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Hotline: 1900-xxxx</li>
-                <li>Email: support@gshop.vn</li>
-              </ul>
-            </CollapsibleContent>
-          </Collapsible>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-export default FAQ
+export default FAQ;
