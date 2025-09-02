@@ -51,6 +51,13 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
   const isProcessingPayment = isCheckoutLoading || isDirectCheckoutLoading || isCreateShipmentLoading;
   const isBusy = isWalletLoading || isRateLoading || isProcessingPayment;
   const onlineShipCost = subRequest?.quotationForPurchase?.shippingEstimate ?? null;
+  // FedEx rate error handling and retry state
+  const hasFedexError = Array.isArray(rate?.errors) && rate.errors.length > 0;
+  const rateErrorMessage = hasFedexError
+    ? rate.errors.map((e) => e?.message || e?.code || 'Đã xảy ra lỗi').join('; ')
+    : '';
+  const [isRetryingRates, setIsRetryingRates] = useState(false);
+
   useEffect(() => {
     if (requestType !== 'OFFLINE') {
       setSelectedRateType(null);
@@ -68,6 +75,7 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
       setSelectedRateType(rateReplyDetails[0]?.serviceType ?? null)
     }
   }, [requestType, isRateLoading, rateReplyDetails, selectedRateType])
+
   const totalAmount = useMemo(() => {
     const q = subRequest?.quotationForPurchase
     if (!q) return 0
@@ -84,6 +92,22 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
     const preferred = selectedService?.ratedShipmentDetails?.find((d) => d?.rateType === 'PREFERRED_CURRENCY');
     return preferred?.totalNetChargeWithDutiesAndTaxes ?? null;
   }, [selectedService])
+
+  // Disable confirm when expired/busy/missing required shipping selection
+  const isConfirmDisabled = expired || isBusy || (requestType === 'OFFLINE' && (!selectedRateType || selectedShipCost == null));
+
+  const handleRetryRates = async () => {
+    try {
+      setIsRetryingRates(true);
+      await refetch();
+    } catch (e) {
+      toast.error('Không thể tải lại biểu phí từ FedEx', {
+        description: e?.data?.message || e?.message || 'Vui lòng thử lại sau.',
+      });
+    } finally {
+      setIsRetryingRates(false);
+    }
+  };
 
   const handleConfirm = async () => {
     try {
@@ -243,24 +267,62 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
           </div>
         )}
         {
-          requestType === "OFFLINE" && <Select value={selectedRateType} onValueChange={setSelectedRateType} disabled={isRateLoading || isProcessingPayment}>
-            <div className="flex items-center gap-2">
-              <SelectTrigger className={!selectedRateType && !isRateLoading ? 'border border-amber-500' : undefined}>
-                <SelectValue placeholder={isRateLoading ? "Đang tải biểu phí..." : "Chọn loại phí"} >{selectedRateType ? `${selectedRateType} - ${formatCurrency(rateReplyDetails.find((rate) => rate.serviceType === selectedRateType)?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}` : (isRateLoading ? 'Đang tải biểu phí...' : "Chọn loại vận chuyển")}</SelectValue>
-              </SelectTrigger>
-              {rate?.errors?.length > 0 && (
-                <>
-                  <span className="text-red-500">Xảy ra lỗi từ bên FedEx</span>
-                  <RefreshCwIcon className="w-4 h-4 cursor-pointer" onClick={refetch} />
-                </>
+          requestType === "OFFLINE" && (
+            <>
+              <Select
+                value={selectedRateType}
+                onValueChange={setSelectedRateType}
+                disabled={isRateLoading || isProcessingPayment}
+              >
+                <div className="flex items-center gap-2">
+                  <SelectTrigger className={!selectedRateType && !isRateLoading ? 'border border-amber-500' : undefined}>
+                    <SelectValue placeholder={isRateLoading ? "Đang tải biểu phí..." : "Chọn loại phí"}>
+                      {selectedRateType
+                        ? `${selectedRateType} - ${formatCurrency(
+                          rateReplyDetails.find((rate) => rate.serviceType === selectedRateType)?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes,
+                          'VND',
+                          getLocaleCurrencyFormat('VND')
+                        )}`
+                        : (isRateLoading ? 'Đang tải biểu phí...' : 'Chọn loại vận chuyển')}
+                    </SelectValue>
+                  </SelectTrigger>
+                </div>
+                <SelectContent>
+                  {rateReplyDetails?.map((rate, index) => (
+                    <SelectItem key={index} value={rate?.serviceType}>
+                      {rate?.serviceName} - {formatCurrency(
+                        rate?.ratedShipmentDetails.find((detail) => detail.rateType === 'PREFERRED_CURRENCY')?.totalNetChargeWithDutiesAndTaxes,
+                        'VND',
+                        getLocaleCurrencyFormat('VND')
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {hasFedexError && (
+                <div className="mt-2 flex items-start justify-between gap-2 rounded border border-red-200 bg-red-50 p-2 text-xs text-red-700">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 mt-[2px]" />
+                    <div>
+                      <div className="font-medium">Không lấy được biểu phí từ FedEx</div>
+                      <div className="mt-0.5">{rateErrorMessage}</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded border border-red-300 bg-white px-2 py-1 text-red-700 hover:bg-red-100 disabled:opacity-50"
+                    onClick={handleRetryRates}
+                    disabled={isRateLoading || isProcessingPayment || isRetryingRates}
+                    aria-label="Thử tải lại biểu phí"
+                  >
+                    <RefreshCwIcon className={`h-3 w-3 ${isRetryingRates ? 'animate-spin' : ''}`} />
+                    {isRetryingRates ? 'Đang tải...' : 'Thử lại'}
+                  </button>
+                </div>
               )}
-            </div>
-            <SelectContent>
-              {rateReplyDetails?.map((rate, index) => (
-                <SelectItem key={index} value={rate?.serviceType}>{rate?.serviceName} - {formatCurrency(rate?.ratedShipmentDetails.find((detail) => detail.rateType === "PREFERRED_CURRENCY")?.totalNetChargeWithDutiesAndTaxes, 'VND', getLocaleCurrencyFormat('VND'))}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>}
+            </>
+          )
+        }
         {requestType === 'OFFLINE' && !isRateLoading && !selectedRateType && (
           <p className="mt-1 text-xs text-amber-600">Vui lòng chọn loại vận chuyển để tiếp tục thanh toán.</p>
         )}
@@ -288,9 +350,14 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
             Hủy
           </button>
           <button
-            className={`px-4 py-2 rounded text-white ${method === 'wallet' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+            className={`px-4 py-2 rounded ${isConfirmDisabled
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : (method === 'wallet'
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white')
+            }`}
             onClick={handleConfirm}
-            disabled={expired || isBusy || (requestType === 'OFFLINE' && (!selectedRateType || selectedShipCost == null))}
+            disabled={isConfirmDisabled}
           >
             {isBusy ? 'Đang xử lý...' : (method === 'wallet' ? 'Xác nhận thanh toán bằng Ví' : 'Xác nhận thanh toán VNPay')}
           </button>

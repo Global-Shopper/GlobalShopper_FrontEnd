@@ -134,10 +134,10 @@ export default function TaxRateUploadPreviewDialog({ open, onOpenChange, rows = 
     try {
       setSubmitting(true);
       const res = await importTaxRatesByList(payload).unwrap();
-      setRows(res.errors?.flatMap(e => e?.object) || []);
       setImportResult(res);
       const { message, errors = [], imported = 0, updated = 0, duplicated = 0 } = res || {};
       if ((errors || []).length > 0) {
+        setRows(res.errors?.flatMap(e => e?.object) || []);
         toast.error(`${message || "Có lỗi khi nhập"}. Lỗi: ${errors.length}.`);
         setErrorOpen(true);
       } else {

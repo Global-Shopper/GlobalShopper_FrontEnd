@@ -5,7 +5,6 @@ import {
 	User,
 	Package,
 	ExternalLink,
-	X,
 	MoreVertical,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,15 +25,16 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getRequestTypeText } from "@/utils/reqTypeHandler";
 import { getStatusBadgeVariant, getStatusColor, getStatusText } from "@/utils/statusHandler";
 import { formatDate } from "@/utils/parseDateTime";
 
 const PurchaseRequestCard = ({ request, listView = false }) => {
+	console.log(request);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const allItems = [
-		...(request?.requestItems || []),
-		...((request?.subRequests || []).flatMap((sub) => sub.requestItems || []))
+		...(request?.requestItems || [])
 	];
 	const allImagesFromRequestItems = (request?.requestItems || [])
 		.flatMap((item) => item?.images || [])
@@ -54,9 +54,35 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 				<CardContent className="px-3 py-0">
 					{/* Header - Request ID and Time with Menu */}
 					<div className="flex items-center justify-between mb-2">
-						<div className="text-lg font-bold text-blue-600">
-							#{request.id || "N/A"}
-						</div>
+						{/* Item name with "+n" tooltip on the left */}
+						{allItems.length > 0 && (
+							<div className="text-left max-w-xs">
+								<div className="font-medium text-gray-800 text-sm truncate">
+									{allItems[0].productName}
+								</div>
+								{allItems.length > 1 && (
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<div className="text-xs text-gray-500 mt-1 cursor-help hover:text-gray-700">
+												+ {allItems.length - 1} sản phẩm khác
+											</div>
+										</TooltipTrigger>
+										<TooltipContent className="w-72 text-left">
+											<div className="font-medium mb-1">Danh sách sản phẩm</div>
+											<ul className="list-disc pl-4 space-y-1 max-h-56 overflow-auto">
+												{allItems.map((it, idx) => (
+													<li key={it.id || idx} className="text-xs">
+														{it.productName} {it.quantity ? `(x${it.quantity})` : ""}
+													</li>
+												))}
+											</ul>
+										</TooltipContent>
+									</Tooltip>
+								)}
+							</div>
+						)}
+
+						{/* Right group: Time + menu */}
 						<div className="flex items-center gap-3">
 							<div className="text-sm text-gray-500 font-medium">
 								{formatDate(request.createdAt)}
@@ -212,26 +238,12 @@ const PurchaseRequestCard = ({ request, listView = false }) => {
 								</div>
 							</div>
 						</div>
-
-						{/* Right side - Product preview */}
-						<div className="flex flex-col items-end">
-							{/* First product preview */}
-							{request.requestItems.length > 0 && (
-								<div className="text-right max-w-xs">
-									<div className="font-medium text-gray-800 text-sm truncate">
-										{request.requestItems[0].productName}
-									</div>
-									{request.requestItems.length > 1 && (
-										<div className="text-xs text-gray-500 mt-1">
-											+ {request.requestItems.length - 1}{" "}
-											sản phẩm khác
-										</div>
-									)}
-								</div>
-							)}
-						</div>
 					</div>
-				</CardContent>
+				{/* ID bottom-right */}
+				<div className="mt-2 flex justify-end">
+					<div className="text-xs font-mono text-gray-400">#{request.id}</div>
+				</div>
+			</CardContent>
 			</Card>
 		);
 	}

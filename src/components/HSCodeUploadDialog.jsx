@@ -95,6 +95,7 @@ export default function HSCodeUploadDialog({ open, onOpenChange, rows = [], setR
       const { message, errors = [], imported = 0, updated = 0, duplicated = 0 } = res || {};
       if ((errors || []).length > 0) {
         toast.error(`${message || "Có lỗi khi nhập"}. Lỗi: ${errors.length}.`);
+        setRows(res?.errors?.flatMap(e => e?.object) || []);
         setErrorOpen(true);
       } else {
         toast.success(message || `Nhập thành công. Imported: ${imported}, Updated: ${updated}, Duplicated: ${duplicated}`);

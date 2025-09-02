@@ -163,7 +163,6 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
               <span className="font-mono text-xs mr-2 text-gray-700">{code}</span>
               <span className="text-gray-800">{node.description}</span>
             </div>
-            {node.level === 8 && (
                 <DropdownMenu
                   open={openMenuCode === code}
                   onOpenChange={(o) => setOpenMenuCode((prev) => (o ? code : prev === code ? null : prev))}
@@ -179,9 +178,13 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" sideOffset={6} onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleTaxDialogOpen(code); }}>
-                      Xem
-                    </DropdownMenuItem>
+                    {
+                      node.level === 8 && (
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleTaxDialogOpen(code); }}>
+                        Xem
+                      </DropdownMenuItem>
+                      )
+                    }
                     {
                       setHScode ? (
                         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setHScode(code); }}>
@@ -194,7 +197,6 @@ export default function HsTree({ treeData, selectedCode, setHScode, showSearch =
                       }
                   </DropdownMenuContent>
                 </DropdownMenu>
-            )}
           </div>
         </div>
         {isOpen && (

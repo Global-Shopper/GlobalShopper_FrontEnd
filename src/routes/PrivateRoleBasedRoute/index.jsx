@@ -15,7 +15,7 @@ const PrivateRoleBasedRoute = ({ requiredRoles }) => {
         rejectAccess: !canAccessWithRoles
     };
     if (!userRole) {
-        toast.error('Vui lòng đăng nhập để tiếp tục');
+        toast.info('Vui lòng đăng nhập để tiếp tục');
         return <Navigate to='/login' state={routingState} replace />;
     }
     return canAccessWithRoles ? <Outlet /> : <Navigate to='/' state={routingState} replace />;
