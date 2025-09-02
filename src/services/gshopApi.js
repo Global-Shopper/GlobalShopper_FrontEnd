@@ -585,8 +585,8 @@ const gshopApi = createApi({
 		}),
 		banCustomer: builder.mutation({
 			query: (id) => ({
-				url: `${endpoints.BAN_CUSTOMER}/${id}`,
-				method: "PUT",
+				url: `${endpoints.BAN_CUSTOMER}/${id}/active`,
+				method: "PATCH",
 			}),
 			invalidatesTags: ["CustomerList"],
 		}),
