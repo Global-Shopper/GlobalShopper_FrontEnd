@@ -19,6 +19,8 @@ export const getStatusColor = (status) => {
       return "bg-blue-100 text-blue-800";
     case "PURCHASED":
       return "bg-green-100 text-green-800";
+    case "PICKED_UP":
+      return "bg-green-100 text-green-800";
     case "IN_TRANSIT":
       return "bg-yellow-100 text-yellow-800";
     case "ARRIVED_IN_DESTINATION":
@@ -58,6 +60,8 @@ export const getStatusText = (status) => {
       return "Đang đặt hàng";
     case "PURCHASED":
       return "Đã mua";
+    case "PICKED_UP":
+      return "Đã lấy hàng";
     case "IN_TRANSIT":
       return "Đang vận chuyển";
     case "ARRIVED_IN_DESTINATION":
@@ -105,6 +109,8 @@ export const getStatusBadgeVariant = (status) => {
     case "REJECTED":
       return "destructive";
     case "APPROVED":
+      return "default";
+    case "PICKED_UP":
       return "default";
 			default:
 			return "outline";

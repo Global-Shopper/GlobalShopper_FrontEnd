@@ -99,7 +99,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
   const validationSchema = Yup.object({
     currency: Yup.string().required("Vui lòng chọn tiền tệ."),
     ...(requestType === "ONLINE"
-      ? { shippingEstimate: Yup.number().typeError("Phí vận chuyển phải là số.").required("Vui lòng nhập phí vận chuyển cho nhóm.") }
+      ? { shippingEstimate: Yup.string().required("Vui lòng nhập phí vận chuyển cho nhóm.") }
       : {}),
     ...(requestType === "OFFLINE"
       ? {
@@ -276,6 +276,7 @@ export function SubRequestDetails({ subRequest, isExpanded, onToggleExpansion, p
                             <label className="block font-medium mb-1">Ước tính phí vận chuyển cho đơn hàng</label>
                             <Input
                               name="shippingEstimate"
+                              step="0.01"
                               type="number"
                               placeholder="Nhập phí vận chuyển"
                               value={values.shippingEstimate}
