@@ -8,9 +8,9 @@ const HistoryDialog = ({ history }) => {
   return (
     <Dialog>
       <DialogTrigger>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 w-full">
           <History className="h-4 w-4 mr-2" />
-          Xem lịch sử trạng thái
+          Lịch sử trạng thái
         </Button>
       </DialogTrigger>
       <DialogContent showCloseButton={false} className="sm:max-w-2xl md:max-w-3xl lg:max-w-4xl">

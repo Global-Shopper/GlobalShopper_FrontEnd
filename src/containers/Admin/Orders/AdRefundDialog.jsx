@@ -17,7 +17,7 @@ const AdRefundDialog = ({ order }) => {
   return (
     <Dialog>
       <DialogTrigger>
-        <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
+        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 gap-2 w-full">
           <Undo className="w-4 h-4" />
           Yêu cầu hoàn tiền
         </Button>

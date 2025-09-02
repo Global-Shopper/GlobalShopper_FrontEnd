@@ -63,12 +63,14 @@ const OrderDetail = () => {
           Đơn hàng đang chờ thanh toán. Vui lòng thanh toán để chúng tôi tiếp tục xử lý đơn hàng của bạn.
         </div>
       )}
-
+      {console.log(orderData)}
       <div className="mt-6">
         <OrderItemList
           orderItems={orderData.orderItems || []}
           ecommercePlatform={orderData.ecommercePlatform}
           seller={orderData.seller}
+          status={orderData.status}
+          order={orderData}
         />
       </div>
 

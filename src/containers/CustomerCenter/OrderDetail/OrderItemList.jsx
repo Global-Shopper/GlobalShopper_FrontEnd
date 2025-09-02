@@ -2,8 +2,9 @@ import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExternalLink, Package } from "lucide-react"
 import { formatCurrency, getLocaleCurrencyFormat } from '@/utils/formatCurrency'
+import RepaymentDialog from '../PurchaseRequestDetail/RepaymentDialog'
 
-const OrderItemList = ({ orderItems = [], ecommercePlatform, seller }) => {
+const OrderItemList = ({ orderItems = [], ecommercePlatform, seller, status, order }) => {
   if (!orderItems.length) return null
 
   return (
@@ -67,6 +68,11 @@ const OrderItemList = ({ orderItems = [], ecommercePlatform, seller }) => {
             </div>
           </div>
         ))}
+        {
+          status === 'AWAITING_PAYMENT' && (
+            <RepaymentDialog order={order} />
+          )
+        }
       </CardContent>
     </Card>
   )
