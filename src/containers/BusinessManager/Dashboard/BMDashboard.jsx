@@ -1115,7 +1115,7 @@ const BMDashboard = () => {
 				<Card className="hover:shadow-lg transition-all duration-300 border-l-2 border-l-blue-500">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
 						<CardTitle className="text-sm font-medium text-gray-600">
-							Tổng người dùng
+							Khách hàng mới
 						</CardTitle>
 						<Users className="h-5 w-5 text-blue-600" />
 					</CardHeader>
