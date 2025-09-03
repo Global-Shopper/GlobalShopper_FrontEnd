@@ -4,7 +4,7 @@ import { getStatusColor, getStatusText } from "@/utils/statusHandler"
 import { Button } from "@/components/ui/button"
 import OrderFeedbackDialog from "./OrderFeedbackDialog"
 import OrderRefundDialog from "./OrderRefundDialog"
-import { Copy } from "lucide-react"
+import { Copy, RefreshCcw } from "lucide-react"
 
 function formatVND(value) {
   if (typeof value !== "number") return value
@@ -15,7 +15,7 @@ function formatDateTime(ts) {
   try { return new Date(ts).toLocaleString("vi-VN", { dateStyle: "medium", timeStyle: "short" }) } catch { return "" }
 }
 
-const OrderInfo = ({ order }) => {
+const OrderInfo = ({ order, refetch, isFetching }) => {
   const statusCls = getStatusColor(order.status)
   const statusText = getStatusText(order.status)
   const itemCount = order.orderItems?.length || 0
@@ -30,18 +30,27 @@ const OrderInfo = ({ order }) => {
             <div className="flex items-center gap-2">
               <span className="text-xl">Đơn hàng #{order.id}</span>
               <span className={`px-2.5 py-1 rounded text-xs font-semibold ${statusCls}`}>{statusText}</span>
+              <Button
+                onClick={() => refetch()}
+                className="h-12 px-4 shadow-sm border"
+                disabled={isFetching}
+                title="Làm mới danh sách"
+              >
+                <RefreshCcw className="h-5 w-5 mr-2" />
+                Làm mới
+              </Button>
             </div>
 
             {order.status === "DELIVERED" && (
               <span className="text-xs text-gray-500 flex gap-2">
                 {!order.feedback ?
-                  <OrderFeedbackDialog order={order}/>
+                  <OrderFeedbackDialog order={order} />
                   :
                   <span className="self-center px-2 py-1 rounded text-xs font-semibold bg-yellow-50 text-yellow-500">
                     Đã đánh giá {order.feedback?.rating}★
                   </span>
                 }
-                <OrderRefundDialog order={order}/>
+                <OrderRefundDialog order={order} />
               </span>
             )}
           </CardTitle>
@@ -74,7 +83,7 @@ const OrderInfo = ({ order }) => {
                         .catch(() => console.warn("Failed to copy tracking number"))
                     }}
                   >
-                    <Copy/>
+                    <Copy />
                   </Button>
                 )}
               </div>

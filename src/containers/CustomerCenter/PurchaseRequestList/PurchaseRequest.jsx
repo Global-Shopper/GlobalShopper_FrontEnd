@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus, ShoppingCart } from "lucide-react";
+import { Plus, ShoppingCart, RefreshCcw } from "lucide-react";
 import PurchaseRequestCard from "@/components/PurchaseRequestCard";
 import PurchaseRequestFilters from "./PurchaseRequestFilters";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,9 @@ export default function PurchaseRequest() {
   const {
     data: purchaseRequestsData,
     isLoading: isRequestLoading,
+    isFetching: isRequestFetching,
     isError: isRequestError,
+    refetch: refetchPurchaseRequests,
   } = useGetPurchaseRequestQuery({
     page: page - 1,
     size: size,
@@ -62,9 +64,9 @@ export default function PurchaseRequest() {
     navigate("/create-request");
   };
 
-  if (isRequestLoading) {
-    return <PageLoading />;
-  }
+  // if (isRequestLoading || isRequestFetching) {
+  //   return <PageLoading />;
+  // }
 
   if (isRequestError) {
     return <PageError />;
@@ -82,13 +84,24 @@ export default function PurchaseRequest() {
               Theo dõi tất cả yêu cầu mua hàng của bạn
             </p>
           </div>
-          <Button
-            onClick={handleCreateRequest}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 h-12 px-6 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Tạo yêu cầu mới
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => refetchPurchaseRequests()}
+              className="h-12 px-4 shadow-sm border"
+              disabled={isRequestLoading}
+              title="Làm mới danh sách"
+            >
+              <RefreshCcw className="h-5 w-5 mr-2" />
+              Làm mới
+            </Button>
+            <Button
+              onClick={handleCreateRequest}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 h-12 px-6 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Tạo yêu cầu mới
+            </Button>
+          </div>
         </div>
         <PurchaseRequestFilters
           status={status}
@@ -102,43 +115,46 @@ export default function PurchaseRequest() {
             <>
               <Card className="shadow-sm">
                 <CardContent className="p-12 text-center">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <ShoppingCart className="h-10 w-10 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-medium text-gray-900 mb-3">
-                  Không có yêu cầu nào
-                </h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                  Bạn chưa có yêu cầu mua hàng nào. Hãy tạo yêu cầu đầu tiên
-                  để bắt đầu!
-                </p>
-              </CardContent>
-            </Card>
-            <PaginationBar
-              totalPages={purchaseRequestsData?.totalPages}
-              page={page}
-              setPage={setPage}
-            />
-          </>
-          ) : (
-            <>
-              <div className="flex flex-col gap-4">
-                {allRequests.map((request) => (
-                  <Link
-                    to={`/account-center/purchase-request/${request.id}`}
-                    key={request.id}
-                  >
-                    <PurchaseRequestCard request={request} listView={true} />
-                  </Link>
-                ))}
-              </div>
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <ShoppingCart className="h-10 w-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-medium text-gray-900 mb-3">
+                    Không có yêu cầu nào
+                  </h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    Bạn chưa có yêu cầu mua hàng nào. Hãy tạo yêu cầu đầu tiên
+                    để bắt đầu!
+                  </p>
+                </CardContent>
+              </Card>
               <PaginationBar
                 totalPages={purchaseRequestsData?.totalPages}
                 page={page}
                 setPage={setPage}
               />
             </>
-          )}
+          ) : (
+            isRequestLoading || isRequestFetching ? (
+              <PageLoading />
+            ) : (
+              <>
+                <div className="flex flex-col gap-4">
+                  {allRequests.map((request) => (
+                    <Link
+                      to={`/account-center/purchase-request/${request.id}`}
+                      key={request.id}
+                    >
+                      <PurchaseRequestCard request={request} listView={true} />
+                    </Link>
+                  ))}
+                </div>
+                <PaginationBar
+                  totalPages={purchaseRequestsData?.totalPages}
+                  page={page}
+                  setPage={setPage}
+                />
+              </>
+            ))}
         </div>
       </div>
     </div>

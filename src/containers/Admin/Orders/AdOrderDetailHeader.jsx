@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, RefreshCcw } from 'lucide-react'
 import { formatDate } from '@/utils/parseDateTime'
 import { getStatusColor, getStatusText } from '@/utils/statusHandler'
 import { Calendar, Truck } from 'lucide-react'
@@ -12,8 +12,9 @@ import { formatCurrency } from '@/utils/formatCurrency'
 import AdminOffTrackingDialog from '@/components/AdminOffTrackingDialog'
 import AdminOnlTrackingDialog from '@/components/AdminOnlTrackingDialog'
 import AdCancelOrderDialog from '@/components/AdCancelOrderDialog'
+import { Button } from '@/components/ui/button'
 
-const AdOrderDetailHeader = ({ order }) => {
+const AdOrderDetailHeader = ({ order, refetchOrders }) => {
 
   return (
     <div className="space-y-4">
@@ -45,9 +46,21 @@ const AdOrderDetailHeader = ({ order }) => {
               </span>
             </span>
             {order?.admin?.name && (
-              <Badge variant="outline" className="text-xs">
-                Admin: {order?.admin?.name}
-              </Badge>
+              <>
+                <Badge variant="outline" className="text-xs">
+                  Admin: {order?.admin?.name}
+                </Badge>
+                <div>
+                  <Button
+                    onClick={() => refetchOrders()}
+                    size="icon"
+                    title="Làm mới danh sách"
+                  >
+                    <RefreshCcw className={`h-5 w-5`} />
+                  </Button>
+                </div>
+              </>
+
             )}
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -74,8 +87,8 @@ const AdOrderDetailHeader = ({ order }) => {
           <HistoryDialog history={order.history} />
           {/* Admin Tracking dialogs */}
           {
-            order?.shippingCarrier === "fedex" ? <AdminOffTrackingDialog order={order} /> : 
-            <AdminOnlTrackingDialog order={order} />
+            order?.shippingCarrier === "fedex" ? <AdminOffTrackingDialog order={order} /> :
+              <AdminOnlTrackingDialog order={order} />
           }
           {/* {order?.trackingNumber ? <AdminOffTrackingDialog order={order} /> : null}
           {order?.trackingNumber && order?.shippingCarrier !== "fedex" ? <AdminOnlTrackingDialog order={order} /> : null} */}

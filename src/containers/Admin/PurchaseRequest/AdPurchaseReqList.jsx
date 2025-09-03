@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { RefreshCcw, Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useGetPurchaseRequestQuery } from "@/services/gshopApi";
 import { PaginationBar } from "@/utils/Pagination";
@@ -25,6 +25,7 @@ import PageError from "@/components/PageError";
 import { useURLSync } from "@/hooks/useURLSync";
 import { getStatusColor, getStatusText } from "@/utils/statusHandler";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 const TABS = [
   { value: "assigned", label: "Yêu cầu đã nhận" },
@@ -49,6 +50,7 @@ const AdPurchaseReqList = () => {
     data: requestsData,
     isFetching: isRequestLoading,
     isError: isRequestError,
+    refetch: refetchRequests,
   } = useGetPurchaseRequestQuery({
     page: page - 1,
     size,
@@ -106,58 +108,58 @@ const AdPurchaseReqList = () => {
     }
   };
 
-    // Table rendering function
-    const PurchaseRequestTable = ({requests, type}) => (
-      <Table className="w-full shadow-md border border-gray-200">
-        <TableHeader>
-          <TableRow className="bg-blue-100 rounded-t-2xl">
-            <TableHead className="w-20 text-gray-700 font-semibold text-sm rounded-tl-2xl bg-blue-100">
-              Mã yêu cầu
-            </TableHead>
-            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-              Khách hàng
-            </TableHead>
-            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-              Cửa hàng
-            </TableHead>
-            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-              Nền tảng
-            </TableHead>
-            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-              Số điện thoại
-            </TableHead>
-            <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-              Loại yêu cầu
-            </TableHead>
-            {type === "assigned" && <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-              Trạng thái
-            </TableHead>}
-            <TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
-              Ngày tạo
-            </TableHead>
-            <TableHead className="text-center text-gray-700 font-semibold text-sm rounded-tr-2xl bg-blue-100">
-              Ngày hết hạn
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {requests.map((request) => (
-            <TableRow
-              className="cursor-pointer transition hover:bg-blue-50/70 group"
-              key={request.id}
-              onClick={() => navigate(`purchase-request/${request.id}`)}
-            >
-              <TableCell className="font-medium text-xs w-20 py-3 group-hover:text-blue-700">
-                <p>{request.id.length > 8 ? request.id.slice(0, 8) + "..." : request.id}</p>
-              </TableCell>
-              <TableCell className="font-medium py-3">
-                {request.customer?.name || "-"}
-              </TableCell>
-              <TableCell className="py-3">
-                {request.subRequests?.slice(0, 2)?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
-                {
-                  request.subRequests?.filter((sub) => sub?.seller)?.length > 2 &&
-                  <Tooltip>
+  // Table rendering function
+  const PurchaseRequestTable = ({ requests, type }) => (
+    <Table className="w-full shadow-md border border-gray-200">
+      <TableHeader>
+        <TableRow className="bg-blue-100 rounded-t-2xl">
+          <TableHead className="w-20 text-gray-700 font-semibold text-sm rounded-tl-2xl bg-blue-100">
+            Mã yêu cầu
+          </TableHead>
+          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Khách hàng
+          </TableHead>
+          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Cửa hàng
+          </TableHead>
+          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Nền tảng
+          </TableHead>
+          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Số điện thoại
+          </TableHead>
+          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Loại yêu cầu
+          </TableHead>
+          {type === "assigned" && <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
+            Trạng thái
+          </TableHead>}
+          <TableHead className="text-center text-gray-700 font-semibold text-sm bg-blue-100">
+            Ngày tạo
+          </TableHead>
+          <TableHead className="text-center text-gray-700 font-semibold text-sm rounded-tr-2xl bg-blue-100">
+            Ngày hết hạn
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {requests.map((request) => (
+          <TableRow
+            className="cursor-pointer transition hover:bg-blue-50/70 group"
+            key={request.id}
+            onClick={() => navigate(`purchase-request/${request.id}`)}
+          >
+            <TableCell className="font-medium text-xs w-20 py-3 group-hover:text-blue-700">
+              <p>{request.id.length > 8 ? request.id.slice(0, 8) + "..." : request.id}</p>
+            </TableCell>
+            <TableCell className="font-medium py-3">
+              {request.customer?.name || "-"}
+            </TableCell>
+            <TableCell className="py-3">
+              {request.subRequests?.slice(0, 2)?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
+              {
+                request.subRequests?.filter((sub) => sub?.seller)?.length > 2 &&
+                <Tooltip>
                   <TooltipTrigger className="ml-2">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)} group-hover:shadow`}>
                       {request.subRequests?.filter((sub) => sub?.seller)?.length > 2 && ` + ${request.subRequests?.filter((sub) => sub?.seller)?.length - 2}`}
@@ -167,13 +169,13 @@ const AdPurchaseReqList = () => {
                     {request.subRequests?.filter((sub) => sub?.seller)?.slice(2, request.subRequests?.length)?.map((sub) => sub?.seller ? sub?.seller : sub?.contactInfo?.[0]?.split(":")[1])?.join(", ") || "-"}
                   </TooltipContent>
                 </Tooltip>
-                }
-              </TableCell>
-              <TableCell className="py-3">
-                {request.subRequests?.slice(0, 2)?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
-                {
-                  request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.length > 2 &&
-                  <Tooltip>
+              }
+            </TableCell>
+            <TableCell className="py-3">
+              {request.subRequests?.slice(0, 2)?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
+              {
+                request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.length > 2 &&
+                <Tooltip>
                   <TooltipTrigger className="ml-2">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)} group-hover:shadow`}>
                       {request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.length > 2 && ` + ${request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.length - 2}`}
@@ -183,38 +185,38 @@ const AdPurchaseReqList = () => {
                     {request.subRequests?.filter((sub) => sub?.ecommercePlatform)?.slice(2, request.subRequests?.length)?.map((sub) => sub?.ecommercePlatform || "-")?.join(", ") || "-"}
                   </TooltipContent>
                 </Tooltip>
-                }
-              </TableCell>
-              <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
-              <TableCell className="py-3">
-                <span>
-                  {request.requestType === "ONLINE" ? "E-commerce" : "Nội địa quốc tế"}
-                </span>
-              </TableCell>
-              {type === "assigned" && <TableCell className="py-3">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                    request.status
-                  )} group-hover:shadow`}
-                >
-                  {getStatusText(request.status)}{" "}{(request?.status === "QUOTED") ? `(${request?.itemsHasQuotation}/${request?.totalItems})` : ""}
-                </span>
-              </TableCell>}
-              <TableCell className="text-center py-3">
-                {request.createdAt
-                  ? new Date(request.createdAt).toLocaleDateString("vi-VN")
-                  : "-"}
-              </TableCell>
-              <TableCell className="text-center py-3">
-                {request.expiredAt
-                  ? new Date(request.expiredAt).toLocaleDateString("vi-VN")
-                  : "-"}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    );
+              }
+            </TableCell>
+            <TableCell className="py-3">{request.customer?.phone || "-"}</TableCell>
+            <TableCell className="py-3">
+              <span>
+                {request.requestType === "ONLINE" ? "E-commerce" : "Nội địa quốc tế"}
+              </span>
+            </TableCell>
+            {type === "assigned" && <TableCell className="py-3">
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                  request.status
+                )} group-hover:shadow`}
+              >
+                {getStatusText(request.status)}{" "}{(request?.status === "QUOTED") ? `(${request?.itemsHasQuotation}/${request?.totalItems})` : ""}
+              </span>
+            </TableCell>}
+            <TableCell className="text-center py-3">
+              {request.createdAt
+                ? new Date(request.createdAt).toLocaleDateString("vi-VN")
+                : "-"}
+            </TableCell>
+            <TableCell className="text-center py-3">
+              {request.expiredAt
+                ? new Date(request.expiredAt).toLocaleDateString("vi-VN")
+                : "-"}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <div className="w-full px-2 md:px-6 flex flex-col flex-1 min-h-screen">
@@ -311,24 +313,36 @@ const AdPurchaseReqList = () => {
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative max-w-md mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Tìm kiếm theo ID"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              onBlur={handleSearchAction}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearchAction();
-                }
-              }}
-              className="pl-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 py-2 text-base"
-            />
+          {/* Search + Refresh */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+              <Input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Tìm kiếm theo ID"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onBlur={handleSearchAction}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearchAction();
+                  }
+                }}
+                className="pl-10 w-1/2 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 py-2 text-base"
+              />
+            </div>
+            <Button
+              onClick={() => refetchRequests()}
+              className="h-10 md:h-12 px-4 shadow-sm border"
+              disabled={isRequestLoading}
+              title="Làm mới danh sách"
+            >
+              <RefreshCcw className={`h-5 w-5 ${isRequestLoading ? "animate-spin" : ""} md:mr-2`} />
+              <span className="hidden md:inline">Làm mới</span>
+            </Button>
           </div>
+
         </div>
         <div className="flex-1 flex flex-col">
           <TabsContent value="assigned">

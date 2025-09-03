@@ -386,7 +386,7 @@ const PurchaseRequestEditOnline = ({ id, data }) => {
                                               <SelectValue placeholder="Chọn thuộc tính" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                              {options.map((opt) => (
+                                              {options?.map((opt) => (
                                                 <SelectItem key={opt} value={opt}>
                                                   {opt}
                                                 </SelectItem>

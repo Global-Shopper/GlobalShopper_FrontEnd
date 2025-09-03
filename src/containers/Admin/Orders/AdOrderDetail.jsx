@@ -8,10 +8,12 @@ import { useGetOrderByIDQuery } from '@/services/gshopApi'
 import PageLoading from '@/components/PageLoading'
 import PageError from '@/components/PageError'
 import AdOrderDetailHeader from './AdOrderDetailHeader'
+import { Button } from '@/components/ui/button'
+import { RefreshCcw } from 'lucide-react'
 
 const AdOrderDetail = () => {
   const { id } = useParams()
-  const { data: order, isLoading: isOrderLoading, isError: isOrderError } = useGetOrderByIDQuery(id)
+  const { data: order, isLoading: isOrderLoading, isError: isOrderError, refetch: refetchOrders, isFetching: isOrderFetching } = useGetOrderByIDQuery(id)
   const [selectedItemId, setSelectedItemId] = useState(null)
 
   // Initialize selected item when order loads
@@ -25,12 +27,12 @@ const AdOrderDetail = () => {
     return order?.orderItems?.find((it) => it.id === selectedItemId) || null
   }, [order, selectedItemId])
 
-  if (isOrderLoading) return <PageLoading />
+  if (isOrderLoading || isOrderFetching) return <PageLoading />
   if (isOrderError) return <PageError />
   return (
     <div className="min-h-screen bg-gray-50/30">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <AdOrderDetailHeader order={order}/>
+        <AdOrderDetailHeader order={order} refetchOrders={refetchOrders}/>
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
           <div className="lg:col-span-3 space-y-4">
             <AdOrderItemList order={order} selectedItemId={selectedItemId} onSelect={setSelectedItemId} />
@@ -40,7 +42,7 @@ const AdOrderDetail = () => {
               <AdOrderItemDetail item={selectedItem} currency={order?.currency} />
             </div>
             <div className="sticky top-4 self-start col-span-2">
-              <CustomerInfoCard customer={order?.customer} shippingAddress={order?.shippingAddress}/>
+              <CustomerInfoCard customer={order?.customer} shippingAddress={order?.shippingAddress} />
             </div>
           </div>
 

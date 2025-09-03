@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { Search, RefreshCcw } from "lucide-react";
 import {
   Tabs,
   TabsList,
@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import PageLoading from "@/components/PageLoading";
 import PageError from "@/components/PageError";
 import { useURLSync } from "@/hooks/useURLSync";
@@ -53,8 +54,8 @@ const AdOrderList = () => {
   const [sort] = useURLSync(searchParams, setSearchParams, "sort", "array", ["createdAt,desc"]);
   const searchInputRef = useRef(null);
 
-  // TODO: Replace DUMMY_DATA with API call
-  const { data: ordersData, isLoading, isError } = useGetAllOrdersQuery({ page: page - 1, size, sort, ...(status !== "ALL" && { status }) });
+  // API call
+  const { data: ordersData, isLoading, isError, refetch: refetchOrders, isFetching } = useGetAllOrdersQuery({ page: page - 1, size, sort, ...(status !== "ALL" && { status }) });
 
   // Pagination controls
   const totalPages = ordersData?.totalPages || 1;
@@ -214,24 +215,36 @@ const AdOrderList = () => {
           </div>
 
         </div>
-        {/* Search Bar */}
-        <div className="relative max-w-md mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <Input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Tìm kiếm theo mã đơn hoặc tracking"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            onBlur={handleSearchAction}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearchAction();
-              }
-            }}
-            className="pl-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 py-2 text-base"
-          />
+        {/* Search + Refresh */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            <Input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Tìm kiếm theo mã đơn hoặc tracking"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onBlur={handleSearchAction}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearchAction();
+                }
+              }}
+              className="pl-10 w-1/2 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 py-2 text-base"
+            />
+          </div>
+          <Button
+            onClick={() => refetchOrders()}
+            className="h-10 md:h-12 px-4 shadow-sm border"
+            disabled={isFetching}
+            title="Làm mới danh sách"
+          >
+            <RefreshCcw className={`h-5 w-5 ${isFetching ? "animate-spin" : ""} md:mr-2`} />
+            <span className="hidden md:inline">Làm mới</span>
+          </Button>
         </div>
+
       </div>
       <div className="flex-1 flex flex-col">
         {isLoading ? (

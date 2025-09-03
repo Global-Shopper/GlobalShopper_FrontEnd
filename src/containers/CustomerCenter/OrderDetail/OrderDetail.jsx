@@ -20,14 +20,16 @@ const OrderDetail = () => {
     data: orderData,
     isLoading: isOrderLoading,
     isError: isOrderError,
+    refetch: refetchOrder,
+    isFetching: isOrderFetching,
   } = useGetOrderByIDQuery(id)
 
   useEffect(() => {
     if (orderData?.trackingNumber && orderData?.shippingCarrier !== "fedex") {
       getTracking(orderData.trackingNumber)
-      .then((res) => {
-        setTrackingMoreData(res.data)
-      })
+        .then((res) => {
+          setTrackingMoreData(res.data)
+        })
     }
   }, [orderData?.trackingNumber, orderData?.shippingCarrier])
 
@@ -39,7 +41,7 @@ const OrderDetail = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-3">
-      <OrderInfo order={orderData} />
+      <OrderInfo order={orderData} refetch={refetchOrder} isFetching={isOrderFetching} />
 
       <div className="flex flex-col md:flex-row md:gap-6 mb-4 mt-4">
         {orderData.admin && (
@@ -65,13 +67,17 @@ const OrderDetail = () => {
       )}
       {console.log(orderData)}
       <div className="mt-6">
-        <OrderItemList
-          orderItems={orderData.orderItems || []}
-          ecommercePlatform={orderData.ecommercePlatform}
-          seller={orderData.seller}
-          status={orderData.status}
-          order={orderData}
-        />
+        {isOrderLoading || isOrderFetching ? (
+          <PageLoading />
+        ) : (
+          <OrderItemList
+            orderItems={orderData.orderItems || []}
+            ecommercePlatform={orderData.ecommercePlatform}
+            seller={orderData.seller}
+            status={orderData.status}
+            order={orderData}
+          />
+        )}
       </div>
 
       {orderData.shipmentTrackingEvents.length > 0 ? (

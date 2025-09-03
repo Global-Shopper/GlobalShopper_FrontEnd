@@ -9,6 +9,8 @@ import { PaginationBar } from "@/utils/Pagination";
 import OrderFilters from "./OrderFilters";
 import OrderEmptyState from "@/components/OrderEmptyState";
 import { toast } from "sonner";
+import { RefreshCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Orders() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,6 +26,7 @@ export default function Orders() {
     isLoading,
     isError,
     refetch,
+    isFetching,
   } = useGetAllOrdersQuery({
     page: page - 1,
     size,
@@ -71,17 +74,32 @@ export default function Orders() {
             <p className="text-gray-600">Xem và quản lý tất cả đơn hàng của bạn</p>
           </div>
         </div>
-        <OrderFilters
-          status={status}
-          setStatus={setStatus}
-          sort={sort}
-          setSort={setSort}
-          onClear={handleClearFilters}
-        />
+        <div className="flex items-center gap-3">
+          <OrderFilters
+            status={status}
+            setStatus={setStatus}
+            sort={sort}
+            setSort={setSort}
+            onClear={handleClearFilters}
+          />
+          <Button
+            onClick={() => refetch()}
+            className="h-12 px-4 shadow-sm border"
+            disabled={isFetching}
+            title="Làm mới danh sách"
+          >
+            <RefreshCcw className="h-5 w-5 mr-2" />
+            Làm mới
+          </Button>
+        </div>
         <div className="space-y-4">
           {allOrders.length === 0 ? (
             <OrderEmptyState />
           ) : (
+            (
+            isLoading || isFetching ? (
+              <PageLoading />
+            ) : (
             <div className="flex flex-col gap-4">
               {allOrders.map((order) => (
                 <Link to={`/account-center/orders/${order.id}`}>
@@ -89,12 +107,13 @@ export default function Orders() {
                     key={order.id}
                     order={order}
                     onCancel={handleCancelOrder}
-                  cancelling={cancellingId === order.id}
-                />
+                    cancelling={cancellingId === order.id}
+                  />
                 </Link>
               ))}
             </div>
-          )}
+            )
+          ))}
           <PaginationBar
             totalPages={ordersData?.totalPages}
             page={page}
