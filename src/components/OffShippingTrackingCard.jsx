@@ -31,7 +31,7 @@ import React from 'react'
     if (u.includes('OUT_FOR_DELIVERY')) return 'OUT_FOR_DELIVERY'
     if (u.includes('DELIVERED')) return 'DELIVERED'
     if (u.includes('IN_TRANSIT')) return 'IN_TRANSIT'
-    if (u.includes('PICKED')) return 'PICKED_UP'
+    if (u.includes('PICKED_UP')) return 'PICKED_UP'
     if (u.includes('EXCEPTION') || u.includes('FAIL')) return 'EXCEPTION'
     return u || 'UNKNOWN'
   }
