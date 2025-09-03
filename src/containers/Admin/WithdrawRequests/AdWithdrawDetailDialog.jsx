@@ -76,36 +76,6 @@ const AdWithdrawDetailDialog = ({ open, setOpen, withdraw }) => {
         {withdraw ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <div className="text-sm font-medium text-gray-700">QR chuyển khoản</div>
-              {qrUrl ? (
-                <div className="border rounded-lg p-2 bg-white">
-                  <img src={qrUrl} alt="VietQR" className="w-full h-auto object-contain" />
-                </div>
-              ) : (
-                <div className="text-sm text-gray-500">Thiếu thông tin để tạo QR</div>
-              )}
-              <div className="text-xs text-gray-600">
-                Người nhận: {bank?.accountHolderName || '-'}
-              </div>
-              <div className="text-xs text-gray-600">
-                STK: {bank?.bankAccountNumber || '-'} ({bank?.providerName || '-'})
-              </div>
-              <div className="text-xs text-gray-600">
-                Số tiền: {Number(withdraw.amount || 0).toLocaleString('vi-VN')} đ
-              </div>
-              <div className="text-xs text-gray-600">
-                Lý do: {withdraw.reason || '-'}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-gray-700">Hóa đơn ngân hàng</div>
-              {withdraw.bankingBill ? (
-                <a href={withdraw.bankingBill} target="_blank" rel="noreferrer" className="block border rounded-lg overflow-hidden bg-white">
-                  <img src={withdraw.bankingBill} alt="Bank bill" className="w-full h-64 object-contain" />
-                </a>
-              ) : (
-                <div className="text-sm text-gray-500">Chưa có hóa đơn</div>
-              )}
               {
                 withdraw.status === 'APPROVED' && <div className="pt-2">
                 <input

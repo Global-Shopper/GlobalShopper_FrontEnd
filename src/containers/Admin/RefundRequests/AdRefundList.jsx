@@ -117,9 +117,6 @@ const AdRefundList = () => {
             Lý do
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
-            Hình ảnh
-          </TableHead>
-          <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
             Số tiền
           </TableHead>
           <TableHead className="text-gray-700 font-semibold text-sm bg-blue-100">
@@ -140,26 +137,6 @@ const AdRefundList = () => {
             <TableCell className="font-medium text-xs w-24 py-3 group-hover:text-blue-700">{refund.id}</TableCell>
             <TableCell className="font-medium py-3">{refund.orderId || '-'}</TableCell>
             <TableCell className="py-3 truncate max-w-[320px]" title={refund.reason}>{refund.reason || '-'}</TableCell>
-            <TableCell className="flex items-center gap-2 py-3">
-              {Array.isArray(refund.evidence) && refund.evidence.length > 0 ? (
-                <>
-                  {refund.evidence.slice(0, 2).map((e, index) => (
-                    <div key={`${refund.id}-${index}`} className="h-12 w-12 overflow-hidden rounded-md border">
-                      <img
-                        src={e}
-                        alt={`evidence-${index}`}
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
-                  ))}
-                  {refund.evidence.length > 2 && (
-                    <div className="relative h-12 w-12 overflow-hidden rounded-md border">
-                      <span className="absolute inset-0 bg-black/50 text-white text-xs font-semibold flex items-center justify-center">+{refund.evidence.length - 2}</span>
-                    </div>
-                  )}
-                </>
-              ) : ('-')}
-            </TableCell>
             <TableCell className="py-3">{formatVNDWithoutSymbol(Number(refund.amount || 0).toFixed(0))}</TableCell>
             <TableCell className="py-3">
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRefundStatusColor(refund.status)} group-hover:shadow`}>
