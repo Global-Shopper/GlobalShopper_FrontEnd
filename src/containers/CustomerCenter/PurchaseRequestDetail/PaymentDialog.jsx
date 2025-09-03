@@ -290,8 +290,10 @@ const PaymentDialog = ({ subRequest, expired, requestType, quotationForPurchase 
             <span>
               Phí vận chuyển{requestType === 'OFFLINE' && selectedService?.serviceName ? ` (${selectedService.serviceName})` : ''}
               <Tooltip >
-                <TooltipTrigger>
-                  <Info className="w-4 h-4" />
+                <TooltipTrigger asChild>
+                  <span className="inline-flex align-middle cursor-help" tabIndex={-1} aria-hidden="true">
+                    <Info className="w-4 h-4" />
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent className="w-64 break-words">
                   {requestType === 'OFFLINE' ? (SHIPMENT_TYPE.find((item) => item.type === selectedService?.serviceType)?.value) : "Phí vận chuyển do bên TMĐT cung cấp"}
